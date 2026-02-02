@@ -7,10 +7,10 @@ import { verifyToken } from "../utils/helper";
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-        const token = req.cookies.accessToken || req.headers.authorization?.split("Bearer")[1].trim();
+        const token = req.cookies?.accessToken || req.headers.authorization?.split("Bearer")[1].trim();
 
         if (!token) {
-            throw new ApiError(401, AUTH_REQUIRED)
+            throw new ApiError(401, "Invalid token")
         }
 
         const decodedToken = verifyToken(token);
