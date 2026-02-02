@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { IUser } from "../models/user.model";
 
 export interface fileTypes extends Express.Multer.File {
     media: Express.Multer.File[];
@@ -8,23 +8,8 @@ export interface fileTypes extends Express.Multer.File {
 /**
  * JWT Auth Payload
  */
-export type JWT_AUTH = Omit<UserType,"email" | "password" | "refreshToken" | "createdAt" | "updatedAt">;
+export type JWT_AUTH = Pick<IUser,"_id" | "fullName" | "avatar" | "role">;
 
-/**
- * UserType
- */
-export type UserType = {
-    _id: Types.ObjectId;
-    username: string;
-    fullName: string;
-    email: string;
-    password: string;
-    avatar?: string;
-    refreshToken?: string;
-    role: RoleType;
-    createdAt: Date;
-    updatedAt: Date;
-};
 
 /**
  * RoleType

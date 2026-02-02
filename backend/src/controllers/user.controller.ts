@@ -29,7 +29,6 @@ export const loginUser = async (req: Request, res: Response) => {
 
         const user = {
             _id: userExists._id,
-            username: userExists.username,
             fullName: userExists.fullName,
             avatar: userExists.avatar,
             role: userExists.role,
@@ -156,6 +155,6 @@ export const currentUser = async (req: Request, res: Response) => {
                 ? error.message || "Something went wrong while fetching current user details"
                 : "Something went wrong while fetching current user details";
 
-        return res.status(500).json(new ApiError(500, message));       
+        return res.status(500).json(new ApiError(500, message));
     }
 }
