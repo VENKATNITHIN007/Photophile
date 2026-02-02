@@ -34,6 +34,7 @@ app.use(cors({
 
 
 app.use(createVersionRoute("users"), userRouter)
+app.use(cookieParser());
 
 
 /**
