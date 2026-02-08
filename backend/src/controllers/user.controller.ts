@@ -36,6 +36,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
         const { accessToken, refreshToken } = await generateTokens(user);
 
+
         return res.json(new ApiResponse({ user, accessToken, refreshToken }, "You've been logged in successfully!"))
     } catch (error) {
 
@@ -58,11 +59,9 @@ export const loginUser = async (req: Request, res: Response) => {
  */
 export const registerUser: RequestHandler = async (req, res) => {
     try {
-        const { email, password, username, fullName } = req.body;
+        const { email, password, fullName } = req.body;
 
-        const userExists = await User.findOne({
-            $or: [{ email }, { username }]
-        })
+        const userExists = await User.findOne({ email });
 
         if (userExists) {
             return res.status(401).json(new ApiError(409, USER_EXISTS))
@@ -72,13 +71,12 @@ export const registerUser: RequestHandler = async (req, res) => {
          * Create a new User
          */
         const user = await User.create({
-            username,
             fullName,
             email,
             password
         });
 
-        if (!user._id) {
+        if (user._id) {
             return res.status(201).json(new ApiResponse({}, "User has been register successfully!"))
         }
 
@@ -146,7 +144,7 @@ export const currentUser = async (req: Request, res: Response) => {
             return res.status(401).json(new ApiError(401, AUTH_REQUIRED));
         }
 
-        return res.json(new ApiResponse(req.user, "Fetched current user details"));
+        return res.status(200).json(new ApiResponse(req.user, "Fetched current user details"));
     } catch (error) {
         console.error("Current user fetch Error:", error);
 
