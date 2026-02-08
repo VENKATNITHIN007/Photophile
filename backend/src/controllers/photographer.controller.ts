@@ -72,6 +72,7 @@ export const createPhotographerProfile: RequestHandler = async (req, res) => {
     return res.status(500).json(new ApiError(500, message));
   }
 };
+
 /** * Get Photographer Profile by User ID
  * @param req
  * @param res

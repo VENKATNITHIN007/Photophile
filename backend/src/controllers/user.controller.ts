@@ -36,6 +36,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
         const { accessToken, refreshToken } = await generateTokens(user);
 
+
         return res.json(new ApiResponse({ user, accessToken, refreshToken }, "You've been logged in successfully!"))
     } catch (error) {
 
@@ -143,7 +144,7 @@ export const currentUser = async (req: Request, res: Response) => {
             return res.status(401).json(new ApiError(401, AUTH_REQUIRED));
         }
 
-        return res.json(new ApiResponse(req.user, "Fetched current user details"));
+        return res.status(200).json(new ApiResponse(req.user, "Fetched current user details"));
     } catch (error) {
         console.error("Current user fetch Error:", error);
 
