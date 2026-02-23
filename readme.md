@@ -2,151 +2,139 @@
 
 > 🚧 **Work in Progress** - This project is actively under development
 
-A platform connecting photographers with clients. Users can discover, book, and review photographers for their events and creative needs.
+A full-stack marketplace application connecting photographers with clients. Users can discover, book, and review photographers for their events and creative needs.
 
-## Overview
+## 📱 Preview
 
-**Dukan** is a full-stack marketplace application designed to help users find and hire professional photographers. Photographers can create profiles, showcase their portfolios, manage bookings, and build their reputation through client reviews.
+**Dukan** allows photographers to create profiles, showcase portfolios, manage bookings, and build their reputation through client reviews.
 
-## Features (In Development)
-
-### For Users (Clients)
-- [ ] Browse photographers by location and specialty
-- [ ] View photographer profiles and portfolios
-- [ ] Book photography sessions
-- [ ] Leave reviews and ratings
-- [ ] Search functionality with filters
-
-### For Photographers
-- [ ] Create and manage photographer profiles
-- [ ] Upload and showcase portfolio images
-- [ ] Manage bookings and availability
-- [ ] Receive reviews from clients
-- [ ] Set pricing information
-
-### Admin Features
-- [ ] User management
-- [ ] Photographer verification
-- [ ] Content moderation
-- [ ] Platform analytics
-
-## Project Structure
+## 🏗️ Project Structure
 
 ```
-├── backend/          # Node.js + Express + TypeScript API
+├── backend/          # Express.js + TypeScript API
 │   ├── src/
 │   │   ├── controllers/    # Route handlers
-│   │   ├── models/         # Database models (Mongoose)
-│   │   ├── routes/         # API route definitions
-│   │   ├── middlewares/    # Express middlewares
-│   │   ├── validations/    # Zod validation schemas
-│   │   ├── utils/          # Utility functions
-│   │   ├── db/             # Database connection
-│   │   └── app.ts          # Express app entry point
+│   │   ├── models/         # Mongoose schemas
+│   │   ├── routes/         # API endpoints
+│   │   ├── middlewares/    # Express middleware
+│   │   ├── validations/    # Zod schemas
+│   │   ├── utils/          # Helper functions
+│   │   └── app.ts          # Entry point
 │   └── package.json
-└── [frontend/]      # (Coming Soon) Frontend application
+│
+└── frontend/        # Next.js 14+ Application
+    ├── src/
+    │   ├── app/            # App Router pages
+    │   ├── components/     # React components
+    │   ├── contexts/       # React contexts
+    │   └── lib/            # Utilities
+    └── package.json
 ```
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 ### Backend
 - **Runtime**: Node.js
 - **Framework**: Express.js
 - **Language**: TypeScript
-- **Database**: MongoDB (via Mongoose)
-- **Authentication**: JWT (Access & Refresh tokens)
+- **Database**: MongoDB (Mongoose)
+- **Auth**: JWT (Access + Refresh tokens)
 - **Validation**: Zod
-- **File Uploads**: Multer + Cloudinary
-- **Security**: Helmet, CORS, Rate Limiting
+- **Uploads**: Multer + Cloudinary
 
-### Frontend (Planned)
-- *To be determined*
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: CSS Modules / Tailwind
+- **HTTP**: Axios
 
-## Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v18+)
-- MongoDB database
+- MongoDB (local or Atlas)
 - Cloudinary account (for image uploads)
 
-### Backend Setup
+### Installation
 
-1. Navigate to the backend folder:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file with the following variables:
-   ```env
-   PORT=3001
-   ORIGIN_HOSTS=http://localhost:5173
-   
-   # JWT Secrets
-   ACCESS_TOKEN_SECRET=your_access_secret
-   ACCESS_TOKEN_EXPIRY=6h
-   REFRESH_TOKEN_SECRET=your_refresh_secret
-   REFRESH_TOKEN_EXPIRY=10d
-   
-   # Cloudinary
-   CLOUDINARY_CLOUD_NAME=your_cloud_name
-   CLOUDINARY_API_KEY=your_api_key
-   CLOUDINARY_API_SECRET=your_api_secret
-   
-   # Database
-   MONGO_URL=mongodb://localhost:27017
-   DB_NAME=dukan
-   ```
-
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-The API will be available at `http://localhost:3001`
-
-## API Documentation
-
-### Base URL
-```
-/api/v1
+1. **Clone the repository**
+```bash
+git clone <repo-url>
+cd dukan
 ```
 
-### Available Endpoints
+2. **Setup Backend**
+```bash
+cd backend
+cp .env.example .env
+# Edit .env with your credentials
+npm install
+npm run dev
+```
+
+3. **Setup Frontend**
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The frontend runs at `http://localhost:3000` and the API at `http://localhost:3001`.
+
+## 📝 Environment Variables
+
+### Backend (.env)
+```
+PORT=3001
+ORIGIN_HOSTS=http://localhost:5173
+
+# JWT Secrets (generate secure random strings)
+ACCESS_TOKEN_SECRET=
+ACCESS_TOKEN_EXPIRY=6h
+REFRESH_TOKEN_SECRET=
+REFRESH_TOKEN_EXPIRY=10d
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+# Database
+MONGO_URI=mongodb://localhost:27017
+DB_NAME=dukan
+```
+
+### Frontend (.env)
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
+```
+
+## 🔌 API Endpoints
 
 | Resource | Description |
 |----------|-------------|
-| `/api/v1/users` | User authentication & management |
+| `/api/v1/users` | Authentication & user management |
 | `/api/v1/photographers` | Photographer profiles |
 | `/api/v1/portfolio` | Portfolio management |
-| `/api/v1/bookings` | Booking management |
+| `/api/v1/bookings` | Booking system |
 | `/api/v1/reviews` | Reviews & ratings |
 
-*Detailed API documentation coming soon*
+## 📌 Status
 
-## Development Status
-
-- ✅ Database schema design
+- ✅ Database schema
 - ✅ Express server setup
-- ✅ Authentication system
-- ✅ Photographer profile management
-- ✅ Portfolio image uploads (Cloudinary)
+- ✅ JWT authentication
+- ✅ Photographer profiles
+- ✅ Portfolio uploads (Cloudinary)
 - ✅ Booking system
-- ✅ Review system
-- 🔄 Frontend development (pending)
-- 🔄 Search & filtering optimization (pending)
+- ✅ Reviews
+- 🔄 Frontend development
+- 🔄 Search & filtering
 - 🔄 Payment integration (planned)
 - 🔄 Real-time notifications (planned)
 
-## Contributing
-
-This is a personal project currently in development. Contributions may be accepted in the future.
-
-## License
+## 📄 License
 
 ISC
 

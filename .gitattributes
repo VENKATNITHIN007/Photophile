@@ -1,0 +1,20 @@
+# GitHub Language Stats
+# Exclude generated files from language statistics
+
+# Don't count these as part of the project
+backend/dist/** linguist-vendored
+frontend/.next/** linguist-vendored
+node_modules/** linguist-vendored
+
+# Binary files
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+
+# Lock files
+package-lock.json linguist-generated
+yarn.lock linguist-generated
+pnpm-lock.yaml linguist-generated

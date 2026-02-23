@@ -28,3 +28,9 @@ export const RegisterSchema = z.object({
 
 export type loginType = z.infer<typeof LoginSchema>;
 export type registerType = z.infer<typeof RegisterSchema>;
+export const UpdateProfileSchema = z.object({
+    fullName: z.string().min(1, { message: "Full name must be 1 or more characters long" }).optional(),
+    phoneNumber: z.string().optional(),
+    avatar: z.string().url("Please provide a valid URL for the avatar").optional().or(z.literal("")),
+});
+export type updateProfileType = z.infer<typeof UpdateProfileSchema>;

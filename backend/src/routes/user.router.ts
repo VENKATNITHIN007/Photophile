@@ -4,9 +4,10 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  updateProfile,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
-import { LoginSchema, RegisterSchema } from "../validations/auth.validation";
+import { LoginSchema, RegisterSchema, UpdateProfileSchema } from "../validations/auth.validation";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { authRateLimiter } from "../middlewares/rateLimiter.middleware";
 
@@ -26,6 +27,7 @@ userRouter
 userRouter
   .use(authMiddleware)
   .get("/me", currentUser)
-  .post("/logout", logoutUser);
+  .post("/logout", logoutUser)
+  .put("/profile", validateRequest(UpdateProfileSchema), updateProfile);
 
 export default userRouter;

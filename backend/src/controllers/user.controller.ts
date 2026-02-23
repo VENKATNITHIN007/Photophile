@@ -106,3 +106,40 @@ export const currentUser = asyncHandler(async (req: Request, res: Response) => {
     .status(200)
     .json(new ApiResponse(req.user, "Fetched current user details"));
 });
+
+export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new ApiError(401, AUTH_REQUIRED);
+  }
+
+  const { fullName, phoneNumber, avatar } = req.body;
+  const userId = req.user._id;
+
+  const updateData: any = {};
+  if (fullName !== undefined) updateData.fullName = fullName;
+  if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+  if (avatar !== undefined) updateData.avatar = avatar;
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedUser) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const user = {
+    _id: updatedUser._id,
+    fullName: updatedUser.fullName,
+    avatar: updatedUser.avatar,
+    role: updatedUser.role,
+    email: updatedUser.email,
+    phoneNumber: updatedUser.phoneNumber
+  };
+
+  return res
+    .status(200)
+    .json(new ApiResponse({ data: user }, "Profile updated successfully"));
+});

@@ -1,0 +1,78 @@
+# ===========================================
+# Dukan - Photography Marketplace
+# GitHub-ready .gitignore for monorepo
+# ===========================================
+
+# -------------------------------------------
+# Dependencies
+# -------------------------------------------
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# -------------------------------------------
+# Environment Variables (CRITICAL - NEVER commit)
+# -------------------------------------------
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# -------------------------------------------
+# Build Outputs
+# -------------------------------------------
+# Backend
+backend/dist/
+backend/build/
+
+# Frontend
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# -------------------------------------------
+# Logs
+# -------------------------------------------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# -------------------------------------------
+# OS & Editor Files
+# -------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-*
+
+# -------------------------------------------
+# Testing & Coverage
+# -------------------------------------------
+coverage/
+.nyc_output/
+
+# -------------------------------------------
+# Misc
+# -------------------------------------------
+*.pem
+*.key
+*.crt
+*.sig
+.cache/
+.vercel
+.netlify

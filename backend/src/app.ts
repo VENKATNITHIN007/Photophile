@@ -21,7 +21,7 @@ import bookingRouter from "./routes/booking.route";
 
 const allowedHost = process.env.ORIGIN_HOSTS
   ? process.env.ORIGIN_HOSTS.split(",").map((h) => h.trim())
-  : "*";
+  : ["http://localhost:3000", "http://localhost:3002"];
 
 const port = process.env.PORT || 3001;
 
