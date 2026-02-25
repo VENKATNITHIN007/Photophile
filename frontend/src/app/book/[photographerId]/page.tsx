@@ -5,6 +5,15 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
 import { apiClient } from "@/lib/api-client";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { consultationSchema, ConsultationInput } from "@/lib/validations/consultation";
+import { Form } from "@/components/ui/form";
+import { FormInput } from "@/components/forms/FormInput";
+import { FormSelect } from "@/components/forms/FormSelect";
+import { FormTextarea } from "@/components/forms/FormTextarea";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfile {
   _id: string;
@@ -23,6 +32,15 @@ interface PhotographerProfile {
   priceFrom?: number;
 }
 
+const EVENT_TYPES = [
+  { label: "Wedding", value: "wedding" },
+  { label: "Portrait", value: "portrait" },
+  { label: "Event", value: "event" },
+  { label: "Commercial", value: "commercial" },
+  { label: "Family", value: "family" },
+  { label: "Other", value: "other" },
+];
+
 export default function BookPhotographerPage({
   params,
 }: {
@@ -30,22 +48,27 @@ export default function BookPhotographerPage({
 }) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { success, error: showError } = useToast();
   
-  // Unwrap params using React.use()
   const resolvedParams = use(params);
   const photographerId = resolvedParams.photographerId;
 
   const [profile, setProfile] = useState<PhotographerProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [errorProfile, setErrorProfile] = useState("");
-
-  const [date, setDate] = useState("");
-  const [eventType, setEventType] = useState("wedding");
-  const [location, setLocation] = useState("");
-  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const form = useForm<ConsultationInput>({
+    resolver: zodResolver(consultationSchema),
+    defaultValues: {
+      eventDate: "",
+      eventType: "wedding",
+      location: "",
+      phoneNumber: "",
+      message: "",
+    },
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -71,12 +94,42 @@ export default function BookPhotographerPage({
     fetchProfile();
   }, [photographerId]);
 
+  const onSubmit = async (data: ConsultationInput) => {
+    setSubmitting(true);
+
+    try {
+      const combinedMessage = `Event Type: ${data.eventType}\nLocation: ${data.location}\nPhone: ${data.phoneNumber}\n\n${data.message || 'No additional details provided.'}`;
+
+      await apiClient.post("/bookings", {
+        photographerId: profile?._id,
+        eventDate: new Date(data.eventDate).toISOString(),
+        message: combinedMessage,
+      });
+
+      setIsSuccess(true);
+      success("Booking request sent successfully");
+      
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 3000);
+    } catch (err: unknown) {
+      const errorMsg = ((err as {response?: {data?: {message?: string}}}).response?.data?.message) || (err as Error).message || "Failed to submit booking";
+      showError(errorMsg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (authLoading || (loadingProfile && user)) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-black"></div>
+      </div>
+    );
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   if (errorProfile || !profile) {
@@ -84,57 +137,14 @@ export default function BookPhotographerPage({
       <div className="min-h-screen flex items-center justify-center flex-col">
         <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
         <p className="text-gray-700">{errorProfile}</p>
-        <button onClick={() => router.back()} className="mt-4 text-blue-600 hover:underline">
+        <Button onClick={() => router.back()} variant="outline" className="mt-4">
           Go back
-        </button>
+        </Button>
       </div>
     );
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitError("");
-
-    if (!date) {
-      setSubmitError("Event date is required");
-      return;
-    }
-
-    const selectedDate = new Date(date);
-    if (selectedDate <= new Date()) {
-      setSubmitError("Event date must be in the future");
-      return;
-    }
-
-    if (!eventType || !location) {
-      setSubmitError("Event type and location are required");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const combinedMessage = `Event Type: ${eventType}\nLocation: ${location}\n\n${message}`;
-
-      await apiClient.post("/bookings", {
-        photographerId: profile._id,
-        eventDate: new Date(date).toISOString(),
-        message: combinedMessage,
-      });
-
-      setSuccess(true);
-      // Automatically redirect after a few seconds
-      setTimeout(() => {
-        router.push("/dashboard"); // or maybe /my-bookings
-      }, 3000);
-    } catch (err: unknown) {
-      setSubmitError(((err as {response?: {data?: {message?: string}}}).response?.data?.message) || (err as Error).message || "Failed to submit booking");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (success) {
+  if (isSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 text-center">
@@ -147,12 +157,12 @@ export default function BookPhotographerPage({
           <p className="text-gray-500 mb-6">
             Your booking request has been successfully sent to {profile.userId.fullName}. They will review it and get back to you shortly.
           </p>
-          <button
+          <Button
             onClick={() => router.push("/photographers")}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800"
+            className="w-full"
           >
             Back to Photographers
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -192,111 +202,80 @@ export default function BookPhotographerPage({
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {submitError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-                {submitError}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-              <div className="sm:col-span-1">
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700">
-                  Event Date *
-                </label>
-                <div className="mt-1">
-                  <input
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
+              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                <div className="sm:col-span-1">
+                  <FormInput
+                    control={form.control}
+                    name="eventDate"
+                    label="Event Date"
                     type="date"
-                    name="date"
-                    id="date"
-                    required
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="shadow-sm focus:ring-black focus:border-black block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                    disabled={submitting}
                   />
                 </div>
-              </div>
 
-              <div className="sm:col-span-1">
-                <label htmlFor="eventType" className="block text-sm font-medium text-gray-700">
-                  Event Type *
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="eventType"
+                <div className="sm:col-span-1">
+                  <FormSelect
+                    control={form.control}
                     name="eventType"
-                    required
-                    value={eventType}
-                    onChange={(e) => setEventType(e.target.value)}
-                    className="shadow-sm focus:ring-black focus:border-black block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border bg-white"
-                  >
-                    <option value="wedding">Wedding</option>
-                    <option value="portrait">Portrait</option>
-                    <option value="event">Event</option>
-                    <option value="commercial">Commercial</option>
-                    <option value="family">Family</option>
-                    <option value="other">Other</option>
-                  </select>
+                    label="Event Type"
+                    options={EVENT_TYPES}
+                    disabled={submitting}
+                  />
                 </div>
-              </div>
 
-              <div className="sm:col-span-2">
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                  Location *
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
+                <div className="sm:col-span-1">
+                  <FormInput
+                    control={form.control}
                     name="location"
-                    id="location"
-                    required
-                    placeholder="E.g., Central Park, NY or 123 Main St"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="shadow-sm focus:ring-black focus:border-black block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                    label="Location"
+                    placeholder="E.g., Central Park, NY"
+                    disabled={submitting}
                   />
                 </div>
-              </div>
 
-              <div className="sm:col-span-2">
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                  Additional Details
-                </label>
-                <div className="mt-1">
-                  <textarea
-                    id="message"
+                <div className="sm:col-span-1">
+                  <FormInput
+                    control={form.control}
+                    name="phoneNumber"
+                    label="Phone Number"
+                    placeholder="Your contact number"
+                    type="tel"
+                    disabled={submitting}
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <FormTextarea
+                    control={form.control}
                     name="message"
-                    rows={4}
+                    label="Additional Details"
                     placeholder="Tell the photographer about your vision, schedule, or any specific requests..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="shadow-sm focus:ring-black focus:border-black block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                    description="Briefly describe what you're looking for."
+                    disabled={submitting}
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
-                  Briefly describe what you&apos;re looking for.
-                </p>
               </div>
-            </div>
 
-            <div className="pt-4 flex items-center justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? "Submitting..." : "Send Request"}
-              </button>
-            </div>
-          </form>
+              <div className="pt-4 flex items-center justify-end space-x-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={submitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                >
+                  {submitting ? "Submitting..." : "Send Request"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>

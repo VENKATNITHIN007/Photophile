@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { apiClient } from "@/lib/api-client";
 import Image from "next/image";
 import Link from "next/link";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface User {
   _id: string;
@@ -42,8 +48,8 @@ export default function PhotographersPage() {
   // Filter States
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [specialty, setSpecialty] = useState("");
+  const [location, setLocation] = useState("all");
+  const [specialty, setSpecialty] = useState("all");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [page, setPage] = useState(1);
@@ -65,8 +71,8 @@ export default function PhotographersPage() {
       
       const params = new URLSearchParams();
       if (debouncedSearch) params.append("search", debouncedSearch);
-      if (location) params.append("location", location);
-      if (specialty) params.append("specialty", specialty);
+      if (location && location !== "all") params.append("location", location);
+      if (specialty && specialty !== "all") params.append("specialty", specialty);
       if (minPrice) params.append("minPrice", minPrice);
       if (maxPrice) params.append("maxPrice", maxPrice);
       params.append("page", page.toString());
@@ -93,8 +99,8 @@ export default function PhotographersPage() {
 
   const handleResetFilters = () => {
     setSearch("");
-    setLocation("");
-    setSpecialty("");
+    setLocation("all");
+    setSpecialty("all");
     setMinPrice("");
     setMaxPrice("");
     setPage(1);
@@ -109,10 +115,10 @@ export default function PhotographersPage() {
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Find Photographers</h1>
             
             <div className="relative w-full max-w-md hidden sm:block">
-              <input
+              <Input
                 type="text"
                 placeholder="Search by name or username..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="pl-10"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -126,10 +132,10 @@ export default function PhotographersPage() {
           
           {/* Mobile Search */}
           <div className="py-2 sm:hidden relative">
-            <input
+            <Input
               type="text"
               placeholder="Search..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="pl-10"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -147,95 +153,75 @@ export default function PhotographersPage() {
           
           {/* Sidebar Filters */}
           <aside className="w-full md:w-64 flex-shrink-0 space-y-6">
-            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-medium text-gray-900">Filters</h2>
-                <button 
-                  onClick={handleResetFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  Reset
-                </button>
-              </div>
-
-              {/* Location Filter */}
-              <div className="mb-5">
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Location
-                </label>
-                <select
-                  id="location"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border bg-white"
-                  value={location}
-                  onChange={(e) => {
-                    setLocation(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">Any Location</option>
-                  {COMMON_LOCATIONS.map((loc) => (
-                    <option key={loc} value={loc}>
-                      {loc.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Specialty Filter */}
-              <div className="mb-5">
-                <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-1">
-                  Specialty
-                </label>
-                <select
-                  id="specialty"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border bg-white"
-                  value={specialty}
-                  onChange={(e) => {
-                    setSpecialty(e.target.value);
-                    setPage(1);
-                  }}
-                >
-                  <option value="">Any Specialty</option>
-                  {COMMON_SPECIALTIES.map((spec) => (
-                    <option key={spec} value={spec}>
-                      {spec.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Price Filter */}
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Price Starting From ($)
-                </label>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-                    value={minPrice}
-                    onChange={(e) => {
-                      setMinPrice(e.target.value);
-                      setPage(1);
-                    }}
-                    min="0"
-                  />
-                  <span className="text-gray-500">-</span>
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm p-2 border"
-                    value={maxPrice}
-                    onChange={(e) => {
-                      setMaxPrice(e.target.value);
-                      setPage(1);
-                    }}
-                    min="0"
-                  />
+            <Card>
+              <CardHeader className="pb-3 border-b">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-medium text-gray-900">Filters</h2>
+                  <Button variant="ghost" size="sm" onClick={handleResetFilters} className="h-8 px-2 text-blue-600">
+                    Reset
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </CardHeader>
+              <CardContent className="space-y-5 pt-5">
+                {/* Location Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Location</label>
+                  <Select value={location} onValueChange={(val) => { setLocation(val); setPage(1); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any Location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any Location</SelectItem>
+                      {COMMON_LOCATIONS.map((loc) => (
+                        <SelectItem key={loc} value={loc}>
+                          {loc.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Specialty Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Specialty</label>
+                  <Select value={specialty} onValueChange={(val) => { setSpecialty(val); setPage(1); }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Any Specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any Specialty</SelectItem>
+                      {COMMON_SPECIALTIES.map((spec) => (
+                        <SelectItem key={spec} value={spec}>
+                          {spec.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Price Filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Price Starting From ($)</label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="number"
+                      placeholder="Min"
+                      value={minPrice}
+                      onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
+                      min="0"
+                    />
+                    <span className="text-gray-500">-</span>
+                    <Input
+                      type="number"
+                      placeholder="Max"
+                      value={maxPrice}
+                      onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </aside>
 
           {/* Main Content Area */}
@@ -249,7 +235,7 @@ export default function PhotographersPage() {
 
             {loading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-black"></div>
               </div>
             ) : photographers.length === 0 ? (
               <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
@@ -259,21 +245,18 @@ export default function PhotographersPage() {
                 </svg>
                 <h3 className="text-lg font-medium text-gray-900 mb-1">No photographers found</h3>
                 <p className="text-gray-500">Try adjusting your filters or search query.</p>
-                <button 
-                  onClick={handleResetFilters}
-                  className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 cursor-pointer"
-                >
+                <Button variant="outline" onClick={handleResetFilters} className="mt-4">
                   Clear all filters
-                </button>
+                </Button>
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {photographers.map((photographer) => (
-                    <Link href={`/photographers/${photographer.username}`} key={photographer._id} className="group cursor-pointer">
-                      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 h-full flex flex-col">
-                        <div className="p-5 flex flex-col items-center border-b border-gray-100">
-                          <div className="h-20 w-20 rounded-full bg-gray-200 mb-3 overflow-hidden relative">
+                    <Link href={`/photographers/${photographer.username}`} key={photographer._id} className="group cursor-pointer block h-full">
+                      <Card className="h-full flex flex-col hover:shadow-md transition-shadow overflow-hidden">
+                        <CardHeader className="p-5 flex flex-col items-center border-b border-gray-100 bg-gray-50/50">
+                          <div className="h-20 w-20 rounded-full bg-gray-200 mb-3 overflow-hidden relative border border-gray-200">
                             {photographer.userId?.avatar ? (
                               <Image 
                                 src={photographer.userId.avatar} 
@@ -291,9 +274,9 @@ export default function PhotographersPage() {
                             {photographer.userId?.fullName || 'Anonymous'}
                           </h3>
                           <p className="text-sm text-gray-500">@{photographer.username}</p>
-                        </div>
+                        </CardHeader>
                         
-                        <div className="p-5 flex-1 flex flex-col">
+                        <CardContent className="p-5 flex-1 flex flex-col pt-4">
                           <div className="flex items-center text-sm text-gray-600 mb-3">
                             <svg className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
@@ -307,29 +290,31 @@ export default function PhotographersPage() {
                           
                           <div className="mt-auto">
                             {photographer.specialties && photographer.specialties.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mb-3">
+                              <div className="flex flex-wrap gap-1.5 mb-3">
                                 {photographer.specialties.slice(0, 3).map((spec, idx) => (
-                                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 capitalize border border-blue-100">
+                                  <Badge key={idx} variant="secondary" className="capitalize font-normal px-2 py-0">
                                     {spec}
-                                  </span>
+                                  </Badge>
                                 ))}
                                 {photographer.specialties.length > 3 && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                                  <Badge variant="outline" className="px-2 py-0 text-muted-foreground">
                                     +{photographer.specialties.length - 3}
-                                  </span>
+                                  </Badge>
                                 )}
                               </div>
                             )}
-                            
-                            <div className="flex justify-between items-center pt-3 border-t border-gray-100">
-                              <span className="text-sm text-gray-500">Starting at</span>
-                              <span className="text-lg font-bold text-gray-900">
-                                {photographer.priceFrom ? `$${photographer.priceFrom}` : 'TBD'}
-                              </span>
-                            </div>
                           </div>
-                        </div>
-                      </div>
+                        </CardContent>
+                        
+                        <Separator />
+                        
+                        <CardFooter className="p-4 bg-gray-50/50 flex justify-between items-center">
+                          <span className="text-sm text-gray-500">Starting at</span>
+                          <span className="text-lg font-bold text-gray-900">
+                            {photographer.priceFrom ? `$${photographer.priceFrom}` : 'TBD'}
+                          </span>
+                        </CardFooter>
+                      </Card>
                     </Link>
                   ))}
                 </div>
@@ -338,20 +323,20 @@ export default function PhotographersPage() {
                 {pagination && pagination.totalPages > 1 && (
                   <div className="mt-10 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg shadow-sm">
                     <div className="flex flex-1 justify-between sm:hidden">
-                      <button
+                      <Button
+                        variant="outline"
                         onClick={() => setPage(p => Math.max(1, p - 1))}
                         disabled={!pagination.hasPrevPage}
-                        className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         Previous
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="outline"
                         onClick={() => setPage(p => p + 1)}
                         disabled={!pagination.hasNextPage}
-                        className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         Next
-                      </button>
+                      </Button>
                     </div>
                     <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                       <div>
@@ -383,7 +368,7 @@ export default function PhotographersPage() {
                               aria-current={pagination.currentPage === i + 1 ? "page" : undefined}
                               className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus:outline-offset-0 cursor-pointer ${
                                 pagination.currentPage === i + 1
-                                  ? "z-10 bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                                  ? "z-10 bg-black text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                                   : "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                               }`}
                             >

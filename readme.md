@@ -15,7 +15,8 @@ A full-stack marketplace application connecting photographers with clients. User
 │   ├── src/
 │   │   ├── controllers/    # Route handlers
 │   │   ├── models/         # Mongoose schemas
-│   │   ├── routes/         # API endpoints
+│   │   ├── routes/         # API endpoints-----
++
 │   │   ├── middlewares/    # Express middleware
 │   │   ├── validations/    # Zod schemas
 │   │   ├── utils/          # Helper functions
