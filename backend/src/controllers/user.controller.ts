@@ -101,46 +101,6 @@ export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
     throw error;
   }
 });
-  const { email, password, fullName } = req.body;
-
-  isPasswordStrong(password)
-
-  const userExists = await User.findOne({ email });
-  if (userExists) {
-    throw new ApiError(409, USER_EXISTS);
-  }
-
-  const user = await User.create({
-    fullName,
-    email,
-    password,
-  });
-
-  if (!user._id) {
-    throw new ApiError(500, "Something went wrong while registering user");
-  }
-
-  // Auto-login: Generate tokens for the newly registered user
-  const userData = {
-    _id: user._id,
-    fullName: user.fullName,
-    avatar: user.avatar,
-    role: user.role,
-  };
-
-  const { accessToken, refreshToken } = await generateTokens(userData);
-
-  return res
-    .status(201)
-    .cookie("accessToken", accessToken, accessTokenCookieOptions)
-    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
-    .json(
-      new ApiResponse(
-        { user: userData },
-        "User has been registered and logged in successfully!",
-      ),
-    );
-});
 
 /**
  * Logout User
@@ -169,7 +129,6 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     .clearCookie("refreshToken", clearCookieOptions)
     .json(new ApiResponse({}, "You've logged out successfully!"));
 });
-
 
 /**
  * Refresh access token
@@ -234,33 +193,38 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
     throw new ApiError(401, AUTH_REQUIRED);
   }
 
-  const { fullName, phoneNumber, avatar,password } = req.body;
+  const { fullName, phoneNumber, avatar, password, currentPassword } = req.body;
   const userId = req.user._id;
 
+  // Build update data
   const updateData: any = {};
   if (fullName !== undefined) updateData.fullName = fullName;
   if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
-  if (avatar !== undefined) updateData.avatar = avatar
-  // Handle password update separately with proper hashing
+  if (avatar !== undefined) updateData.avatar = avatar;
+
+  // Handle password update with verification
   if (password !== undefined) {
-    // Validate new password strength
+    // Require current password for security
+    if (!currentPassword) {
+      throw new ApiError(400, "Current password is required to change password");
+    }
+
+    // Fetch user with password to verify
+    const user = await User.findById(userId).select("+password");
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await user.isPasswordCorrect(currentPassword);
+    if (!isCurrentPasswordValid) {
+      throw new ApiError(401, "Current password is incorrect");
+    }
+
+    // Validate and hash new password
     isPasswordStrong(password);
-    
-    // Hash the password before storing
     updateData.password = await bcrypt.hash(password, 12);
   }
-  isPasswordStrong(password)
-  const userId = req.user._id;
-
-  const updateData: any = {};
-  if (fullName !== undefined) updateData.fullName = fullName;
-  if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
-  // Handle password update separately with proper hashing
-  if (password !== undefined) {
-    // Hash the password before storing
-    updateData.password = await bcrypt.hash(password, 12);
-  }
-  if(password !== undefined) updateData.password = password
 
   const updatedUser = await User.findByIdAndUpdate(
     userId,
@@ -272,7 +236,7 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
     throw new ApiError(404, "User not found");
   }
 
-  const user = {
+  const userResponse = {
     _id: updatedUser._id,
     fullName: updatedUser.fullName,
     avatar: updatedUser.avatar,
@@ -283,5 +247,5 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
 
   return res
     .status(200)
-    .json(new ApiResponse({ data: user }, "Profile updated successfully"));
+    .json(new ApiResponse({ data: userResponse }, "Profile updated successfully"));
 });
