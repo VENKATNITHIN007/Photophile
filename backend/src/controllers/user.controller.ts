@@ -194,7 +194,7 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
   if (fullName !== undefined) updateData.fullName = fullName;
   if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
   if (avatar !== undefined) updateData.avatar = avatar
-  if(password !== undefined) updateData.passowrd = password
+  if(password !== undefined) updateData.password = password
 
   const updatedUser = await User.findByIdAndUpdate(
     userId,
