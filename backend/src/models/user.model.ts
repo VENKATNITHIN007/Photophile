@@ -1,5 +1,6 @@
 import mongoose, { Model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { isEmail, isURL } from "validator"
 
 export interface IUser {
   _id?: mongoose.Types.ObjectId;
@@ -25,8 +26,10 @@ export interface IUser {
 
 type userModel = Model<IUser>
 
+
+// type obj which has normal function which returns promise 
 type UserMethods = {
-  isPasswordCorrect: (password: string) => Promise<boolean>
+  isPasswordCorrect(password: string): Promise<boolean>
 }
 
 const userSchema = new Schema<IUser, userModel, UserMethods>(
@@ -48,7 +51,12 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       trim: true,
       sparse: true,
       lowercase: true,
-      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, "Please provide a valid email address"]
+      validate:{
+        validator:function(str:string) {
+          return isEmail(str)
+        },
+        message:"Invalid email adress"
+      }
     },
 
     phoneNumber: {
@@ -56,6 +64,7 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       unique: true,
       sparse: true,
       index: true,
+      match: [/^\+?[1-9]\d{9,14}$/, "Invalid phone number"]
     },
 
     password: {
@@ -64,12 +73,12 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       required: [true, "Password is required"],
       minLength: [8, "Password must be at least 8 characters long"],
       maxLength: [70, "Password cannot exceed 70 characters"],
-      // validate: {
-      //   validator: function (password) {
-      //     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password);
-      //   },
-      //   message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
-      // }
+      validate: {
+        validator: function (password) {
+          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password);
+        },
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      }
     },
 
     refreshToken: {
@@ -81,12 +90,9 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       type: String,
       trim: true,
       default: null,
-      validate: {
-        validator: function (url) {
-          if (!url) return true;
-          return /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(url);
-        },
-        message: "Please provide a valid URL for the avatar"
+      validate:{
+        validator:(url:string)=> !url || isURL(url),
+        message:"please provide a valid url for the avatar"
       }
     },
 
@@ -112,12 +118,21 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
 );
 
 
+userSchema.pre("validate", function (next) {
+  if (!this.email && !this.phoneNumber) {
+    return next(new Error("Either email or phone number is required"));
+  }
+  next();
+});
+
+const SALT_ROUNDS = 12;
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
   }
 
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
 
   next();
 });
@@ -128,20 +143,20 @@ userSchema.methods.isPasswordCorrect = async function (password: string,): Promi
 
 
 userSchema.set('toJSON', {
-  transform: (doc, ret) => {
-    const { password, refreshToken, __v, ...rest } = ret;
+  transform: (_doc, ret) => {
+    const { password, refreshToken, __v, ...rest } = ret  ;
 
     return rest;
   },
 });
 
 
-userSchema.methods.toJSON = function () {
-  const user = this.toObject();
-  delete user.password;
-  delete user.refreshToken;
-  return user;
-};
+// userSchema.methods.toJSON = function () {
+//   const user = this.toObject();
+//   delete user.password;
+//   delete user.refreshToken;
+//   return user;
+// };
 
 
 export const User = mongoose.model("User", userSchema);
