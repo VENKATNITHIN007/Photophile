@@ -193,7 +193,11 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
   const updateData: any = {};
   if (fullName !== undefined) updateData.fullName = fullName;
   if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
-  if (avatar !== undefined) updateData.avatar = avatar
+  // Handle password update separately with proper hashing
+  if (password !== undefined) {
+    // Hash the password before storing
+    updateData.password = await bcrypt.hash(password, 12);
+  }
   if(password !== undefined) updateData.password = password
 
   const updatedUser = await User.findByIdAndUpdate(
