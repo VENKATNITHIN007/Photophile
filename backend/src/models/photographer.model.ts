@@ -26,12 +26,14 @@ const photographerSchema = new Schema<IPhotographer>(
       unique: true,
       trim: true,
       lowercase: true,
+      // default monogoDB value and error message
       minLength: [3, "Username must be at least 3 characters"],
       maxLength: [30, "Username cannot exceed 30 characters"],
       match: [
         /^[a-z0-9_]+$/,
         "Username can only contain lowercase letters, numbers, and underscores",
       ],
+      // end
     },
     bio: String,
     location: { type: String, index: true, lowercase: true },

@@ -18,10 +18,13 @@ import portfolioRouter from "./routes/portfolio.route";
 import reviewRouter from "./routes/review.route";
 import bookingRouter from "./routes/booking.route";
 
-
+// Read allowed frontend origins from ORIGIN_HOSTS env variable.
+// If it exists, convert the comma-separated string into an array and remove spaces.
+// If it does not exist, fall back to default localhost origins.
 const allowedHost = process.env.ORIGIN_HOSTS
   ? process.env.ORIGIN_HOSTS.split(",").map((h) => h.trim())
   : ["http://localhost:3000", "http://localhost:3002"];
+
 
 const port = process.env.PORT || 3001;
 

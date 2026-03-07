@@ -1,6 +1,5 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response, ErrorRequestHandler } from "express";
 import ApiError from "../utils/ApiError";
-import { ErrorRequestHandler } from "express-serve-static-core";
 import { ZodError } from "zod";
 import mongoose from "mongoose";
 

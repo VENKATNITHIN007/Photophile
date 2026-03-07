@@ -5,6 +5,7 @@ import {
   logoutUser,
   registerUser,
   updateProfile,
+  refreshAccessToken,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
 import { LoginSchema, RegisterSchema, UpdateProfileSchema } from "../validations/auth.validation";
@@ -21,7 +22,8 @@ userRouter
     authRateLimiter,
     validateRequest(RegisterSchema),
     registerUser,
-  );
+  )
+  .post("/refresh-token", refreshAccessToken);
 
 // Protected routes
 userRouter

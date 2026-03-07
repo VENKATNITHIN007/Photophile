@@ -2,9 +2,10 @@ import { Request, RequestHandler, Response } from "express";
 import ApiResponse from "../utils/ApiResponse";
 import User from "../models/user.model";
 import ApiError from "../utils/ApiError";
+import bcrypt from "bcrypt";
 import { AUTH_FAILED, AUTH_REQUIRED, USER_EXISTS } from "../constants";
-import { generateTokens } from "../utils/helper";
-import { clearCookieOptions } from "../config";
+import { generateTokens, isPasswordStrong, verifyRefreshToken } from "../utils/helper";
+import { clearCookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions } from "../config";
 import { asyncHandler } from "../utils/asyncHandler";
 
 /**
@@ -33,12 +34,16 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   };
 
   const { accessToken, refreshToken } = await generateTokens(user);
-  return res.json(
-    new ApiResponse(
-      { user, accessToken, refreshToken },
-      "You've been logged in successfully!",
-    ),
-  );
+
+  return res
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
+    .json(
+      new ApiResponse(
+        { user },
+        "You've been logged in successfully!",
+      ),
+    );
 });
 
 /**
@@ -49,6 +54,8 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
  */
 export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
   const { email, password, fullName } = req.body;
+
+  isPasswordStrong(password)
 
   const userExists = await User.findOne({ email });
   if (userExists) {
@@ -61,13 +68,30 @@ export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
     password,
   });
 
-  if (user._id) {
-    return res
-      .status(201)
-      .json(new ApiResponse({}, "User has been register successfully!"));
+  if (!user._id) {
+    throw new ApiError(500, "Something went wrong while registering user");
   }
 
-  throw new ApiError(500, "Someting went wrong while registering user");
+  // Auto-login: Generate tokens for the newly registered user
+  const userData = {
+    _id: user._id,
+    fullName: user.fullName,
+    avatar: user.avatar,
+    role: user.role,
+  };
+
+  const { accessToken, refreshToken } = await generateTokens(userData);
+
+  return res
+    .status(201)
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
+    .json(
+      new ApiResponse(
+        { user: userData },
+        "User has been registered and logged in successfully!",
+      ),
+    );
 });
 
 /**
@@ -98,6 +122,56 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     .json(new ApiResponse({}, "You've logged out successfully!"));
 });
 
+
+/**
+ * Refresh access token
+ * @param req
+ * @param res
+ * @returns
+ */
+export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
+  const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+
+  if (!refreshToken) {
+    throw new ApiError(401, "Refresh token is required");
+  }
+
+  const decodedToken = verifyRefreshToken(refreshToken);
+  const user = await User.findById(decodedToken._id).select("+refreshToken");
+
+  if (!user) {
+    throw new ApiError(401, "User not found");
+  }
+
+  if (!user.refreshToken) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  const isValidToken = await bcrypt.compare(refreshToken, user.refreshToken);
+  if (!isValidToken) {
+    throw new ApiError(401, "Invalid or expired refresh token");
+  }
+
+  const userData = {
+    _id: user._id,
+    fullName: user.fullName,
+    avatar: user.avatar,
+    role: user.role,
+  };
+
+  const { accessToken, refreshToken: newRefreshToken } = await generateTokens(userData);
+
+  return res
+    .cookie("accessToken", accessToken, accessTokenCookieOptions)
+    .cookie("refreshToken", newRefreshToken, refreshTokenCookieOptions)
+    .json(
+      new ApiResponse(
+        { accessToken },
+        "Access token refreshed successfully",
+      ),
+    );
+});
+
 export const currentUser = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
     throw new ApiError(401, AUTH_REQUIRED);
@@ -112,13 +186,15 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
     throw new ApiError(401, AUTH_REQUIRED);
   }
 
-  const { fullName, phoneNumber, avatar } = req.body;
+  const { fullName, phoneNumber, avatar,password } = req.body;
+  isPasswordStrong(password)
   const userId = req.user._id;
 
   const updateData: any = {};
   if (fullName !== undefined) updateData.fullName = fullName;
   if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
-  if (avatar !== undefined) updateData.avatar = avatar;
+  if (avatar !== undefined) updateData.avatar = avatar
+  if(password !== undefined) updateData.passowrd = password
 
   const updatedUser = await User.findByIdAndUpdate(
     userId,

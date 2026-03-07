@@ -85,15 +85,15 @@ export const isPasswordStrong = (password: string): boolean => {
         throw new ApiError(409, "Password must have one uppercase letter");
     }
 
-    if (hasLowerCase) {
+    if (!hasLowerCase) {
         throw new ApiError(409, "Password must have one lowercase letter");
     }
 
-    if (hasNumbers) {
+    if (!hasNumbers) {
         throw new ApiError(409, "Password must have one number");
     }
 
-    if (hasSpecialChar) {
+    if (!hasSpecialChar) {
         throw new ApiError(409, "Password must have one Special character");
     }
 
@@ -218,7 +218,7 @@ export const generateTokens = async (userData: JWT_AUTH) => {
  */
 export const generateAccessToken = (payload: JWT_AUTH) => {
     return jwt.sign(payload, appConfig.ACCESS_TOKEN_SECRET, {
-        expiresIn: appConfig.ACCESS_TOKEN_EXPIRY,
+        expiresIn: appConfig.ACCESS_TOKEN_EXPIRY as `${number}${'d' | 'h' | 'm' | 's'}`,
     });
 };
 
@@ -229,6 +229,6 @@ export const generateAccessToken = (payload: JWT_AUTH) => {
  */
 export const generateRefreshToken = (payload: JWT_AUTH) => {
     return jwt.sign(payload, appConfig.REFRESH_TOKEN_SECRET, {
-        expiresIn: appConfig.REFRESH_TOKEN_EXPIRY,
+        expiresIn: appConfig.REFRESH_TOKEN_EXPIRY as `${number}${'d' | 'h' | 'm' | 's'}`,
     });
 };
