@@ -55,6 +55,54 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
   const { email, password, fullName } = req.body;
 
+  // Validate password strength
+  isPasswordStrong(password);
+
+  try {
+    // Attempt to create user directly
+    // Unique index on email will prevent duplicates atomically
+    const user = await User.create({
+      fullName,
+      email,
+      password,
+    });
+
+    if (!user._id) {
+      throw new ApiError(500, "Something went wrong while registering user");
+    }
+
+    // Auto-login: Generate tokens for the newly registered user
+    const userData = {
+      _id: user._id,
+      fullName: user.fullName,
+      avatar: user.avatar,
+      role: user.role,
+    };
+
+    const { accessToken, refreshToken } = await generateTokens(userData);
+
+    return res
+      .status(201)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
+      .json(
+        new ApiResponse(
+          { user: userData },
+          "User has been registered and logged in successfully!",
+        ),
+      );
+  } catch (error: any) {
+    // Handle duplicate key error (MongoDB error code 11000)
+    if (error.code === 11000 && error.keyPattern?.email) {
+      throw new ApiError(409, USER_EXISTS);
+    }
+    
+    // Re-throw other errors
+    throw error;
+  }
+});
+  const { email, password, fullName } = req.body;
+
   isPasswordStrong(password)
 
   const userExists = await User.findOne({ email });
