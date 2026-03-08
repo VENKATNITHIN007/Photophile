@@ -5,7 +5,7 @@ import { Photographer } from "../models/photographer.model";
 import Review from "../models/Review.model";
 import Booking from "../models/Booking.model";
 import { asyncHandler } from "../utils/asyncHandler";
-import { ERROR_MESSAGES } from "../constants";
+import { ERRORS } from "../constants/error";
 
 /**
  * Create a review for a photographer
@@ -18,12 +18,12 @@ export const createReview = asyncHandler(
     // Check if photographer exists
     const photographer = await Photographer.findById(photographerId);
     if (!photographer) {
-      return next(new ApiError(404, ERROR_MESSAGES.PHOTOGRAPHER.NOT_FOUND));
+      return next(new ApiError(404, ERRORS.PHOTOGRAPHER.NOT_FOUND));
     }
 
     // Check if user is not reviewing themselves
     if (photographer.userId.toString() === userId?.toString()) {
-      return next(new ApiError(403, ERROR_MESSAGES.REVIEW.CANNOT_REVIEW_SELF));
+      return next(new ApiError(403, ERRORS.REVIEW.CANNOT_REVIEW_SELF));
     }
 
     // Check if user has a completed booking with this photographer
@@ -34,13 +34,13 @@ export const createReview = asyncHandler(
     });
 
     if (!completedBooking) {
-      return next(new ApiError(403, ERROR_MESSAGES.REVIEW.REQUIRES_BOOKING));
+      return next(new ApiError(403, ERRORS.REVIEW.REQUIRES_BOOKING));
     }
 
     // Check if user already reviewed this photographer
     const existingReview = await Review.findOne({ userId, photographerId });
     if (existingReview) {
-      return next(new ApiError(409, ERROR_MESSAGES.REVIEW.EXISTS));
+      return next(new ApiError(409, ERRORS.REVIEW.EXISTS));
     }
 
     const review = await Review.create({
@@ -67,7 +67,7 @@ export const getPhotographerReviews = asyncHandler(
       username: username.toLowerCase(),
     });
     if (!photographer) {
-      return next(new ApiError(404, ERROR_MESSAGES.PHOTOGRAPHER.NOT_FOUND));
+      return next(new ApiError(404, ERRORS.PHOTOGRAPHER.NOT_FOUND));
     }
 
     const reviews = await Review.find({ photographerId: photographer._id })

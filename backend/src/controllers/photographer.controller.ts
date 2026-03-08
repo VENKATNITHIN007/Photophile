@@ -5,7 +5,7 @@ import ApiResponse from "../utils/ApiResponse";
 import User from "../models/user.model";
 import ApiError from "../utils/ApiError";
 import { Photographer, IPhotographer } from "../models/photographer.model";
-import { USER_NOT_FOUND } from "../constants";
+import { ERRORS } from "../constants/error";
 
 /** * Create Photographer Profile
  * @param req
@@ -18,20 +18,20 @@ export const createPhotographerProfile: RequestHandler = asyncHandler(
       req.body;
     const user = await User.findById(userId);
     if (!user) {
-      throw new ApiError(404, USER_NOT_FOUND);
+      throw new ApiError(404, ERRORS.AUTH.USER_NOT_FOUND);
     }
     const existingProfile = await Photographer.findOne({ userId: user._id });
     if (existingProfile) {
       throw new ApiError(
         409,
-        "Photographer profile already exists for this user",
+        ERRORS.PHOTOGRAPHER.PROFILE_EXISTS,
       );
     }
     const usernameExists = await Photographer.findOne({
       username: username.toLowerCase(),
     });
     if (usernameExists) {
-      throw new ApiError(409, "Username is already taken");
+      throw new ApiError(409, ERRORS.PHOTOGRAPHER.USERNAME_TAKEN);
     }
     const photographerData: IPhotographer = {
       userId: user._id,
@@ -61,12 +61,12 @@ export const createPhotographerProfile: RequestHandler = asyncHandler(
 export const getPhotographerProfileByUserId = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(404, "Photographer profile not found");
+      throw new ApiError(404, ERRORS.PHOTOGRAPHER.PROFILE_NOT_FOUND);
     }
     return res
       .status(200)
@@ -91,7 +91,7 @@ export const getPhotographerProfileByUsername: RequestHandler = asyncHandler(
       username: username.toLowerCase(),
     }).populate("userId", "fullName avatar email");
     if (!photographer) {
-      throw new ApiError(404, "Photographer profile not found");
+      throw new ApiError(404, ERRORS.PHOTOGRAPHER.PROFILE_NOT_FOUND);
     }
     return res
       .status(200)
@@ -112,13 +112,13 @@ export const getPhotographerProfileByUsername: RequestHandler = asyncHandler(
 export const updatePhotographerProfile = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const { bio, location, specialties, priceFrom } = req.body;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(404, "Photographer profile not found");
+      throw new ApiError(404, ERRORS.PHOTOGRAPHER.PROFILE_NOT_FOUND);
     }
     photographer.bio = bio || photographer.bio;
     photographer.location = location || photographer.location;

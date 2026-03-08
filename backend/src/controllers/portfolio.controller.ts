@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import ApiResponse from "../utils/ApiResponse";
 import ApiError from "../utils/ApiError";
 import { Photographer } from "../models/photographer.model";
-import Portfolio, { IPortfolio } from "../models/protfolio.model";
+import { ERRORS } from "../constants/error";
 
 /**
  * Add single portfolio item
@@ -11,13 +11,13 @@ import Portfolio, { IPortfolio } from "../models/protfolio.model";
 export const addPortfolioItem = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const { mediaUrl, mediaType, category } = req.body;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(403, "Only photographers can add portfolio items");
+      throw new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY);
     }
     const portfolioItem = await Portfolio.create({
       photographerId: photographer._id,
@@ -39,13 +39,13 @@ export const addPortfolioItem = asyncHandler(
 export const addMultiplePortfolioItems = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const { items } = req.body;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(403, "Only photographers can add portfolio items");
+      throw new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY);
     }
     const portfolioItems = items.map((item: IPortfolio) => ({
       photographerId: photographer._id,
@@ -71,12 +71,12 @@ export const addMultiplePortfolioItems = asyncHandler(
 export const getMyPortfolio = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(403, "Only photographers have portfolios");
+      throw new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY);
     }
     const portfolio = await Portfolio.find({
       photographerId: photographer._id,
@@ -97,7 +97,7 @@ export const getPortfolioByUsername = asyncHandler(
       username: username.toLowerCase(),
     });
     if (!photographer) {
-      throw new ApiError(404, "Photographer not found");
+      throw new ApiError(404, ERRORS.PHOTOGRAPHER.NOT_FOUND);
     }
     const portfolio = await Portfolio.find({
       photographerId: photographer._id,
@@ -114,7 +114,7 @@ export const getPortfolioByUsername = asyncHandler(
 export const updatePortfolioItem =  asyncHandler(async (req: Request, res: Response) => {
 
     if (!req.user) {
-      return res.status(401).json(new ApiError(401, "Authentication required"));
+      return res.status(401).json(new ApiError(401, ERRORS.AUTH.REQUIRED));
     }
 
     const userId = req.user._id;
@@ -126,7 +126,7 @@ export const updatePortfolioItem =  asyncHandler(async (req: Request, res: Respo
       return res
         .status(403)
         .json(
-          new ApiError(403, "Only photographers can update portfolio items"),
+          new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY),
         );
     }
 
@@ -139,7 +139,7 @@ export const updatePortfolioItem =  asyncHandler(async (req: Request, res: Respo
     if (!portfolioItem) {
       return res
         .status(404)
-        .json(new ApiError(404, "Portfolio item not found"));
+        .json(new ApiError(404, ERRORS.PORTFOLIO.ITEM_NOT_FOUND));
     }
 
     return res
@@ -155,20 +155,20 @@ export const updatePortfolioItem =  asyncHandler(async (req: Request, res: Respo
 export const deletePortfolioItem = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const { itemId } = req.params;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(403, "Only photographers can delete portfolio items");
+      throw new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY);
     }
     const portfolioItem = await Portfolio.findOneAndDelete({
       _id: itemId,
       photographerId: photographer._id,
     });
     if (!portfolioItem) {
-      throw new ApiError(404, "Portfolio item not found");
+      throw new ApiError(404, ERRORS.PORTFOLIO.ITEM_NOT_FOUND);
     }
     return res
       .status(200)
@@ -182,13 +182,13 @@ export const deletePortfolioItem = asyncHandler(
 export const deleteMultiplePortfolioItems = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new ApiError(401, "Authentication required");
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
     }
     const userId = req.user._id;
     const { itemIds } = req.body;
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      throw new ApiError(403, "Only photographers can delete portfolio items");
+      throw new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY);
     }
     const result = await Portfolio.deleteMany({
       _id: { $in: itemIds },

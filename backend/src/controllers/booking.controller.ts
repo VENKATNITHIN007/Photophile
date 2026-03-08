@@ -3,8 +3,10 @@ import ApiResponse from "../utils/ApiResponse";
 import ApiError from "../utils/ApiError";
 import { Photographer } from "../models/photographer.model";
 import Booking from "../models/Booking.model";
-import { BOOKING_STATUS_TRANSITIONS, ERROR_MESSAGES } from "../constants";
+import { ERRORS } from "../constants/error";
+import { BOOKING_STATUS_TRANSITIONS } from "../constants/booking";
 import { asyncHandler } from "../utils/asyncHandler";
+
 
 /**
  * Create a booking request (user books a photographer)
@@ -17,12 +19,12 @@ export const createBooking = asyncHandler(
     // Check if photographer exists
     const photographer = await Photographer.findById(photographerId);
     if (!photographer) {
-      return next(new ApiError(404, ERROR_MESSAGES.PHOTOGRAPHER.NOT_FOUND));
+      return next(new ApiError(404, ERRORS.PHOTOGRAPHER.NOT_FOUND));
     }
 
     // Check if user is not booking themselves
     if (photographer.userId.toString() === userId?.toString()) {
-      return next(new ApiError(403, ERROR_MESSAGES.BOOKING.CANNOT_BOOK_SELF));
+      return next(new ApiError(403, ERRORS.BOOKING.CANNOT_BOOK_SELF));
     }
 
     // Check for existing pending booking on same date
@@ -34,7 +36,7 @@ export const createBooking = asyncHandler(
     });
 
     if (existingBooking) {
-      return next(new ApiError(409, ERROR_MESSAGES.BOOKING.EXISTS));
+      return next(new ApiError(409, ERRORS.BOOKING.EXISTS));
     }
 
     const booking = await Booking.create({
@@ -82,7 +84,7 @@ export const getBookingRequests = asyncHandler(
     // Check if user is a photographer
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      return next(new ApiError(403, ERROR_MESSAGES.BOOKING.PHOTOGRAPHER_ONLY));
+      return next(new ApiError(403, ERRORS.PHOTOGRAPHER.ONLY));
     }
 
     const bookings = await Booking.find({ photographerId: photographer._id })
@@ -108,7 +110,7 @@ export const updateBookingStatus = asyncHandler(
     // Check if user is a photographer
     const photographer = await Photographer.findOne({ userId });
     if (!photographer) {
-      return next(new ApiError(403, ERROR_MESSAGES.BOOKING.PHOTOGRAPHER_ONLY));
+      return next(new ApiError(403, ERRORS.PHOTOGRAPHER.ONLY));
     }
 
     // Find the booking first to validate status transition
@@ -118,18 +120,18 @@ export const updateBookingStatus = asyncHandler(
     });
 
     if (!booking) {
-      return next(new ApiError(404, ERROR_MESSAGES.BOOKING.NOT_FOUND));
+      return next(new ApiError(404, ERRORS.BOOKING.NOT_FOUND));
     }
 
     // Validate status transition using state machine
     const currentStatus = booking.status;
     const allowedTransitions = BOOKING_STATUS_TRANSITIONS[currentStatus] || [];
 
-    if (!allowedTransitions.includes(newStatus)) {
+    if (!(allowedTransitions as unknown as string[]).includes(newStatus)) {
       return next(
         new ApiError(
           400,
-          `${ERROR_MESSAGES.BOOKING.INVALID_TRANSITION} Cannot change from "${currentStatus}" to "${newStatus}". Allowed: ${allowedTransitions.join(", ") || "none"}`,
+          `${ERRORS.BOOKING.INVALID_TRANSITION} Cannot change from "${currentStatus}" to "${newStatus}". Allowed: ${allowedTransitions.join(", ") || "none"}`,
         ),
       );
     }
@@ -161,7 +163,7 @@ export const updateBooking = asyncHandler(
     });
 
     if (!booking) {
-      return next(new ApiError(404, ERROR_MESSAGES.BOOKING.CANNOT_MODIFY));
+      return next(new ApiError(404, ERRORS.BOOKING.CANNOT_MODIFY));
     }
 
     if (eventDate) booking.eventDate = new Date(eventDate);
@@ -191,7 +193,7 @@ export const cancelBooking = asyncHandler(
     });
 
     if (!booking) {
-      return next(new ApiError(404, ERROR_MESSAGES.BOOKING.CANNOT_CANCEL));
+      return next(new ApiError(404, ERRORS.BOOKING.CANNOT_CANCEL));
     }
 
     return res
@@ -224,7 +226,7 @@ export const getBookingById = asyncHandler(
       });
 
     if (!booking) {
-      return next(new ApiError(404, ERROR_MESSAGES.BOOKING.NOT_FOUND));
+      return next(new ApiError(404, ERRORS.BOOKING.NOT_FOUND));
     }
 
     return res

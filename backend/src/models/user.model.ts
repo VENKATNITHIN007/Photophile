@@ -120,7 +120,7 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
 
 userSchema.pre("validate", function (next) {
   if (!this.email && !this.phoneNumber) {
-    return next(new Error("Either email or phone number is required"));
+    next(new Error("Either email or phone number is required"));
   }
   next();
 });

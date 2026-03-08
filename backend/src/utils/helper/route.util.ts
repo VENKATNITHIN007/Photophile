@@ -1,0 +1,1 @@
+export const createVersionRoute = (route: string, version: number = 1) => "/api/v" + version + "/" + route;

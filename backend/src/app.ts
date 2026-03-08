@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectToDB from "./db";
 
-import { createVersionRoute } from "./utils/helper";
+import { createVersionRoute } from "./utils/helper/route.util";
 import errorHandler from "./middlewares/errorHandler.middleware";
 import ApiError from "./utils/ApiError";
 import {

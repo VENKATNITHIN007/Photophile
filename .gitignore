@@ -77,3 +77,4 @@ coverage/
 .vercel
 .netlify
 .sisyphus/
+/notes

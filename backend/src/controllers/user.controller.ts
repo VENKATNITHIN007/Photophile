@@ -3,8 +3,9 @@ import ApiResponse from "../utils/ApiResponse";
 import User from "../models/user.model";
 import ApiError from "../utils/ApiError";
 import bcrypt from "bcrypt";
-import { AUTH_FAILED, AUTH_REQUIRED, USER_EXISTS } from "../constants";
-import { generateTokens, isPasswordStrong, verifyRefreshToken } from "../utils/helper";
+import { ERRORS } from "../constants/error";
+import { isPasswordStrong } from "../utils/helper/password.util";
+import { generateTokens, verifyRefreshToken } from "../utils/helper/jwt.util";
 import { clearCookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions } from "../config";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -19,11 +20,11 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
   const userExists = await User.findOne({ email }).select("+password");
   if (!userExists) {
-    throw new ApiError(401, AUTH_FAILED);
+    throw new ApiError(401, ERRORS.AUTH.INVALID_CREDENTIALS );
   }
 
   if (!userExists.isPasswordCorrect(password)) {
-    throw new ApiError(401, AUTH_FAILED);
+    throw new ApiError(401, ERRORS.AUTH.WRONG_PASSWORD);
   }
 
   const user = {
@@ -94,7 +95,7 @@ export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
   } catch (error: any) {
     // Handle duplicate key error (MongoDB error code 11000)
     if (error.code === 11000 && error.keyPattern?.email) {
-      throw new ApiError(409, USER_EXISTS);
+      throw new ApiError(409, ERRORS.AUTH.USER_EXISTS);
     }
     
     // Re-throw other errors
@@ -110,7 +111,7 @@ export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
  */
 export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
-    throw new ApiError(401, AUTH_REQUIRED);
+    throw new ApiError(401, ERRORS.AUTH.REQUIRED);
   }
 
   const userId = req.user._id;
@@ -181,7 +182,7 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
 
 export const currentUser = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
-    throw new ApiError(401, AUTH_REQUIRED);
+    throw new ApiError(401, ERRORS.AUTH.REQUIRED);
   }
   return res
     .status(200)
@@ -190,7 +191,7 @@ export const currentUser = asyncHandler(async (req: Request, res: Response) => {
 
 export const updateProfile = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) {
-    throw new ApiError(401, AUTH_REQUIRED);
+    throw new ApiError(401, ERRORS.AUTH.REQUIRED);
   }
 
   const { fullName, phoneNumber, avatar, password, currentPassword } = req.body;
