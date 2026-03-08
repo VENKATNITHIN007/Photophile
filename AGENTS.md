@@ -12,21 +12,34 @@ Photophile (codename: Dukan) connects photographers with clients. Photographers 
 
 ## Structure
 
-```
 ├── backend/                # Express.js API
 │   └── src/
 │       ├── app.ts          # Entry point
 │       ├── config.ts       # Environment config
-│       ├── constants.ts    # App constants
+│       ├── constants/      # App constants (modular)
+│       │   ├── error.ts    # Error messages
+│       │   ├── pagination.ts
+│       │   ├── upload.ts
+│       │   └── booking.ts
 │       ├── controllers/    # Route handlers
 │       ├── db/             # Database connection
 │       ├── middlewares/    # Express middleware
 │       ├── models/         # Mongoose schemas
 │       ├── routes/         # API routes
 │       ├── types/          # TypeScript types
-│       ├── utils/          # Helpers
+│       ├── utils/          # Utilities
+│       │   ├── helper/     # Helper functions (modular)
+│       │   │   ├── jwt.util.ts
+│       │   │   ├── password.util.ts
+│       │   │   ├── route.util.ts
+│       │   │   ├── string.util.ts
+│       │   │   └── pagination.ts
+│       │   ├── ApiError.ts
+│       │   ├── ApiResponse.ts
+│       │   ├── asyncHandler.ts
+│       │   └── cloudinary.ts
 │       └── validations/    # Zod schemas
-│
+
 └── frontend/               # Next.js 15 App
     └── src/
         ├── app/            # App Router pages
@@ -339,7 +352,7 @@ router.post("/login", validateRequest(LoginSchema), loginUser);
 All API routes include a version prefix (`/api/v1/`):
 
 ```typescript
-// backend/src/utils/helper.ts
+// backend/src/utils/helper/route.util.ts
 export const createVersionRoute = (route: string, version: number = 1) => 
   "/api/v" + version + "/" + route;
 

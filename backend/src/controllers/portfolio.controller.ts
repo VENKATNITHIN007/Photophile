@@ -4,6 +4,7 @@ import ApiResponse from "../utils/ApiResponse";
 import ApiError from "../utils/ApiError";
 import { Photographer } from "../models/photographer.model";
 import { ERRORS } from "../constants/error";
+import {Portfolio, IPortfolio }from "../models/protfolio.model";
 
 /**
  * Add single portfolio item

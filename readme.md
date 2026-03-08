@@ -108,16 +108,30 @@ See [docs/decisions.md](docs/decisions.md) for detailed architectural decisions.
 │   └── src/
 │       ├── app.ts          # Entry point
 │       ├── config.ts       # Environment config
-│       ├── constants.ts    # App constants
+│       ├── constants/      # App constants (modular)
+│       │   ├── error.ts    # Error messages
+│       │   ├── pagination.ts
+│       │   ├── upload.ts
+│       │   └── booking.ts
 │       ├── controllers/    # Route handlers
 │       ├── db/             # Database connection
 │       ├── middlewares/    # Express middleware
 │       ├── models/         # Mongoose schemas
 │       ├── routes/         # API routes
 │       ├── types/          # TypeScript types
-│       ├── utils/          # Helpers
+│       ├── utils/          # Utilities
+│       │   ├── helper/     # Helper functions (modular)
+│       │   │   ├── jwt.util.ts
+│       │   │   ├── password.util.ts
+│       │   │   ├── route.util.ts
+│       │   │   ├── string.util.ts
+│       │   │   └── pagination.ts
+│       │   ├── ApiError.ts
+│       │   ├── ApiResponse.ts
+│       │   ├── asyncHandler.ts
+│       │   └── cloudinary.ts
 │       └── validations/    # Zod schemas
-│
+
 └── frontend/               # Next.js 15 App
     └── src/
         ├── app/            # App Router pages
