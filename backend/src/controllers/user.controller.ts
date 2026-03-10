@@ -8,7 +8,7 @@ import { isPasswordStrong } from "../utils/helper/password.util";
 import { generateTokens, verifyRefreshToken } from "../utils/helper/jwt.util";
 import { clearCookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions, appConfig } from "../config";
 import { asyncHandler } from "../utils/asyncHandler";
-import { generateSecureToken, hashToken } from "../utils/helper/token.util";
+import { generateSecureToken, hashToken, verifyToken } from "../utils/helper/token.util";
 import { sendEmail } from "../utils/email.service";
 import { getVerificationEmailTemplate } from "../templates/email.template";
 
@@ -330,4 +330,71 @@ export const sendVerificationEmail = asyncHandler(async (req: Request, res: Resp
   return res
     .status(200)
     .json(new ApiResponse({}, genericMessage));
+});
+
+/**
+ * Verify email with token
+ * Verifies user's email address using the provided verification token
+ * @param req
+ * @param res
+ * @returns
+ */
+export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { token } = req.body;
+
+  if (!token) {
+    throw new ApiError(400, ERRORS.AUTH.VERIFICATION_TOKEN_INVALID);
+  }
+
+  // Find user by querying all users and checking tokens
+  // We need to select the verification fields which are not selected by default
+  const users = await User.find({
+    emailVerificationToken: { $exists: true, $ne: null },
+    emailVerificationExpires: { $exists: true, $ne: null },
+  }).select("+emailVerificationToken +emailVerificationExpires +isEmailVerified email");
+
+  // Find the user with matching token using bcrypt compare
+  let matchedUser = null;
+  for (const user of users) {
+    if (user.emailVerificationToken) {
+      const isMatch = await verifyToken(token, user.emailVerificationToken);
+      if (isMatch) {
+        matchedUser = user;
+        break;
+      }
+    }
+  }
+
+  // If no user found with matching token, return generic error
+  // Don't reveal whether token is invalid or expired
+  if (!matchedUser) {
+    throw new ApiError(400, ERRORS.AUTH.VERIFICATION_TOKEN_INVALID);
+  }
+
+  // Check if token has expired
+  if (matchedUser.emailVerificationExpires && matchedUser.emailVerificationExpires < new Date()) {
+    throw new ApiError(400, ERRORS.AUTH.VERIFICATION_TOKEN_INVALID);
+  }
+
+  // Check if already verified
+  if (matchedUser.isEmailVerified) {
+    // Still clear the token fields for security
+    matchedUser.emailVerificationToken = undefined;
+    matchedUser.emailVerificationExpires = undefined;
+    await matchedUser.save();
+    
+    return res
+      .status(200)
+      .json(new ApiResponse({}, "Email verified successfully"));
+  }
+
+  // Mark email as verified and clear token fields
+  matchedUser.isEmailVerified = true;
+  matchedUser.emailVerificationToken = undefined;
+  matchedUser.emailVerificationExpires = undefined;
+  await matchedUser.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse({}, "Email verified successfully"));
 });

@@ -7,6 +7,7 @@ import {
   updateProfile,
   refreshAccessToken,
   sendVerificationEmail,
+  verifyEmail,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
 import { LoginSchema, RegisterSchema, UpdateProfileSchema } from "../validations/auth.validation";
@@ -25,7 +26,8 @@ userRouter
     registerUser,
   )
   .post("/refresh-token", refreshAccessToken)
-  .post("/verify-email/send", emailVerificationLimiter, sendVerificationEmail);
+  .post("/verify-email/send", emailVerificationLimiter, sendVerificationEmail)
+  .post("/verify-email", emailVerificationLimiter, verifyEmail);
 
 // Protected routes
 userRouter
