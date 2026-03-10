@@ -6,10 +6,6 @@ import connectToDB from "./db";
 import { createVersionRoute } from "./utils/helper/route.util";
 import errorHandler from "./middlewares/errorHandler.middleware";
 import ApiError from "./utils/ApiError";
-import {
-  securityHeaders,
-  removeSensitiveHeaders,
-} from "./middlewares/security.middleware";
 import { apiRateLimiter } from "./middlewares/rateLimiter.middleware";
 
 import userRouter from "./routes/user.router";
@@ -17,6 +13,7 @@ import photographerRouter from "./routes/photographer.route";
 import portfolioRouter from "./routes/portfolio.route";
 import reviewRouter from "./routes/review.route";
 import bookingRouter from "./routes/booking.route";
+import helmet from "helmet";
 
 // Read allowed frontend origins from ORIGIN_HOSTS env variable.
 // If it exists, convert the comma-separated string into an array and remove spaces.
@@ -31,10 +28,10 @@ const port = process.env.PORT || 3001;
 const app = express();
 
 /**
- * Security middlewares (apply early in the chain)
+ * Security middlewares learn more about headers 
  */
-app.use(securityHeaders);
-app.use(removeSensitiveHeaders);
+app.use(helmet())
+
 
 app.use(express.json({ limit: "10MB" }));
 app.use(express.urlencoded({ limit: "10MB", extended: true }));
