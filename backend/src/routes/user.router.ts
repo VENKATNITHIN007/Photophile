@@ -8,11 +8,12 @@ import {
   refreshAccessToken,
   sendVerificationEmail,
   verifyEmail,
+  forgotPassword,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
-import { LoginSchema, RegisterSchema, UpdateProfileSchema } from "../validations/auth.validation";
+import { LoginSchema, RegisterSchema, UpdateProfileSchema, ForgotPasswordSchema } from "../validations/auth.validation";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { authRateLimiter, emailVerificationLimiter } from "../middlewares/rateLimiter.middleware";
+import { authRateLimiter, emailVerificationLimiter, forgotPasswordLimiter } from "../middlewares/rateLimiter.middleware";
 
 const userRouter = Router();
 
@@ -27,7 +28,8 @@ userRouter
   )
   .post("/refresh-token", refreshAccessToken)
   .post("/verify-email/send", emailVerificationLimiter, sendVerificationEmail)
-  .post("/verify-email", emailVerificationLimiter, verifyEmail);
+  .post("/verify-email", emailVerificationLimiter, verifyEmail)
+  .post("/forgot-password", forgotPasswordLimiter, validateRequest(ForgotPasswordSchema), forgotPassword);
 
 // Protected routes
 userRouter

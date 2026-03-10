@@ -10,7 +10,7 @@ import { clearCookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions
 import { asyncHandler } from "../utils/asyncHandler";
 import { generateSecureToken, hashToken, verifyToken } from "../utils/helper/token.util";
 import { sendEmail } from "../utils/email.service";
-import { getVerificationEmailTemplate } from "../templates/email.template";
+import { getVerificationEmailTemplate, getPasswordResetTemplate } from "../templates/email.template";
 
 
 
@@ -397,4 +397,77 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(new ApiResponse({}, "Email verified successfully"));
+});
+
+/**
+ * Forgot password - initiates password reset process
+ * Sends password reset email with secure token
+ * Returns generic success message to prevent email enumeration
+ * @param req
+ * @param res
+ * @returns
+ */
+export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  // Always return generic success message to prevent email enumeration
+  const genericMessage = "If an account exists, a password reset email has been sent";
+
+  // Find user by email (select password reset fields which are not selected by default)
+  const user = await User.findOne({ email }).select("+passwordResetToken +passwordResetExpires");
+
+  // If user doesn't exist, return generic success (don't reveal user existence)
+  if (!user) {
+    return res
+      .status(200)
+      .json(new ApiResponse({}, genericMessage));
+  }
+
+  // Invalidate any existing reset tokens by clearing them first
+  // This ensures only one active reset token per user
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  // Generate secure token and hash it
+  const resetToken = generateSecureToken();
+  const hashedToken = await hashToken(resetToken);
+
+  // Calculate expiry time (1 hour from now)
+  const expiryHours = parseInt(appConfig.PASSWORD_RESET_EXPIRY) || 1;
+  const resetExpires = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
+
+  // Save hashed token and expiry to user document
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = resetExpires;
+  await user.save();
+
+  // Get email template
+  const baseUrl = appConfig.APP_BASE_URL;
+  const emailTemplate = getPasswordResetTemplate(resetToken, baseUrl);
+
+  // Send password reset email
+  const emailResult = await sendEmail({
+    to: user.email,
+    subject: emailTemplate.subject,
+    html: emailTemplate.html,
+    text: emailTemplate.text,
+  });
+
+  // If email fails, log error but still return generic success
+  // Don't reveal internal errors to the client
+  if (!emailResult.success) {
+    console.error("[EMAIL ERROR] Failed to send password reset email:", {
+      userId: user._id,
+      email: user.email,
+      error: emailResult.error,
+    });
+  } else {
+    console.log("[EMAIL] Password reset email sent successfully to:", user.email);
+  }
+
+  // Return generic success message regardless of outcome
+  return res
+    .status(200)
+    .json(new ApiResponse({}, genericMessage));
 });
