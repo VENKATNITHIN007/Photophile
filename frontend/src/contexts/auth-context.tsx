@@ -11,6 +11,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  isEmailVerified?: boolean;
 }
 
 export interface LoginCredentials {
@@ -28,10 +29,13 @@ export interface RegisterData {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isEmailVerified: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
+  checkEmailVerification: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,17 +43,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
 
   const checkAuth = async () => {
     try {
       const response = await apiClient.get<{ data: User }>("/users/me");
-      // Assuming response structure is { data: user } or just user directly based on backend implementation
-      setUser(response.data.data || (response.data as unknown as User));
+      const userData = response.data.data || (response.data as unknown as User);
+      setUser(userData);
+      setIsEmailVerified(userData.isEmailVerified ?? false);
     } catch {
       setUser(null);
+      setIsEmailVerified(false);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resendVerificationEmail = async () => {
+    if (!user?.email) {
+      throw new Error("User email not available");
+    }
+    await apiClient.post("/users/verify-email/send", { email: user.email });
+  };
+
+  const checkEmailVerification = async (): Promise<boolean> => {
+    try {
+      const response = await apiClient.get<{ data: User }>("/users/me");
+      const userData = response.data.data || (response.data as unknown as User);
+      const verified = userData.isEmailVerified ?? false;
+      setIsEmailVerified(verified);
+      setUser(userData);
+      return verified;
+    } catch {
+      return false;
     }
   };
 
@@ -76,12 +103,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Logout error", error);
     } finally {
       setUser(null);
+      setIsEmailVerified(false);
       router.push("/login");
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, isEmailVerified, login, register, logout, checkAuth, resendVerificationEmail, checkEmailVerification }}>
       {children}
     </AuthContext.Provider>
   );
