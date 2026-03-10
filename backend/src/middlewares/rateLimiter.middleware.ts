@@ -67,3 +67,60 @@ setInterval(() => {
     }
   });
 }, 60 * 1000);
+
+
+/**
+ * Rate limiter for email-based endpoints
+ * Uses email from request body as the key
+ */
+export const emailRateLimiter = (
+  windowMs: number = 60 * 60 * 1000, // 1 hour default
+  maxRequests: number = 3,
+) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const email = req.body.email;
+    
+    if (!email || typeof email !== 'string') {
+      return next(new ApiError(400, 'Email is required'));
+    }
+    
+    const key = `email:${email.toLowerCase().trim()}`;
+    const now = Date.now();
+
+    if (!store[key] || store[key].resetTime < now) {
+      store[key] = {
+        count: 1,
+        resetTime: now + windowMs,
+      };
+      return next();
+    }
+
+    if (store[key].count >= maxRequests) {
+      const retryAfter = Math.ceil((store[key].resetTime - now) / 1000);
+      res.setHeader('Retry-After', retryAfter);
+      return res
+        .status(429)
+        .json(
+          new ApiError(
+            429,
+            `Too many requests for this email. Please try again in ${retryAfter} seconds.`,
+          ),
+        );
+    }
+
+    store[key].count++;
+    next();
+  };
+};
+
+/**
+ * Rate limiter for email verification endpoint
+ * 3 requests per hour per email
+ */
+export const emailVerificationLimiter = emailRateLimiter(60 * 60 * 1000, 3);
+
+/**
+ * Rate limiter for forgot password endpoint
+ * 3 requests per hour per email
+ */
+export const forgotPasswordLimiter = emailRateLimiter(60 * 60 * 1000, 3);
