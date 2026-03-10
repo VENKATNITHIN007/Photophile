@@ -69,3 +69,51 @@ export const UpdateProfileSchema = z.object({
     avatar: z.string().url("Please provide a valid URL for the avatar").optional().or(z.literal("")),
 });
 export type updateProfileType = z.infer<typeof UpdateProfileSchema>;
+
+
+
+export const SendVerificationEmailSchema = z.object({
+    email: z.string({
+        required_error: "Email Address is required",
+        invalid_type_error: "Email must be a string"
+    }).email('Invalid email'),
+});
+
+export const VerifyEmailSchema = z.object({
+    token: z.string({
+        required_error: "Verification token is required",
+        invalid_type_error: "Token must be a string"
+    }).min(32),
+});
+
+export const ForgotPasswordSchema = z.object({
+    email: z.string({
+        required_error: "Email Address is required",
+        invalid_type_error: "Email must be a string"
+    }).email('Invalid email'),
+});
+
+export const ResetPasswordSchema = z.object({
+    token: z.string({
+        required_error: "Reset token is required",
+        invalid_type_error: "Token must be a string"
+    }).min(32),
+    newPassword: z.string({
+        required_error: "New password is required",
+        invalid_type_error: "Password must be a string"
+    })
+    .min(8, "Password must be at least 8 characters")
+    .refine((pwd) => /[A-Z]/.test(pwd), { message: "Need uppercase" })
+    .refine((pwd) => /[a-z]/.test(pwd), { message: "Need lowercase" })
+    .refine((pwd) => /\d/.test(pwd), { message: "Need number" })
+    .refine((pwd) => /[!@#$%^&*]/.test(pwd), { message: "Need special char" }),
+    confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
+
+export type sendVerificationEmailType = z.infer<typeof SendVerificationEmailSchema>;
+export type verifyEmailType = z.infer<typeof VerifyEmailSchema>;
+export type forgotPasswordType = z.infer<typeof ForgotPasswordSchema>;
+export type resetPasswordType = z.infer<typeof ResetPasswordSchema>;
