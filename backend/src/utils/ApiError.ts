@@ -1,6 +1,9 @@
 import appConfig from "../config";
 
+// extends default js error class
+
 class ApiError extends Error {
+    // types for obj , public and readonly are typescript features 
     public readonly success: boolean = false;
     public readonly statusCode: number;
     public readonly data: null = null;
@@ -14,13 +17,14 @@ class ApiError extends Error {
         errors: unknown = "",
         stack = ""
     ) {
+       // giving message to js default error object using super so that it attches msg to the front of error 
         super(message);
         this.success = false;
         this.statusCode = statusCode;
         this.message = message;
         this.data = null;
         this.errors = errors;
-
+        // where the error occured at is stack 
         if (stack) {
             this.stack = stack;
         } else {
@@ -28,7 +32,7 @@ class ApiError extends Error {
         }
 
     }
-
+    // returns filtered js obj required to convert in json using .json
     toJSON() {
         return {
             success: this.success,
@@ -36,6 +40,7 @@ class ApiError extends Error {
             message: this.message,
             data: this.data,
             errors: this.errors,
+            // undefined in production stack can cause security issues in prod
             stack: appConfig.debug ? this.stack : undefined,
         }
     }
