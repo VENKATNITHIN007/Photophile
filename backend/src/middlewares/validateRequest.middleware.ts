@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { ZodError, ZodType } from "zod";
-import ApiError from "../utils/ApiError";
+import {  ZodType } from "zod";
 
+/**
+ * this validates the request data using zod validations before the data reaching controller 
+ */
 export const validateRequest = (schema: ZodType) => {
     return function (req: Request, res: Response, next: NextFunction) {
 
