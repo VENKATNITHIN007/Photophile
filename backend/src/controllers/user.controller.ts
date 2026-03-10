@@ -14,6 +14,7 @@ import { getVerificationEmailTemplate, getPasswordResetTemplate } from "../templ
 
 
 
+
 /**
  * Login user
  * @param req
@@ -51,6 +52,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
       ),
     );
 });
+
 
 /**
  * Register a new User
@@ -108,6 +110,7 @@ export const registerUser: RequestHandler = asyncHandler(async (req, res) => {
   }
 });
 
+
 /**
  * Logout User
  * @param req
@@ -135,6 +138,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
     .clearCookie("refreshToken", clearCookieOptions)
     .json(new ApiResponse({}, "You've logged out successfully!"));
 });
+
 
 /**
  * Refresh access token
@@ -255,6 +259,8 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
     .status(200)
     .json(new ApiResponse({ data: userResponse }, "Profile updated successfully"));
 });
+
+
 
 
 /**
@@ -470,4 +476,74 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   return res
     .status(200)
     .json(new ApiResponse({}, genericMessage));
+});
+
+/**
+ * Reset password with token
+ * Resets user's password using a valid reset token
+ * Invalidates all refresh tokens and clears reset token fields
+ * @param req
+ * @param res
+ * @returns
+ */
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  // Validate required fields
+  if (!token) {
+    throw new ApiError(400, ERRORS.AUTH.RESET_TOKEN_INVALID);
+  }
+
+  if (!newPassword) {
+    throw new ApiError(400, "Password is required");
+  }
+
+  // Validate password strength
+  isPasswordStrong(newPassword);
+
+  // Find users with active reset tokens
+  // We need to select the reset token fields which are not selected by default
+  const users = await User.find({
+    passwordResetToken: { $exists: true, $ne: null },
+    passwordResetExpires: { $exists: true, $ne: null },
+  }).select("+passwordResetToken +passwordResetExpires +refreshToken email");
+
+  // Find the user with matching token using bcrypt compare
+  let matchedUser = null;
+  for (const user of users) {
+    if (user.passwordResetToken) {
+      const isMatch = await verifyToken(token, user.passwordResetToken);
+      if (isMatch) {
+        matchedUser = user;
+        break;
+      }
+    }
+  }
+
+  // If no user found with matching token, return generic error
+  // Don't reveal whether token is invalid or expired
+  if (!matchedUser) {
+    throw new ApiError(400, ERRORS.AUTH.RESET_TOKEN_INVALID);
+  }
+
+  // Check if token has expired
+  if (matchedUser.passwordResetExpires && matchedUser.passwordResetExpires < new Date()) {
+    throw new ApiError(400, ERRORS.AUTH.RESET_TOKEN_INVALID);
+  }
+
+  // Update password - will be auto-hashed by pre-save hook
+  matchedUser.password = newPassword;
+
+  // Clear reset token fields to prevent token reuse
+  matchedUser.passwordResetToken = undefined;
+  matchedUser.passwordResetExpires = undefined;
+
+  // Invalidate all refresh tokens to force re-login on all devices
+  matchedUser.refreshToken = undefined;
+
+  await matchedUser.save();
+
+  return res
+    .status(200)
+    .json(new ApiResponse({}, "Password has been reset successfully. Please log in with your new password."));
 });
