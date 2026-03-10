@@ -6,8 +6,13 @@ import bcrypt from "bcrypt";
 import { ERRORS } from "../constants/error";
 import { isPasswordStrong } from "../utils/helper/password.util";
 import { generateTokens, verifyRefreshToken } from "../utils/helper/jwt.util";
-import { clearCookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions } from "../config";
+import { clearCookieOptions, accessTokenCookieOptions, refreshTokenCookieOptions, appConfig } from "../config";
 import { asyncHandler } from "../utils/asyncHandler";
+import { generateSecureToken, hashToken } from "../utils/helper/token.util";
+import { sendEmail } from "../utils/email.service";
+import { getVerificationEmailTemplate } from "../templates/email.template";
+
+
 
 /**
  * Login user
@@ -249,4 +254,80 @@ export const updateProfile = asyncHandler(async (req: Request, res: Response) =>
   return res
     .status(200)
     .json(new ApiResponse({ data: userResponse }, "Profile updated successfully"));
+});
+
+
+/**
+ * Send verification email to user
+ * Send verification email to user
+ * Send verification email to user
+ * @param req
+ * @param res
+ * @returns
+ */
+export const sendVerificationEmail = asyncHandler(async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  // Always return generic success message to prevent email enumeration
+  const genericMessage = "If an account exists, a verification email has been sent";
+
+  // Find user by email (select verification fields which are not selected by default)
+  const user = await User.findOne({ email }).select("+emailVerificationToken +emailVerificationExpires +isEmailVerified");
+
+  // If user doesn't exist, return generic success (don't reveal user existence)
+  if (!user) {
+    return res
+      .status(200)
+      .json(new ApiResponse({}, genericMessage));
+  }
+
+  // If already verified, still return success but don't send email
+  // This prevents revealing whether the email is verified or not
+  if (user.isEmailVerified) {
+    return res
+      .status(200)
+      .json(new ApiResponse({}, genericMessage));
+  }
+
+  // Generate secure token and hash it
+  const verificationToken = generateSecureToken();
+  const hashedToken = await hashToken(verificationToken);
+
+  // Calculate expiry time (24 hours from now)
+  const expiryHours = parseInt(appConfig.EMAIL_VERIFICATION_EXPIRY) || 24;
+  const verificationExpires = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
+
+  // Save hashed token and expiry to user document
+  user.emailVerificationToken = hashedToken;
+  user.emailVerificationExpires = verificationExpires;
+  await user.save();
+
+  // Get email template
+  const baseUrl = appConfig.APP_BASE_URL;
+  const emailTemplate = getVerificationEmailTemplate(verificationToken, baseUrl);
+
+  // Send verification email
+  const emailResult = await sendEmail({
+    to: user.email,
+    subject: emailTemplate.subject,
+    html: emailTemplate.html,
+    text: emailTemplate.text,
+  });
+
+  // If email fails, log error but still return generic success
+  // Don't reveal internal errors to the client
+  if (!emailResult.success) {
+    console.error("[EMAIL ERROR] Failed to send verification email:", {
+      userId: user._id,
+      email: user.email,
+      error: emailResult.error,
+    });
+  } else {
+    console.log("[EMAIL] Verification email sent successfully to:", user.email);
+  }
+
+  // Return generic success message regardless of outcome
+  return res
+    .status(200)
+    .json(new ApiResponse({}, genericMessage));
 });

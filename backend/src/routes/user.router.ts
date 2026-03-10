@@ -6,11 +6,12 @@ import {
   registerUser,
   updateProfile,
   refreshAccessToken,
+  sendVerificationEmail,
 } from "../controllers/user.controller";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
 import { LoginSchema, RegisterSchema, UpdateProfileSchema } from "../validations/auth.validation";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { authRateLimiter } from "../middlewares/rateLimiter.middleware";
+import { authRateLimiter, emailVerificationLimiter } from "../middlewares/rateLimiter.middleware";
 
 const userRouter = Router();
 
@@ -23,7 +24,8 @@ userRouter
     validateRequest(RegisterSchema),
     registerUser,
   )
-  .post("/refresh-token", refreshAccessToken);
+  .post("/refresh-token", refreshAccessToken)
+  .post("/verify-email/send", emailVerificationLimiter, sendVerificationEmail);
 
 // Protected routes
 userRouter
