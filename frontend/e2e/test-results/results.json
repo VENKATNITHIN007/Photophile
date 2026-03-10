@@ -1,0 +1,555 @@
+{
+  "config": {
+    "configFile": "/home/nobita/projects/Photophile/frontend/playwright.config.ts",
+    "rootDir": "/home/nobita/projects/Photophile/frontend/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/nobita/projects/Photophile/frontend/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/home/nobita/projects/Photophile/frontend/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "html",
+        {
+          "open": "never"
+        }
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "./e2e/test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "auth-flows.spec.ts",
+      "file": "auth-flows.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authentication Flow Tests",
+          "file": "auth-flows.spec.ts",
+          "line": 13,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Registration Flow - Create new account",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 19317,
+                      "error": {
+                        "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================",
+                        "stack": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================\n    at /home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts:34:16",
+                        "location": {
+                          "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                          "column": 16,
+                          "line": 34
+                        },
+                        "snippet": "  32 |     await page.getByRole('button', { name: 'Register' }).click();\n  33 |\n> 34 |     await page.waitForURL('/dashboard', { timeout: 15000 });\n     |                ^\n  35 |     await expect(page.getByText('My Dashboard')).toBeVisible();\n  36 |     await captureScreenshot(page, '03-register-success-dashboard');\n  37 |   });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                            "column": 16,
+                            "line": 34
+                          },
+                          "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================\n\n  32 |     await page.getByRole('button', { name: 'Register' }).click();\n  33 |\n> 34 |     await page.waitForURL('/dashboard', { timeout: 15000 });\n     |                ^\n  35 |     await expect(page.getByText('My Dashboard')).toBeVisible();\n  36 |     await captureScreenshot(page, '03-register-success-dashboard');\n  37 |   });\n    at /home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts:34:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:01.500Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication--a4592-n-Flow---Create-new-account-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication--a4592-n-Flow---Create-new-account-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication--a4592-n-Flow---Create-new-account-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                        "column": 16,
+                        "line": 34
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-761e3a8148e4335d862e",
+              "file": "auth-flows.spec.ts",
+              "line": 18,
+              "column": 7
+            },
+            {
+              "title": "Login Flow - Existing account",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 19183,
+                      "error": {
+                        "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================",
+                        "stack": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================\n    at /home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts:53:16",
+                        "location": {
+                          "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                          "column": 16,
+                          "line": 53
+                        },
+                        "snippet": "  51 |     await page.getByRole('button', { name: 'Sign in' }).click();\n  52 |\n> 53 |     await page.waitForURL('/dashboard', { timeout: 15000 });\n     |                ^\n  54 |     await expect(page.getByText('My Dashboard')).toBeVisible();\n  55 |     await captureScreenshot(page, '06-login-success-dashboard');\n  56 |   });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                            "column": 16,
+                            "line": 53
+                          },
+                          "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================\n\n  51 |     await page.getByRole('button', { name: 'Sign in' }).click();\n  52 |\n> 53 |     await page.waitForURL('/dashboard', { timeout: 15000 });\n     |                ^\n  54 |     await expect(page.getByText('My Dashboard')).toBeVisible();\n  55 |     await captureScreenshot(page, '06-login-success-dashboard');\n  56 |   });\n    at /home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts:53:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:22.096Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication--5d98d-gin-Flow---Existing-account-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication--5d98d-gin-Flow---Existing-account-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication--5d98d-gin-Flow---Existing-account-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                        "column": 16,
+                        "line": 53
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-b273b8b6cb829b2b8dbb",
+              "file": "auth-flows.spec.ts",
+              "line": 39,
+              "column": 7
+            },
+            {
+              "title": "Forgot Password Flow",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4460,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:42.412Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-d78b7ea7ca0dc2be58f9",
+              "file": "auth-flows.spec.ts",
+              "line": 58,
+              "column": 7
+            },
+            {
+              "title": "Reset Password Flow - Invalid token page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3769,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:46.970Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-590a1abc7005bb8c1cf5",
+              "file": "auth-flows.spec.ts",
+              "line": 74,
+              "column": 7
+            },
+            {
+              "title": "Verify Email Flow - Invalid token page",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3622,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:50.749Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-2f9a67dfbdeecf10bb88",
+              "file": "auth-flows.spec.ts",
+              "line": 83,
+              "column": 7
+            },
+            {
+              "title": "Verify Email Flow - With mock token (will fail but shows UI)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4369,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:54.380Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-ff2095233d13542b8c0b",
+              "file": "auth-flows.spec.ts",
+              "line": 91,
+              "column": 7
+            },
+            {
+              "title": "Logout Flow",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 18770,
+                      "error": {
+                        "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================",
+                        "stack": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================\n    at /home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts:105:16",
+                        "location": {
+                          "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                          "column": 16,
+                          "line": 105
+                        },
+                        "snippet": "  103 |     await page.getByLabel('Password').fill(testPassword);\n  104 |     await page.getByRole('button', { name: 'Sign in' }).click();\n> 105 |     await page.waitForURL('/dashboard', { timeout: 15000 });\n      |                ^\n  106 |\n  107 |     await captureScreenshot(page, '13-logout-before');\n  108 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                            "column": 16,
+                            "line": 105
+                          },
+                          "message": "TimeoutError: page.waitForURL: Timeout 15000ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"/dashboard\" until \"load\"\n============================================================\n\n  103 |     await page.getByLabel('Password').fill(testPassword);\n  104 |     await page.getByRole('button', { name: 'Sign in' }).click();\n> 105 |     await page.waitForURL('/dashboard', { timeout: 15000 });\n      |                ^\n  106 |\n  107 |     await captureScreenshot(page, '13-logout-before');\n  108 |\n    at /home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts:105:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:04:58.760Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication-Flow-Tests-Logout-Flow-chromium/test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication-Flow-Tests-Logout-Flow-chromium/video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/nobita/projects/Photophile/frontend/e2e/test-results/auth-flows-Authentication-Flow-Tests-Logout-Flow-chromium/error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/nobita/projects/Photophile/frontend/e2e/auth-flows.spec.ts",
+                        "column": 16,
+                        "line": 105
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-fe30eeb15c74b47536a3",
+              "file": "auth-flows.spec.ts",
+              "line": 98,
+              "column": 7
+            },
+            {
+              "title": "Login Flow - Invalid credentials",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5394,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:05:18.568Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-e7415a0610deef9d6132",
+              "file": "auth-flows.spec.ts",
+              "line": 115,
+              "column": 7
+            },
+            {
+              "title": "Registration Flow - Password mismatch",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5324,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:05:24.047Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-51b019a449562359cde3",
+              "file": "auth-flows.spec.ts",
+              "line": 127,
+              "column": 7
+            },
+            {
+              "title": "Dashboard - Protected route redirects to login",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4442,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-03-10T05:05:29.380Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0c6c160bbdde4ceadf0a-15bdec16378791973f7f",
+              "file": "auth-flows.spec.ts",
+              "line": 141,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-03-10T05:04:00.289Z",
+    "duration": 93605.36,
+    "expected": 7,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}
