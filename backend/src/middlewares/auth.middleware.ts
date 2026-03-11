@@ -6,11 +6,20 @@ import { verifyToken } from "../utils/helper/jwt.util";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const authHeader = req.headers.authorization;
+        let bearerToken: string | undefined;
 
-        const token = req.cookies?.accessToken || req.headers.authorization?.split("Bearer")[1].trim();
+        if (authHeader) {
+            const [scheme, token] = authHeader.trim().split(/\s+/);
+            if (scheme?.toLowerCase() === "bearer" && token) {
+                bearerToken = token;
+            }
+        }
+
+        const token = req.cookies?.accessToken || bearerToken;
 
         if (!token) {
-            throw new ApiError(401, "Invalid token")
+            throw new ApiError(401, ERRORS.AUTH.INVALID_TOKEN)
         }
 
         const decodedToken = verifyToken(token);

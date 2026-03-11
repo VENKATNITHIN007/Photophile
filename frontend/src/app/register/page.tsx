@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AxiosError } from "axios";
@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 export default function RegisterPage() {
   const { user, register, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -40,13 +41,11 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      // Hardcode role to "user" as per requirement
       await register({
-        name: data.fullName,
+        fullName: data.fullName,
         email: data.email,
         password: data.password,
-        role: "user"
-      });
+      }, searchParams.get("redirect") || "/dashboard");
       success("Account created successfully");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {

@@ -11,6 +11,20 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  avatar?: string | null;
+  phoneNumber?: string;
+  isEmailVerified?: boolean;
+}
+
+interface BackendUser {
+  _id?: string;
+  id?: string;
+  fullName?: string;
+  name?: string;
+  email: string;
+  role: UserRole;
+  avatar?: string | null;
+  phoneNumber?: string;
   isEmailVerified?: boolean;
 }
 
@@ -20,18 +34,17 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  name: string;
+  fullName: string;
   email: string;
   password: string;
-  role: UserRole;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isEmailVerified: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (userData: RegisterData) => Promise<void>;
+  login: (credentials: LoginCredentials, redirectTo?: string) => Promise<void>;
+  register: (userData: RegisterData, redirectTo?: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
   resendVerificationEmail: () => Promise<void>;
@@ -46,10 +59,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
 
+  const normalizeUser = (rawUser: BackendUser): User => {
+    return {
+      id: rawUser._id || rawUser.id || "",
+      name: rawUser.fullName || rawUser.name || "",
+      email: rawUser.email,
+      role: rawUser.role,
+      avatar: rawUser.avatar,
+      phoneNumber: rawUser.phoneNumber,
+      isEmailVerified: rawUser.isEmailVerified,
+    };
+  };
+
   const checkAuth = async () => {
     try {
-      const response = await apiClient.get<{ data: User }>("/users/me");
-      const userData = response.data.data || (response.data as unknown as User);
+      const response = await apiClient.get<{ data: BackendUser }>("/users/me");
+      const rawUserData = response.data.data || (response.data as unknown as BackendUser);
+      const userData = normalizeUser(rawUserData);
       setUser(userData);
       setIsEmailVerified(userData.isEmailVerified ?? false);
     } catch {
@@ -69,8 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkEmailVerification = async (): Promise<boolean> => {
     try {
-      const response = await apiClient.get<{ data: User }>("/users/me");
-      const userData = response.data.data || (response.data as unknown as User);
+      const response = await apiClient.get<{ data: BackendUser }>("/users/me");
+      const rawUserData = response.data.data || (response.data as unknown as BackendUser);
+      const userData = normalizeUser(rawUserData);
       const verified = userData.isEmailVerified ?? false;
       setIsEmailVerified(verified);
       setUser(userData);
@@ -84,16 +111,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkAuth();
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginCredentials, redirectTo = "/dashboard") => {
     await apiClient.post("/users/login", credentials);
     await checkAuth();
-    router.push("/dashboard");
+    router.push(redirectTo);
   };
 
-  const register = async (userData: RegisterData) => {
+  const register = async (userData: RegisterData, redirectTo = "/dashboard") => {
     await apiClient.post("/users/register", userData);
     await checkAuth();
-    router.push("/dashboard");
+    router.push(redirectTo);
   };
 
   const logout = async () => {
