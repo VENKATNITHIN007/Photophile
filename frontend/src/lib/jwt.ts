@@ -3,7 +3,10 @@ import { jwtVerify, decodeJwt, JWTPayload } from 'jose';
 // Secret key for JWT verification if needed on the edge
 // In production, this should match your backend's ACCESS_TOKEN_SECRET or Next.js specific secret
 export const getJwtSecretKey = () => {
-  const secret = process.env.JWT_SECRET || 'fallback_secret_for_dev';
+  const secret = process.env.ACCESS_TOKEN_SECRET;
+  if (!secret) {
+    throw new Error('ACCESS_TOKEN_SECRET is not configured for middleware token verification');
+  }
   return new TextEncoder().encode(secret);
 };
 

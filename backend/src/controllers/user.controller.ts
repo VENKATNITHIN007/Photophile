@@ -12,6 +12,29 @@ import { generateSecureToken, hashToken, verifyToken } from "../utils/helper/tok
 import { sendEmail } from "../utils/email.service";
 import { getVerificationEmailTemplate, getPasswordResetTemplate } from "../templates/email.template";
 
+const parseDurationToMs = (value: string, fallbackMs: number): number => {
+  const trimmedValue = value.trim();
+  const match = trimmedValue.match(/^(\d+)([smhd])$/i);
+
+  if (!match) {
+    const numeric = Number(trimmedValue);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : fallbackMs;
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2].toLowerCase();
+
+  const unitMap: Record<string, number> = {
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+  };
+
+  const multiplier = unitMap[unit];
+  return amount > 0 && multiplier ? amount * multiplier : fallbackMs;
+};
+
 
 
 
@@ -29,7 +52,8 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, ERRORS.AUTH.INVALID_CREDENTIALS );
   }
 
-  if (!userExists.isPasswordCorrect(password)) {
+  const isPasswordValid = await userExists.isPasswordCorrect(password);
+  if (!isPasswordValid) {
     throw new ApiError(401, ERRORS.AUTH.WRONG_PASSWORD);
   }
 
@@ -300,8 +324,8 @@ export const sendVerificationEmail = asyncHandler(async (req: Request, res: Resp
   const hashedToken = await hashToken(verificationToken);
 
   // Calculate expiry time (24 hours from now)
-  const expiryHours = parseInt(appConfig.EMAIL_VERIFICATION_EXPIRY) || 24;
-  const verificationExpires = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
+  const verificationExpiryMs = parseDurationToMs(appConfig.EMAIL_VERIFICATION_EXPIRY, 24 * 60 * 60 * 1000);
+  const verificationExpires = new Date(Date.now() + verificationExpiryMs);
 
   // Save hashed token and expiry to user document
   user.emailVerificationToken = hashedToken;
@@ -440,8 +464,8 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   const hashedToken = await hashToken(resetToken);
 
   // Calculate expiry time (1 hour from now)
-  const expiryHours = parseInt(appConfig.PASSWORD_RESET_EXPIRY) || 1;
-  const resetExpires = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
+  const resetExpiryMs = parseDurationToMs(appConfig.PASSWORD_RESET_EXPIRY, 60 * 60 * 1000);
+  const resetExpires = new Date(Date.now() + resetExpiryMs);
 
   // Save hashed token and expiry to user document
   user.passwordResetToken = hashedToken;
