@@ -6,23 +6,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-900">
       
-      {/* Navigation */}
-      <nav className="fixed w-full z-50 top-0 border-b border-gray-200 bg-white/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="text-2xl font-extrabold tracking-tight text-black">
-            Dukan<span className="text-blue-600">.</span>
-          </div>
-          <div className="flex gap-4 items-center">
-            <Link href="/login" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
-              Log in
-            </Link>
-            <Button asChild variant="default" className="rounded-full">
-              <Link href="/register">Sign up</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-white"></div>

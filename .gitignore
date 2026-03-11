@@ -65,6 +65,11 @@ Thumbs.db
 # -------------------------------------------
 coverage/
 .nyc_output/
+frontend/playwright-report/
+frontend/e2e/test-results/
+
+# TypeScript incremental build artifacts
+*.tsbuildinfo
 
 # -------------------------------------------
 # Misc
@@ -78,3 +83,5 @@ coverage/
 .netlify
 .sisyphus/
 /notes
+EOF
+LEARNINGSEOF

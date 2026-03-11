@@ -17,6 +17,10 @@ export interface IUser {
   // OTP / verification
   isEmailVerified?: boolean;
   isPhoneVerified?: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
 
   role?: "user" | "admin";
 
@@ -105,6 +109,22 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       type: Boolean,
       default: false,
     },
+    emailVerificationToken: {
+      type: String,
+      select: false,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
 
     role: {
       type: String,
@@ -144,7 +164,7 @@ userSchema.methods.isPasswordCorrect = async function (password: string,): Promi
 
 userSchema.set('toJSON', {
   transform: (_doc, ret) => {
-    const { password, refreshToken, __v, ...rest } = ret  ;
+    const { password, refreshToken, emailVerificationToken, emailVerificationExpires, passwordResetToken, passwordResetExpires, __v, ...rest } = ret  ;
 
     return rest;
   },

@@ -8,6 +8,11 @@ export const ERRORS = {
     INVALID_TOKEN: "Invalid or expired token",
     FORBIDDEN: "Administrator privileges are required for this action",
     RATE_LIMIT: "Too many login attempts. Please try again later",
+    EMAIL_NOT_VERIFIED: "Please verify your email to access this feature",
+    VERIFICATION_TOKEN_INVALID: "Invalid or expired verification link",
+    RESET_TOKEN_INVALID: "Invalid or expired password reset link",
+    EMAIL_SEND_FAILED: "Failed to send email. Please try again later",
+    FORGOT_PASSWORD_GENERIC: "If an account exists, a reset email has been sent",
   },
 
   PHOTOGRAPHER: {

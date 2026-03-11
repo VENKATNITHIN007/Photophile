@@ -20,7 +20,14 @@ export const appConfig = {
     // MongoDB Database
     MONGO_URL: process.env.MONGO_URL|| "mongodb://localhost:27017",
 
-    DB_NAME: process.env.DB_NAME || "dukan"
+    DB_NAME: process.env.DB_NAME || "dukan",
+
+    // Email Configuration (Resend)
+    RESEND_API_KEY: process.env.RESEND_API_KEY || "",
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || "",
+    APP_BASE_URL: process.env.APP_BASE_URL || "http://localhost:3000",
+    EMAIL_VERIFICATION_EXPIRY: process.env.EMAIL_VERIFICATION_EXPIRY || "24h",
+    PASSWORD_RESET_EXPIRY: process.env.PASSWORD_RESET_EXPIRY || "1h",
 }
 
 export const clearCookieOptions = {
@@ -40,3 +47,18 @@ export const refreshTokenCookieOptions = {
 };
 
 export default appConfig;
+
+// Validate required email configuration
+if (!appConfig.RESEND_API_KEY) {
+    console.error("[ERROR] RESEND_API_KEY is required but not set");
+    if (process.env.NODE_ENV === "production") {
+        process.exit(1);
+    }
+}
+
+if (!appConfig.RESEND_FROM_EMAIL) {
+    console.error("[ERROR] RESEND_FROM_EMAIL is required but not set");
+    if (process.env.NODE_ENV === "production") {
+        process.exit(1);
+    }
+}

@@ -1,0 +1,55 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Photophile" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - generic [ref=e9]: Photophile
+      - navigation [ref=e10]:
+        - link "Photographers" [ref=e11] [cursor=pointer]:
+          - /url: /photographers
+        - link "About" [ref=e12] [cursor=pointer]:
+          - /url: /about
+      - generic [ref=e13]:
+        - link "Log in" [ref=e14] [cursor=pointer]:
+          - /url: /login
+        - link "Sign up" [ref=e15] [cursor=pointer]:
+          - /url: /register
+  - region "Notifications alt+T"
+  - generic [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]: Create an account
+      - generic [ref=e20]: Enter your details to create your account
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - generic [ref=e24]: Full Name
+        - textbox "Full Name" [ref=e25]:
+          - /placeholder: John Doe
+          - text: Test User
+      - generic [ref=e26]:
+        - generic [ref=e27]: Email address
+        - textbox "Email address" [ref=e28]:
+          - /placeholder: name@example.com
+          - text: test1773155386816@example.com
+      - generic [ref=e29]:
+        - generic [ref=e30]: Password
+        - textbox "Password" [ref=e31]:
+          - /placeholder: ••••••••
+          - text: TestPass123!
+      - generic [ref=e32]:
+        - generic [ref=e33]: Confirm Password
+        - textbox "Confirm Password" [ref=e34]:
+          - /placeholder: ••••••••
+          - text: TestPass123!
+      - button "Register" [ref=e35]
+    - paragraph [ref=e37]:
+      - text: Already have an account?
+      - link "Sign in here" [ref=e38] [cursor=pointer]:
+        - /url: /login
+  - button "Open Next.js Dev Tools" [ref=e44] [cursor=pointer]:
+    - img [ref=e45]
+  - alert [ref=e48]
+```

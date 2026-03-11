@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Mail, Camera } from "lucide-react";
+import Link from "next/link";
 import { AxiosError } from "axios";
 import { useAuth } from "@/contexts/auth-context";
 import { ProtectedRoute } from "@/components/protected-route";
@@ -28,7 +33,7 @@ interface Booking {
 }
 
 export default function UserDashboard() {
-  const { user, checkAuth } = useAuth();
+  const { user, checkAuth, isEmailVerified, resendVerificationEmail } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,6 +44,9 @@ export default function UserDashboard() {
   const [avatar, setAvatar] = useState("");
   const [updatingProfile, setUpdatingProfile] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState("");
+  const [resendingEmail, setResendingEmail] = useState(false);
+
+  const { success, error: showError } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -89,6 +97,18 @@ export default function UserDashboard() {
     }
   };
 
+  const handleResendVerification = async () => {
+    try {
+      setResendingEmail(true);
+      await resendVerificationEmail();
+      success("Verification email sent", "Check your inbox for the verification link");
+    } catch (err) {
+      showError("Failed to send verification email", "Please try again later");
+    } finally {
+      setResendingEmail(false);
+    }
+  };
+
   return (
     <ProtectedRoute allowedRoles={["user", "admin"]}>
       <div className="max-w-6xl mx-auto p-6 space-y-8">
@@ -101,6 +121,38 @@ export default function UserDashboard() {
           <div className="p-4 bg-red-50 text-red-700 rounded-md">
             {error}
           </div>
+        )}
+
+        {/* Email Verification Banner */}
+        {!isEmailVerified && (
+          <Alert variant="destructive" className="border-amber-500 bg-amber-50 text-amber-900 [&>svg]:text-amber-700">
+            <AlertTriangle className="h-4 w-4 text-amber-700" />
+            <AlertTitle className="text-amber-900">Email Not Verified</AlertTitle>
+            <AlertDescription className="text-amber-800">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-1">
+                <span>Please verify your email address to unlock all features.</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendVerification}
+                  disabled={resendingEmail}
+                  className="shrink-0 border-amber-600 text-amber-900 hover:bg-amber-100 hover:text-amber-900"
+                >
+                  {resendingEmail ? (
+                    <>
+                      <Mail className="mr-2 h-4 w-4 animate-pulse" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Resend verification email
+                    </>
+                  )}
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -164,6 +216,25 @@ export default function UserDashboard() {
                 >
                   {updatingProfile ? "Updating..." : "Update Profile"}
                 </button>
+
+                {/* Become Photographer Button */}
+                {user?.role === "user" && (
+                  <div className="pt-4 border-t border-gray-200 mt-4">
+                    <p className="text-sm text-gray-600 mb-3">
+                      Want to offer your photography services?
+                    </p>
+                    <Link href="/photographer/onboard">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full border-purple-600 text-purple-700 hover:bg-purple-50"
+                      >
+                        <Camera className="mr-2 h-4 w-4" />
+                        Become a Photographer
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </form>
             </div>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AxiosError } from "axios";
@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 export default function LoginPage() {
   const { user, login, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +39,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(data);
+      await login(data, searchParams.get("redirect") || "/dashboard");
       success("Logged in successfully");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {
