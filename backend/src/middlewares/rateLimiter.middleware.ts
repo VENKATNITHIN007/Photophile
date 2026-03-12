@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import ApiError from "../utils/ApiError";
 
 /**
@@ -31,7 +31,8 @@ const keyGenerator = (req: Request): string => {
   if (req.user?._id) {
     return req.user._id.toString();
   }
-  return req.ip || req.socket.remoteAddress || "unknown";
+  const ip = req.ip || req.socket.remoteAddress || "";
+  return ipKeyGenerator(ip);
 };
 
 /**
