@@ -27,6 +27,10 @@ const port = process.env.PORT || 3001;
 
 const app = express();
 
+if (process.env.TRUST_PROXY) {
+  app.set("trust proxy", 1);
+}
+
 /**
  * Security middlewares learn more about headers 
  */

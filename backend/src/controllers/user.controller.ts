@@ -171,25 +171,36 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response) => {
  * @returns
  */
 export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
-  const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+  const refreshToken = req.cookies?.refreshToken;
 
   if (!refreshToken) {
     throw new ApiError(401, "Refresh token is required");
   }
 
-  const decodedToken = verifyRefreshToken(refreshToken);
-  const user = await User.findById(decodedToken._id).select("+refreshToken");
+  const clearAuthCookies = () => {
+    res.clearCookie("accessToken", clearCookieOptions);
+    res.clearCookie("refreshToken", clearCookieOptions);
+  };
 
-  if (!user) {
-    throw new ApiError(401, "User not found");
+  let decodedToken;
+  try {
+    decodedToken = verifyRefreshToken(refreshToken);
+  } catch (error) {
+    clearAuthCookies();
+    throw error;
   }
 
-  if (!user.refreshToken) {
-    throw new ApiError(401, "Invalid refresh token");
+  const user = await User.findById(decodedToken._id).select("+refreshToken");
+
+  if (!user || !user.refreshToken) {
+    clearAuthCookies();
+    throw new ApiError(401, "Invalid or expired refresh token");
   }
 
   const isValidToken = await bcrypt.compare(refreshToken, user.refreshToken);
   if (!isValidToken) {
+    await User.findByIdAndUpdate(user._id, { $set: { refreshToken: undefined } });
+    clearAuthCookies();
     throw new ApiError(401, "Invalid or expired refresh token");
   }
 

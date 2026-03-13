@@ -11,7 +11,10 @@ declare namespace NodeJS {
         CLOUDINARY_CLOUD_NAME: string;
         CLOUDINARY_API_KEY: string;
         CLOUDINARY_API_SECRET: string;
-        MONGODB_URL: string,
+        MONGO_URL: string,
         DB_NAME: string,
+        COOKIE_DOMAIN?: string,
+        COOKIE_SAMESITE?: "strict" | "lax" | "none",
+        TRUST_PROXY?: string,
     }
 }

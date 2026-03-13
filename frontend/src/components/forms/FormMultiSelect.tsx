@@ -61,12 +61,15 @@ export function FormMultiSelect<T extends FieldValues>({
                           disabled={disabled}
                           onCheckedChange={(checked) => {
                             return checked
-                              ? field.onChange([...(field.value || []), item.value])
+                              ? field.onChange([
+                                  ...(field.value || []),
+                                  item.value,
+                                ])
                               : field.onChange(
                                   field.value?.filter(
-                                    (value: string) => value !== item.value
-                                  )
-                                )
+                                    (value: string) => value !== item.value,
+                                  ),
+                                );
                           }}
                         />
                       </FormControl>
@@ -74,7 +77,7 @@ export function FormMultiSelect<T extends FieldValues>({
                         {item.label}
                       </FormLabel>
                     </FormItem>
-                  )
+                  );
                 }}
               />
             ))}

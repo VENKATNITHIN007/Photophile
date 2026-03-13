@@ -14,7 +14,7 @@ import {
 import { validateRequest } from "../middlewares/validateRequest.middleware";
 import { LoginSchema, RegisterSchema, UpdateProfileSchema, ForgotPasswordSchema, ResetPasswordSchema, VerifyEmailSchema } from "../validations/auth.validation";
 import { authMiddleware } from "../middlewares/auth.middleware";
-import { authRateLimiter, emailVerificationLimiter, forgotPasswordLimiter, apiRateLimiter } from "../middlewares/rateLimiter.middleware";
+import { authRateLimiter, sensitiveOpRateLimiter } from "../middlewares/rateLimiter.middleware";
 
 const userRouter = Router();
 
@@ -27,11 +27,11 @@ userRouter
     validateRequest(RegisterSchema),
     registerUser,
   )
-  .post("/refresh-token", refreshAccessToken)
-  .post("/verify-email/send", emailVerificationLimiter, sendVerificationEmail)
-  .post("/verify-email", apiRateLimiter, validateRequest(VerifyEmailSchema), verifyEmail)
-  .post("/forgot-password", forgotPasswordLimiter, validateRequest(ForgotPasswordSchema), forgotPassword)
-  .post("/reset-password", apiRateLimiter, validateRequest(ResetPasswordSchema), resetPassword);
+  .post("/refresh-token", sensitiveOpRateLimiter, refreshAccessToken)
+  .post("/verify-email/send", sensitiveOpRateLimiter, sendVerificationEmail)
+  .post("/verify-email", sensitiveOpRateLimiter, validateRequest(VerifyEmailSchema), verifyEmail)
+  .post("/forgot-password", sensitiveOpRateLimiter, validateRequest(ForgotPasswordSchema), forgotPassword)
+  .post("/reset-password", sensitiveOpRateLimiter, validateRequest(ResetPasswordSchema), resetPassword);
 
 // Protected routes
 userRouter
