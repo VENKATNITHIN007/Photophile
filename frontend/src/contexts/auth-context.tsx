@@ -1,7 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { apiClient } from "@/lib/api-client";
+import {
+  getCurrentUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+  sendVerificationEmail,
+} from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
 
 export type UserRole = "user" | "photographer" | "admin";
@@ -73,8 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const response = await apiClient.get<{ data: BackendUser }>("/users/me");
-      const rawUserData = response.data.data || (response.data as unknown as BackendUser);
+      const rawUserData = (await getCurrentUser()) as BackendUser;
       const userData = normalizeUser(rawUserData);
       setUser(userData);
       setIsEmailVerified(userData.isEmailVerified ?? false);
@@ -90,13 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user?.email) {
       throw new Error("User email not available");
     }
-    await apiClient.post("/users/verify-email/send", { email: user.email });
+    await sendVerificationEmail(user.email);
   };
 
   const checkEmailVerification = async (): Promise<boolean> => {
     try {
-      const response = await apiClient.get<{ data: BackendUser }>("/users/me");
-      const rawUserData = response.data.data || (response.data as unknown as BackendUser);
+      const rawUserData = (await getCurrentUser()) as BackendUser;
       const userData = normalizeUser(rawUserData);
       const verified = userData.isEmailVerified ?? false;
       setIsEmailVerified(verified);
@@ -112,20 +116,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (credentials: LoginCredentials, redirectTo = "/dashboard") => {
-    await apiClient.post("/users/login", credentials);
+    await loginUser(credentials);
     await checkAuth();
     router.push(redirectTo);
   };
 
   const register = async (userData: RegisterData, redirectTo = "/dashboard") => {
-    await apiClient.post("/users/register", userData);
+    await registerUser(userData);
     await checkAuth();
     router.push(redirectTo);
   };
 
   const logout = async () => {
     try {
-      await apiClient.post("/users/logout");
+      await logoutUser();
     } catch (error) {
       console.error("Logout error", error);
     } finally {
