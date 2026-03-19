@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import {
   getCurrentUser,
   loginUser,
@@ -32,25 +32,25 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const normalizeUser = (rawUser: BackendUser): User => {
+  return {
+    id: rawUser._id || rawUser.id || "",
+    name: rawUser.fullName || rawUser.name || "",
+    email: rawUser.email,
+    role: rawUser.role,
+    avatar: rawUser.avatar,
+    phoneNumber: rawUser.phoneNumber,
+    isEmailVerified: rawUser.isEmailVerified,
+  };
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
 
-  const normalizeUser = (rawUser: BackendUser): User => {
-    return {
-      id: rawUser._id || rawUser.id || "",
-      name: rawUser.fullName || rawUser.name || "",
-      email: rawUser.email,
-      role: rawUser.role,
-      avatar: rawUser.avatar,
-      phoneNumber: rawUser.phoneNumber,
-      isEmailVerified: rawUser.isEmailVerified,
-    };
-  };
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const rawUserData = (await getCurrentUser()) as BackendUser;
       const userData = normalizeUser(rawUserData);
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const resendVerificationEmail = async () => {
     if (!user?.email) {
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
   const login = async (credentials: LoginCredentials, redirectTo = "/dashboard") => {
     await loginUser(credentials);

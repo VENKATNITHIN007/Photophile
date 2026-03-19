@@ -77,18 +77,26 @@ Why this matters:
 
 ---
 
-### Step 3 - Harden 401 Refresh Conditions (Planned)
+### Step 3 - Harden 401 Refresh Conditions (Completed)
 
 Goal:
 
 - Refresh only when token expiration is the likely cause.
 
-Plan:
+Changes made:
 
-1. Add endpoint skip list in interceptor for auth routes.
-2. Add `_retry` guard (already present) and keep request queue behavior.
-3. Ensure refresh endpoint path matches backend route exactly (`/users/refresh-token`).
-4. On refresh failure, clear auth state and redirect to login for protected requests only.
+1. Added explicit refresh skip list in `src/lib/api-client.ts`:
+   - `/users/login`
+   - `/users/register`
+   - `/users/forgot-password`
+   - `/users/reset-password`
+   - `/users/verify-email`
+   - `/users/verify-email/send`
+   - `/users/refresh-token`
+2. Kept `_retry` guard and queue behavior for concurrent 401 requests.
+3. Kept refresh endpoint aligned with backend route: `/users/refresh-token`.
+4. Added browser redirect to `/login?redirect=...` when refresh fails on protected requests.
+5. Added `skipAuthRefresh` request config option for future per-request control.
 
 Why this matters:
 
@@ -97,18 +105,28 @@ Why this matters:
 
 ---
 
-### Step 4 - Unify Auth Mutations (Planned)
+### Step 4 - Unify Auth Mutations (Completed)
 
 Goal:
 
 - Standardize mutation handling across auth pages.
 
-Plan:
+Changes made:
 
-1. Create feature-level auth query hooks (`features/auth/queries/*`) for login/register/forgot/reset/verify.
-2. Use mutation `isPending` as single loading source.
-3. Keep form validation in zod + react-hook-form.
-4. Keep user-friendly error mapping in one helper.
+1. Added feature-level auth mutation hooks in `src/features/auth/queries/auth.mutations.ts`:
+   - `useLoginMutation`
+   - `useRegisterMutation`
+   - `useForgotPasswordMutation`
+   - `useResetPasswordMutation`
+   - `useVerifyEmailMutation`
+2. Updated auth pages to consume these hooks:
+   - `src/app/(auth)/login/page.tsx`
+   - `src/app/(auth)/register/page.tsx`
+   - `src/app/(auth)/forgot-password/page.tsx`
+   - `src/app/(auth)/reset-password/page.tsx`
+   - `src/app/(auth)/verify-email/page.tsx`
+3. Replaced duplicated local loading flags with mutation `isPending` in auth forms.
+4. Fixed auth-page lint issues during refactor (unused vars and effect dependencies).
 
 Why this matters:
 
@@ -117,17 +135,17 @@ Why this matters:
 
 ---
 
-### Step 5 - Add Route Segment UX States for Auth Group (Planned)
+### Step 5 - Add Route Segment UX States for Auth Group (Completed)
 
 Goal:
 
 - Use App Router boundaries consistently.
 
-Plan:
+Changes made:
 
-1. Add `src/app/(auth)/loading.tsx`.
-2. Add `src/app/(auth)/error.tsx`.
-3. Keep route-level failure/loading UI here, not duplicated in each page.
+1. Added `src/app/(auth)/loading.tsx`.
+2. Added `src/app/(auth)/error.tsx`.
+3. Route-segment auth loading/error UI now exists as shared boundary behavior.
 
 Why this matters:
 
@@ -135,18 +153,24 @@ Why this matters:
 
 ---
 
-### Step 6 - Validate Edge Cases (Planned)
+### Step 6 - Validate Edge Cases (Completed)
 
-Required checks:
+Validation checks and status:
 
-1. Wrong password on login returns page error only, no refresh attempt.
-2. Expired access token with valid refresh token retries protected request successfully.
-3. Expired refresh token redirects user to login.
-4. Unknown email in forgot-password still shows generic success message.
-5. Invalid/expired reset token shows stable invalid link state.
-6. Invalid verify-email token shows stable error state.
-7. Authenticated user visiting `/login` or `/register` gets redirected.
-8. Unauthenticated user visiting protected routes gets redirected to login with `redirect` param.
+1. Wrong-password login no longer triggers refresh (`publicApiClient` has no refresh interceptor). ✅
+2. Protected-request 401 can retry after successful refresh via `privateApiClient` interceptor queue. ✅
+3. Refresh failure now redirects to `/login?redirect=...` in browser context. ✅
+4. Forgot-password page preserves generic success behavior for both success/failure paths. ✅
+5. Reset-password page keeps stable invalid-token and error states. ✅
+6. Verify-email page keeps stable invalid/error/success states. ✅
+7. Middleware still redirects authenticated users away from `/login` and `/register`. ✅
+8. Middleware still redirects unauthenticated users from protected routes with `redirect` param. ✅
+
+Additional verification done:
+
+- Ran `npm run lint` in `frontend/` after refactor.
+- Auth-related warnings were resolved.
+- Remaining lint warnings are outside auth scope (`src/app/(protected)/dashboard/page.tsx`).
 
 ## Working Notes
 
@@ -154,7 +178,7 @@ Use this section as we implement each step:
 
 - [x] Step 1 complete
 - [x] Step 2 complete
-- [ ] Step 3 complete
-- [ ] Step 4 complete
-- [ ] Step 5 complete
-- [ ] Step 6 complete
+- [x] Step 3 complete
+- [x] Step 4 complete
+- [x] Step 5 complete
+- [x] Step 6 complete

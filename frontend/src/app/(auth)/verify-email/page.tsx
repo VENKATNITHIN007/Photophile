@@ -1,21 +1,17 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, CheckCircle, AlertCircle, Mail } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { verifyEmailToken } from "@/lib/api/auth";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useVerifyEmailMutation } from "@/features/auth/queries/auth.mutations";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const token = searchParams.get("token");
-  const verifyEmailMutation = useMutation({
-    mutationFn: (value: string) => verifyEmailToken(value),
-  });
+  const { mutateAsync } = useVerifyEmailMutation();
   
   const [status, setStatus] = useState<"loading" | "success" | "error" | "invalid">("loading");
   const [message, setMessage] = useState("");
@@ -29,7 +25,7 @@ function VerifyEmailContent() {
 
     const verifyEmail = async () => {
       try {
-        await verifyEmailMutation.mutateAsync(token);
+        await mutateAsync(token);
         setStatus("success");
         setMessage("Your email has been verified successfully!");
       } catch (err) {
@@ -39,7 +35,7 @@ function VerifyEmailContent() {
     };
 
     verifyEmail();
-  }, [token]);
+  }, [token, mutateAsync]);
 
   if (status === "loading") {
     return (
