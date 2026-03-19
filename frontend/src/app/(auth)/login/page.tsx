@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
@@ -13,13 +13,14 @@ import { FormInput } from "@/components/forms/FormInput";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLoginMutation } from "@/features/auth/queries/auth.mutations";
 
 export default function LoginPage() {
-  const { user, login, loading: authLoading } = useAuth();
+  const { user, checkAuth, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { success, error: showError } = useToast();
-  const [loading, setLoading] = useState(false);
+  const loginMutation = useLoginMutation();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -36,10 +37,10 @@ export default function LoginPage() {
   }, [user, authLoading, router]);
 
   const onSubmit = async (data: LoginInput) => {
-    setLoading(true);
-
     try {
-      await login(data, searchParams.get("redirect") || "/dashboard");
+      await loginMutation.mutateAsync(data);
+      await checkAuth();
+      router.push(searchParams.get("redirect") || "/dashboard");
       success("Logged in successfully");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {
@@ -47,7 +48,6 @@ export default function LoginPage() {
       } else {
         showError("Invalid email or password.");
       }
-      setLoading(false);
     }
   };
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 label="Email address"
                 type="email"
                 placeholder="name@example.com"
-                disabled={loading}
+                disabled={loginMutation.isPending}
               />
               <FormInput
                 control={form.control}
@@ -85,10 +85,10 @@ export default function LoginPage() {
                 label="Password"
                 type="password"
                 placeholder="••••••••"
-                disabled={loading}
+                disabled={loginMutation.isPending}
               />
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Signing in..." : "Sign in"}
+              <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+                {loginMutation.isPending ? "Signing in..." : "Sign in"}
               </Button>
             </form>
           </Form>
