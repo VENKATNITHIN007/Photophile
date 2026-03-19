@@ -1,5 +1,17 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+    skipAuthFailureRedirect?: boolean;
+  }
+
+  interface InternalAxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+    skipAuthFailureRedirect?: boolean;
+  }
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 export const publicApiClient = axios.create({
@@ -20,7 +32,6 @@ export const privateApiClient = axios.create({
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
-  skipAuthRefresh?: boolean;
 };
 
 const AUTH_REFRESH_SKIP_PATHS = [
@@ -87,7 +98,8 @@ privateApiClient.interceptors.response.use(
         return privateApiClient(originalRequest);
       } catch (err) {
         processQueue(err as AxiosError, null);
-        if (typeof window !== 'undefined') {
+
+        if (typeof window !== 'undefined' && !originalRequest.skipAuthFailureRedirect) {
           const pathname = window.location.pathname;
           const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/register');
 

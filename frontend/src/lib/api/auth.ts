@@ -25,8 +25,14 @@ export async function logoutUser() {
   return response.data.data;
 }
 
-export async function getCurrentUser() {
-  const response = await privateApiClient.get("/users/me");
+type GetCurrentUserOptions = {
+  skipAuthFailureRedirect?: boolean;
+};
+
+export async function getCurrentUser(options: GetCurrentUserOptions = {}) {
+  const response = await privateApiClient.get("/users/me", {
+    skipAuthFailureRedirect: options.skipAuthFailureRedirect,
+  });
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to fetch user");
   }
