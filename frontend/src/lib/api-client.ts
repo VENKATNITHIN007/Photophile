@@ -2,9 +2,17 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-export const apiClient = axios.create({
+export const publicApiClient = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // Crucial for HTTP-only cookies
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export const privateApiClient = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -31,7 +39,7 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
   failedQueue = [];
 };
 
-apiClient.interceptors.response.use(
+privateApiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
@@ -41,7 +49,7 @@ apiClient.interceptors.response.use(
         return new Promise(function(resolve, reject) {
           failedQueue.push({ resolve, reject });
         }).then(() => {
-          return apiClient(originalRequest);
+          return privateApiClient(originalRequest);
         }).catch(err => {
           return Promise.reject(err);
         });
@@ -55,7 +63,7 @@ apiClient.interceptors.response.use(
         await axios.post(`${API_URL}/users/refresh-token`, {}, { withCredentials: true });
         
         processQueue(null);
-        return apiClient(originalRequest);
+        return privateApiClient(originalRequest);
       } catch (err) {
         processQueue(err as AxiosError, null);
         // Optional: emit event to trigger logout in UI
@@ -68,3 +76,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const apiClient = privateApiClient;

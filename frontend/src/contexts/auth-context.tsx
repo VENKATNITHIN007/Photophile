@@ -9,41 +9,14 @@ import {
   sendVerificationEmail,
 } from "@/lib/api/auth";
 import { useRouter } from "next/navigation";
+import type {
+  BackendUser,
+  LoginCredentials,
+  RegisterData,
+  User,
+} from "@/lib/types/auth";
 
-export type UserRole = "user" | "photographer" | "admin";
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  avatar?: string | null;
-  phoneNumber?: string;
-  isEmailVerified?: boolean;
-}
-
-interface BackendUser {
-  _id?: string;
-  id?: string;
-  fullName?: string;
-  name?: string;
-  email: string;
-  role: UserRole;
-  avatar?: string | null;
-  phoneNumber?: string;
-  isEmailVerified?: boolean;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  fullName: string;
-  email: string;
-  password: string;
-}
+export type { LoginCredentials, RegisterData, User, UserRole } from "@/lib/types/auth";
 
 interface AuthContextType {
   user: User | null;

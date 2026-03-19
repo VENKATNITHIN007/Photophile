@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api-client";
+import { privateApiClient } from "@/lib/api-client";
 import type { PortfolioItem } from "@/lib/types/photographer";
 
 export interface AddPortfolioItemPayload {
@@ -8,7 +8,7 @@ export interface AddPortfolioItemPayload {
 }
 
 export async function getMyPortfolio() {
-  const response = await apiClient.get("/portfolio");
+  const response = await privateApiClient.get("/portfolio");
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to load portfolio");
   }
@@ -16,7 +16,7 @@ export async function getMyPortfolio() {
 }
 
 export async function addPortfolioItem(payload: AddPortfolioItemPayload) {
-  const response = await apiClient.post("/portfolio/add", payload);
+  const response = await privateApiClient.post("/portfolio/add", payload);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to add portfolio item");
   }
