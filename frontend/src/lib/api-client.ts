@@ -1,14 +1,48 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+    skipAuthFailureRedirect?: boolean;
+  }
+
+  interface InternalAxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+    skipAuthFailureRedirect?: boolean;
+  }
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-export const apiClient = axios.create({
+export const publicApiClient = axios.create({
   baseURL: API_URL,
-  withCredentials: true, // Crucial for HTTP-only cookies
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+export const privateApiClient = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
+
+const AUTH_REFRESH_SKIP_PATHS = [
+  '/users/login',
+  '/users/register',
+  '/users/forgot-password',
+  '/users/reset-password',
+  '/users/verify-email',
+  '/users/verify-email/send',
+  '/users/refresh-token',
+];
 
 // Optionally, we can set up an interceptor to refresh tokens
 // For HTTP-only cookies, the server handles refresh logic on its end usually,
@@ -31,17 +65,23 @@ const processQueue = (error: AxiosError | null, token: string | null = null) => 
   failedQueue = [];
 };
 
-apiClient.interceptors.response.use(
+privateApiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    const requestUrl = originalRequest?.url ?? '';
+    const shouldSkipRefresh =
+      !originalRequest ||
+      originalRequest.skipAuthRefresh ||
+      AUTH_REFRESH_SKIP_PATHS.some((path) => requestUrl.includes(path));
+
+    if (error.response?.status === 401 && !shouldSkipRefresh && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise(function(resolve, reject) {
           failedQueue.push({ resolve, reject });
         }).then(() => {
-          return apiClient(originalRequest);
+          return privateApiClient(originalRequest);
         }).catch(err => {
           return Promise.reject(err);
         });
@@ -55,10 +95,20 @@ apiClient.interceptors.response.use(
         await axios.post(`${API_URL}/users/refresh-token`, {}, { withCredentials: true });
         
         processQueue(null);
-        return apiClient(originalRequest);
+        return privateApiClient(originalRequest);
       } catch (err) {
         processQueue(err as AxiosError, null);
-        // Optional: emit event to trigger logout in UI
+
+        if (typeof window !== 'undefined' && !originalRequest.skipAuthFailureRedirect) {
+          const pathname = window.location.pathname;
+          const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/register');
+
+          if (!isAuthPath) {
+            const next = `${window.location.pathname}${window.location.search}`;
+            window.location.assign(`/login?redirect=${encodeURIComponent(next)}`);
+          }
+        }
+
         return Promise.reject(err);
       } finally {
         isRefreshing = false;
@@ -68,3 +118,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const apiClient = privateApiClient;

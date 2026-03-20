@@ -11,12 +11,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { forgotPassword } from "@/lib/api/auth";
+import { useForgotPasswordMutation } from "@/features/auth/queries/auth.mutations";
 
 export default function ForgotPasswordPage() {
-  const { success, error: showError } = useToast();
-  const [loading, setLoading] = useState(false);
+  const { success } = useToast();
   const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<ForgotPasswordInput>({
@@ -26,23 +24,18 @@ export default function ForgotPasswordPage() {
     },
   });
 
-  const forgotPasswordMutation = useMutation({
-    mutationFn: (email: string) => forgotPassword(email),
-  });
+  const forgotPasswordMutation = useForgotPasswordMutation();
 
   const onSubmit = async (data: ForgotPasswordInput) => {
-    setLoading(true);
-
     try {
       await forgotPasswordMutation.mutateAsync(data.email);
       setSubmitted(true);
       success("If an account exists with this email, you will receive password reset instructions.");
-    } catch (err) {
+    } catch {
       // Show generic message to prevent email enumeration
       setSubmitted(true);
       success("If an account exists with this email, you will receive password reset instructions.");
     } finally {
-      setLoading(false);
       forgotPasswordMutation.reset();
     }
   };
@@ -95,10 +88,10 @@ export default function ForgotPasswordPage() {
                 label="Email address"
                 type="email"
                 placeholder="name@example.com"
-                disabled={loading}
+                disabled={forgotPasswordMutation.isPending}
               />
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Sending..." : "Send reset instructions"}
+              <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
+                {forgotPasswordMutation.isPending ? "Sending..." : "Send reset instructions"}
               </Button>
             </form>
           </Form>

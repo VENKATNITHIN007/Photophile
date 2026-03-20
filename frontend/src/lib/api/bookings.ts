@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api-client";
+import { privateApiClient } from "@/lib/api-client";
 import type { Booking } from "@/lib/types/booking";
 
 export interface CreateBookingPayload {
@@ -8,7 +8,7 @@ export interface CreateBookingPayload {
 }
 
 export async function createBooking(payload: CreateBookingPayload) {
-  const response = await apiClient.post("/bookings", payload);
+  const response = await privateApiClient.post("/bookings", payload);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to create booking");
   }
@@ -16,7 +16,7 @@ export async function createBooking(payload: CreateBookingPayload) {
 }
 
 export async function getMyBookings() {
-  const response = await apiClient.get("/bookings/my-bookings");
+  const response = await privateApiClient.get("/bookings/my-bookings");
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to load bookings");
   }
@@ -24,7 +24,7 @@ export async function getMyBookings() {
 }
 
 export async function cancelBooking(bookingId: string) {
-  const response = await apiClient.delete(`/bookings/${bookingId}`);
+  const response = await privateApiClient.delete(`/bookings/${bookingId}`);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to cancel booking");
   }
@@ -32,7 +32,7 @@ export async function cancelBooking(bookingId: string) {
 }
 
 export async function getPhotographerBookings() {
-  const response = await apiClient.get("/bookings/requests/all");
+  const response = await privateApiClient.get("/bookings/requests/all");
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to load booking requests");
   }
@@ -40,7 +40,7 @@ export async function getPhotographerBookings() {
 }
 
 export async function updateBookingStatus(bookingId: string, status: string) {
-  const response = await apiClient.patch(`/bookings/${bookingId}/status`, { status });
+  const response = await privateApiClient.patch(`/bookings/${bookingId}/status`, { status });
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to update booking status");
   }

@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { KeyRound, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { resetPassword } from "@/lib/api/auth";
+import { useResetPasswordMutation } from "@/features/auth/queries/auth.mutations";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -21,7 +20,6 @@ function ResetPasswordForm() {
   const token = searchParams.get("token");
   
   const { success, error: showError } = useToast();
-  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<ResetPasswordInput>({
@@ -40,17 +38,13 @@ function ResetPasswordForm() {
     }
   }, [token, form]);
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: (payload: { token: string; newPassword: string }) => resetPassword(payload.token, payload.newPassword),
-  });
+  const resetPasswordMutation = useResetPasswordMutation();
 
   const onSubmit = async (data: ResetPasswordInput) => {
     if (!token) {
       showError("Invalid or missing reset token. Please request a new password reset link.");
       return;
     }
-
-    setLoading(true);
 
     try {
       await resetPasswordMutation.mutateAsync({ token: data.token, newPassword: data.newPassword });
@@ -64,11 +58,9 @@ function ResetPasswordForm() {
       }, 2000);
     } catch (err) {
       showError((err as Error).message || "Failed to reset password. The link may have expired. Please request a new one.");
-      setLoading(false);
       resetPasswordMutation.reset();
       return;
     }
-    setLoading(false);
   };
 
   // Show error state if no token is present
@@ -151,7 +143,7 @@ function ResetPasswordForm() {
                 label="New password"
                 type="password"
                 placeholder="••••••••"
-                disabled={loading}
+                disabled={resetPasswordMutation.isPending}
               />
               <div className="text-xs text-gray-500 space-y-1">
                 <p>Password must contain:</p>
@@ -170,11 +162,11 @@ function ResetPasswordForm() {
                 label="Confirm password"
                 type="password"
                 placeholder="••••••••"
-                disabled={loading}
+                disabled={resetPasswordMutation.isPending}
               />
               
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Resetting..." : "Reset password"}
+              <Button type="submit" className="w-full" disabled={resetPasswordMutation.isPending}>
+                {resetPasswordMutation.isPending ? "Resetting..." : "Reset password"}
               </Button>
             </form>
           </Form>
