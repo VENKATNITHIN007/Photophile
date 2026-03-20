@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { asyncHandler } from "../utils/asyncHandler";
-import ApiResponse from "../utils/ApiResponse";
-import ApiError from "../utils/ApiError";
+import { asyncHandler } from "../utils/core/asyncHandler";
+import ApiResponse from "../utils/core/ApiResponse";
+import ApiError from "../utils/core/ApiError";
 import { Photographer } from "../models/photographer.model";
 import { ERRORS } from "../constants/error";
-import {Portfolio, IPortfolio }from "../models/protfolio.model";
+import { Portfolio, IPortfolio } from "../models/portfolio.model";
 
 /**
  * Add single portfolio item
@@ -112,42 +112,42 @@ export const getPortfolioByUsername = asyncHandler(
 /**
  * Update portfolio item
  */
-export const updatePortfolioItem =  asyncHandler(async (req: Request, res: Response) => {
+export const updatePortfolioItem = asyncHandler(async (req: Request, res: Response) => {
 
-    if (!req.user) {
-      return res.status(401).json(new ApiError(401, ERRORS.AUTH.REQUIRED));
-    }
+  if (!req.user) {
+    return res.status(401).json(new ApiError(401, ERRORS.AUTH.REQUIRED));
+  }
 
-    const userId = req.user._id;
-    const { itemId } = req.params;
-    const { category } = req.body;
+  const userId = req.user._id;
+  const { itemId } = req.params;
+  const { category } = req.body;
 
-    const photographer = await Photographer.findOne({ userId });
-    if (!photographer) {
-      return res
-        .status(403)
-        .json(
-          new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY),
-        );
-    }
-
-    const portfolioItem = await Portfolio.findOneAndUpdate(
-      { _id: itemId, photographerId: photographer._id },
-      { category },
-      { new: true },
-    );
-
-    if (!portfolioItem) {
-      return res
-        .status(404)
-        .json(new ApiError(404, ERRORS.PORTFOLIO.ITEM_NOT_FOUND));
-    }
-
+  const photographer = await Photographer.findOne({ userId });
+  if (!photographer) {
     return res
-      .status(200)
+      .status(403)
       .json(
-        new ApiResponse(portfolioItem, "Portfolio item updated successfully"),
+        new ApiError(403, ERRORS.PHOTOGRAPHER.PORTFOLIO_ONLY),
       );
+  }
+
+  const portfolioItem = await Portfolio.findOneAndUpdate(
+    { _id: itemId, photographerId: photographer._id },
+    { category },
+    { new: true },
+  );
+
+  if (!portfolioItem) {
+    return res
+      .status(404)
+      .json(new ApiError(404, ERRORS.PORTFOLIO.ITEM_NOT_FOUND));
+  }
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(portfolioItem, "Portfolio item updated successfully"),
+    );
 })
 
 /**

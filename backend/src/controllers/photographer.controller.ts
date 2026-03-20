@@ -1,9 +1,9 @@
 import { Request, RequestHandler, Response } from "express";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/core/asyncHandler";
 import mongoose from "mongoose";
-import ApiResponse from "../utils/ApiResponse";
+import ApiResponse from "../utils/core/ApiResponse";
 import User from "../models/user.model";
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/core/ApiError";
 import { Photographer, IPhotographer } from "../models/photographer.model";
 import { ERRORS } from "../constants/error";
 
@@ -12,8 +12,8 @@ import { ERRORS } from "../constants/error";
  * @param res
  * @returns
  */
-export const createPhotographerProfile: RequestHandler = asyncHandler(
-  async (req, res) => {
+export const createPhotographerProfile = asyncHandler(
+  async (req: Request, res: Response) => {
     const { userId, username, bio, location, specialties, priceFrom } =
       req.body;
     const user = await User.findById(userId);
@@ -84,8 +84,8 @@ export const getPhotographerProfileByUserId = asyncHandler(
  * @param res
  * @returns
  */
-export const getPhotographerProfileByUsername: RequestHandler = asyncHandler(
-  async (req, res) => {
+export const getPhotographerProfileByUsername = asyncHandler(
+  async (req: Request, res: Response) => {
     const { username } = req.params;
     const photographer = await Photographer.findOne({
       username: username.toLowerCase(),
@@ -141,8 +141,8 @@ export const updatePhotographerProfile = asyncHandler(
  * Supports: location, specialties, priceFrom/priceTo, rating, search
  */
 
-export const browsePhotographers: RequestHandler = asyncHandler(
-  async (req, res) => {
+export const browsePhotographers = asyncHandler(
+  async (req: Request, res: Response) => {
     const {
       location,
       specialty,
@@ -160,7 +160,7 @@ export const browsePhotographers: RequestHandler = asyncHandler(
     // base 10 means decimal number system
 
     // Math.max returns the BIGGEST value among arguments and Math.min returns the SMALLEST value among arguments. This ensures page is NEVER less than 1 and limit is between 1 and 50 to prevent abuse.
-  
+
     const pageNum = Math.max(1, parseInt(page || "1", 10));
     const limitNum = Math.min(50, Math.max(1, parseInt(limit || "15", 10)));
     const skip = (pageNum - 1) * limitNum;

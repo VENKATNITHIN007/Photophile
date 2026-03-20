@@ -18,4 +18,4 @@ export type JWT_AUTH = Pick<IUser, "_id" | "fullName" | "avatar" | "role">;
 /**
  * RoleType
  */
-export type RoleType = "user" | "admin";
+export type RoleType = "user" | "photographer";

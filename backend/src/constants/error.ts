@@ -1,10 +1,15 @@
 export const ERRORS = {
+  COMMON: {
+    SERVER_ERROR: "Something went wrong on our end",
+    INVALID_ID: "Invalid ID(s) provided",
+    NOT_FOUND: "Resource not found",
+  },
   AUTH: {
     USER_EXISTS: "User name or email already exists",
     INVALID_CREDENTIALS: "These credentials do not match our records",
     WRONG_PASSWORD: "The provided password is incorrect",
     REQUIRED: "Authentication required. Please log in to access this resource",
-    USER_NOT_FOUND: "User not found",
+    USER_NOT_FOUND: "User not found!",
     INVALID_TOKEN: "Invalid or expired token",
     FORBIDDEN: "Administrator privileges are required for this action",
     RATE_LIMIT: "Too many login attempts. Please try again later",
@@ -13,8 +18,25 @@ export const ERRORS = {
     RESET_TOKEN_INVALID: "Invalid or expired password reset link",
     EMAIL_SEND_FAILED: "Failed to send email. Please try again later",
     FORGOT_PASSWORD_GENERIC: "If an account exists, a reset email has been sent",
+    CURRENT_PASSWORD_REQUIRED: "Current password is required to change password",
+    NEW_PASSWORD_REQUIRED: "New password is required to change password",
+    PASSWORD_REQUIRED: "Password is required",
+    PASSWORD_LENGTH: "Password length must be 8 characters",
+    PASSWORD_UPPERCASE: "Password must have one uppercase letter",
+    PASSWORD_LOWERCASE: "Password must have one lowercase letter",
+    PASSWORD_NUMBER: "Password must have one number",
+    PASSWORD_SPECIAL: "Password must have one special character",
+    REGISTRATION_FAILED: "Something went wrong while registering user",
+    REFRESH_TOKEN_REQUIRED: "Refresh token is required",
+    REFRESH_TOKEN_INVALID: "Invalid or expired refresh token",
   },
-
+  JWT: {
+    EXPIRED: "Token has expired",
+    INVALID: "Invalid Token",
+    REFRESH_EXPIRED: "Refresh Token has expired",
+    REFRESH_INVALID: "Invalid Refresh Token",
+    GENERATION_FAILED: "Something went wrong while generating tokens",
+  },
   PHOTOGRAPHER: {
     NOT_FOUND: "Photographer not found",
     ONLY: "Only photographers can access this resource",
@@ -23,7 +45,6 @@ export const ERRORS = {
     PORTFOLIO_ONLY: "Only photographers can manage portfolio items",
     PROFILE_NOT_FOUND: "Photographer profile not found",
   },
-
   BOOKING: {
     NOT_FOUND: "Booking not found",
     CANNOT_BOOK_SELF: "You cannot book yourself",
@@ -34,7 +55,6 @@ export const ERRORS = {
     INVALID_TRANSITION: "Invalid status transition",
     UPDATE_STATUS_FAILED: "Something went wrong while updating booking status",
   },
-
   REVIEW: {
     NOT_FOUND: "Review not found",
     CANNOT_REVIEW_SELF: "You cannot review yourself",
@@ -42,7 +62,6 @@ export const ERRORS = {
       "You can only review photographers after a completed booking",
     EXISTS: "You have already reviewed this photographer",
   },
-
   PORTFOLIO: {
     ITEM_NOT_FOUND: "Portfolio item not found",
   },

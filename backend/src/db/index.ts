@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import appConfig from "../config";
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/core/ApiError";
 
 export default async function connectToDB() {
   const { MONGO_URL, DB_NAME } = appConfig;

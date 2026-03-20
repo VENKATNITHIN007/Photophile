@@ -1,4 +1,4 @@
-import appConfig from "../config";
+import appConfig from "../../config";
 
 // extends default js error class
 
@@ -17,7 +17,7 @@ class ApiError extends Error {
         errors: unknown = "",
         stack = ""
     ) {
-       // giving message to js default error object using super so that it attches msg to the front of error 
+        // giving message to js default error object using super so that it attches msg to the front of error 
         super(message);
         this.success = false;
         this.statusCode = statusCode;

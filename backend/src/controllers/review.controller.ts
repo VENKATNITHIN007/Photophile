@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import ApiResponse from "../utils/ApiResponse";
-import ApiError from "../utils/ApiError";
+import ApiResponse from "../utils/core/ApiResponse";
+import ApiError from "../utils/core/ApiError";
 import { Photographer } from "../models/photographer.model";
-import Review from "../models/Review.model";
-import Booking from "../models/Booking.model";
-import { asyncHandler } from "../utils/asyncHandler";
+import Review from "../models/review.model";
+import Booking from "../models/booking.model";
+import { asyncHandler } from "../utils/core/asyncHandler";
 import { ERRORS } from "../constants/error";
 
 /**

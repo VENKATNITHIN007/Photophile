@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { ERRORS } from "../constants/error";
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/core/ApiError";
 import User from "../models/user.model";
-import { verifyToken } from "../utils/helper/jwt.util";
+import { verifyToken } from "../utils/auth/jwt.util";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {

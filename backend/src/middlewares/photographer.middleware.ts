@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/core/ApiError";
 import { Photographer } from "../models/photographer.model";
 
 /**

@@ -18,7 +18,7 @@ export const appConfig = {
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || "",
 
     // MongoDB Database
-    MONGO_URL: process.env.MONGO_URL|| "mongodb://localhost:27017",
+    MONGO_URL: process.env.MONGO_URL || "mongodb://localhost:27017",
 
     DB_NAME: process.env.DB_NAME || "dukan",
 
@@ -28,53 +28,6 @@ export const appConfig = {
     APP_BASE_URL: process.env.APP_BASE_URL || "http://localhost:3000",
     EMAIL_VERIFICATION_EXPIRY: process.env.EMAIL_VERIFICATION_EXPIRY || "24h",
     PASSWORD_RESET_EXPIRY: process.env.PASSWORD_RESET_EXPIRY || "1h",
-}
-
-const parseDurationToMs = (value: string, fallbackMs: number): number => {
-    const trimmedValue = value.trim();
-    const match = trimmedValue.match(/^(\d+)([smhd])$/i);
-
-    if (!match) {
-        const numeric = Number(trimmedValue);
-        return Number.isFinite(numeric) && numeric > 0 ? numeric : fallbackMs;
-    }
-
-    const amount = Number(match[1]);
-    const unit = match[2].toLowerCase();
-
-    const unitMap: Record<string, number> = {
-        s: 1000,
-        m: 60 * 1000,
-        h: 60 * 60 * 1000,
-        d: 24 * 60 * 60 * 1000,
-    };
-
-    const multiplier = unitMap[unit];
-    return amount > 0 && multiplier ? amount * multiplier : fallbackMs;
-};
-
-const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
-const cookieSameSite = (process.env.COOKIE_SAMESITE || "strict").toLowerCase();
-const resolvedSameSite = (cookieSameSite === "none" || cookieSameSite === "lax" || cookieSameSite === "strict")
-    ? (cookieSameSite as "none" | "lax" | "strict")
-    : "strict";
-
-export const clearCookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: resolvedSameSite,
-    domain: cookieDomain,
-    path: "/",
-};
-
-export const accessTokenCookieOptions = {
-    ...clearCookieOptions,
-    maxAge: parseDurationToMs(appConfig.ACCESS_TOKEN_EXPIRY, 24 * 60 * 60 * 1000),
-};
-
-export const refreshTokenCookieOptions = {
-    ...clearCookieOptions,
-    maxAge: parseDurationToMs(appConfig.REFRESH_TOKEN_EXPIRY, 7 * 24 * 60 * 60 * 1000),
 };
 
 export default appConfig;

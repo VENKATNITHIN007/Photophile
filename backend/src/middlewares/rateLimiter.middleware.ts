@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/core/ApiError";
 
 /**
  * Standard headers for rate limiting (RFC 6585 compliant)

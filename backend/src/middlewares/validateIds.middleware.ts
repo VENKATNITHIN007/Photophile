@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import mongoose, { Model } from "mongoose";
-import ApiError from "../utils/ApiError";
+import ApiError from "../utils/core/ApiError";
+import { ERRORS } from "../constants/error";
 
 type Source = "body" | "query" | "both";
 
@@ -37,14 +38,14 @@ export function validateIds<T extends mongoose.Document>({
     if (!allValid) {
       return res
         .status(400)
-        .json(new ApiError(400, `Invalid ${fieldName} ID(s)`));
+        .json(new ApiError(400, `${ERRORS.COMMON.INVALID_ID}: ${fieldName}`));
     }
 
     const foundDocs = await model.find({ _id: { $in: ids } });
     if (foundDocs.length !== ids.length) {
       return res
         .status(404)
-        .json(new ApiError(404, `Some ${fieldName} ID(s) not found`));
+        .json(new ApiError(404, `${ERRORS.COMMON.NOT_FOUND}: ${fieldName}`));
     }
 
     // convert ids from string to array inside query or body  to maintain consistency for both single and multiple ids

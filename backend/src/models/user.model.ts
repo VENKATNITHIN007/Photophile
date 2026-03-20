@@ -22,7 +22,7 @@ export interface IUser {
   passwordResetToken?: string;
   passwordResetExpires?: Date;
 
-  role?: "user" | "admin";
+  role?: "user" | "photographer";
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -55,11 +55,11 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       trim: true,
       sparse: true,
       lowercase: true,
-      validate:{
-        validator:function(str:string) {
+      validate: {
+        validator: function (str: string) {
           return isEmail(str)
         },
-        message:"Invalid email adress"
+        message: "Invalid email adress"
       }
     },
 
@@ -94,9 +94,9 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
       type: String,
       trim: true,
       default: null,
-      validate:{
-        validator:(url:string)=> !url || isURL(url),
-        message:"please provide a valid url for the avatar"
+      validate: {
+        validator: (url: string) => !url || isURL(url),
+        message: "please provide a valid url for the avatar"
       }
     },
 
@@ -112,6 +112,8 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
     emailVerificationToken: {
       type: String,
       select: false,
+      index: true,
+      sparse: true,
     },
     emailVerificationExpires: {
       type: Date,
@@ -120,6 +122,8 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
     passwordResetToken: {
       type: String,
       select: false,
+      index: true,
+      sparse: true,
     },
     passwordResetExpires: {
       type: Date,
@@ -128,7 +132,7 @@ const userSchema = new Schema<IUser, userModel, UserMethods>(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "photographer"],
       default: "user",
     },
   },
@@ -164,7 +168,7 @@ userSchema.methods.isPasswordCorrect = async function (password: string,): Promi
 
 userSchema.set('toJSON', {
   transform: (_doc, ret) => {
-    const { password, refreshToken, emailVerificationToken, emailVerificationExpires, passwordResetToken, passwordResetExpires, __v, ...rest } = ret  ;
+    const { password, refreshToken, emailVerificationToken, emailVerificationExpires, passwordResetToken, passwordResetExpires, __v, ...rest } = ret;
 
     return rest;
   },

@@ -1,9 +1,10 @@
 import appConfig from "../../config";
 import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
-import ApiError from "../ApiError";
+import ApiError from "../core/ApiError";
 import User from "../../models/user.model";
 import type { JWT_AUTH } from "../../types/user";
 import bcrypt from "bcrypt";
+import { ERRORS } from "../../constants/error";
 
 // in auth middleware 
 // it is used in many places later 
@@ -14,14 +15,14 @@ export const verifyToken = (token: string) => {
         console.log("JWT Error", error);
 
         if (error instanceof TokenExpiredError) {
-            throw new ApiError(401, "Token has expired");
+            throw new ApiError(401, ERRORS.JWT.EXPIRED);
         }
 
         if (error instanceof JsonWebTokenError) {
-            throw new ApiError(401, "Invalid Token");
+            throw new ApiError(401, ERRORS.JWT.INVALID);
         }
 
-        throw new ApiError(401, "Invalid token");
+        throw new ApiError(401, ERRORS.JWT.INVALID);
     }
 };
 // to generate new acess token after expiration 
@@ -30,14 +31,14 @@ export const verifyRefreshToken = (token: string) => {
         return jwt.verify(token, appConfig.REFRESH_TOKEN_SECRET) as JWT_AUTH;
     } catch (error) {
         if (error instanceof TokenExpiredError) {
-            throw new ApiError(401, "Refresh Token has expired");
+            throw new ApiError(401, ERRORS.JWT.REFRESH_EXPIRED);
         }
 
         if (error instanceof JsonWebTokenError) {
-            throw new ApiError(401, "Invalid Refresh Token");
+            throw new ApiError(401, ERRORS.JWT.REFRESH_INVALID);
         }
 
-        throw new ApiError(401, "Invalid Refresh token");
+        throw new ApiError(401, ERRORS.JWT.REFRESH_INVALID);
     }
 };
 // login controller 
@@ -67,7 +68,7 @@ export const generateTokens = async (userData: JWT_AUTH) => {
             throw new ApiError(500, error.message);
         }
 
-        throw new ApiError(500, "Something went wrong while generating tokens");
+        throw new ApiError(500, ERRORS.JWT.GENERATION_FAILED);
     }
 };
 
