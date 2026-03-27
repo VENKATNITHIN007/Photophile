@@ -1,5 +1,9 @@
 import { Query } from "mongoose";
 
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 15;
+const MAX_LIMIT = 100;
+
 export interface PaginationOptions {
   page?: number;
   limit?: number;
@@ -26,8 +30,13 @@ export const paginate = async <T>(
   query: Query<T[], T>,
   options: PaginationOptions = {},
 ): Promise<PaginatedResult<T>> => {
-  const page = Math.max(1, options.page || 1);
-  const limit = Math.min(100, Math.max(1, options.limit || 15));
+
+  
+  const page = Math.max(DEFAULT_PAGE, options.page || DEFAULT_PAGE);
+  const limit = Math.min(
+    MAX_LIMIT,
+    Math.max(1, options.limit || DEFAULT_LIMIT),
+  );
   const skip = (page - 1) * limit;
 
   // Clone query for count
@@ -68,8 +77,8 @@ export const parsePaginationQuery = (query: {
   sortOrder?: string;
 }): PaginationOptions => {
   return {
-    page: query.page ? parseInt(query.page, 10) : 1,
-    limit: query.limit ? parseInt(query.limit, 10) : 15,
+    page: query.page ? parseInt(query.page, 10) : DEFAULT_PAGE,
+    limit: query.limit ? parseInt(query.limit, 10) : DEFAULT_LIMIT,
     sortBy: query.sortBy,
     sortOrder: query.sortOrder === "desc" ? "desc" : "asc",
   };

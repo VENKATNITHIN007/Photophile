@@ -85,125 +85,99 @@ function isRetryableError(error: unknown): boolean {
 }
 
 /**
- * Send an email using Resend API with retry logic
- * @param options - Email send options
- * @returns Promise resolving to send result
+ * Helper: Validate that all required email fields are present.
  */
-export async function sendEmail(
-  options: SendEmailOptions
-): Promise<SendEmailResult> {
-  // Validate required fields
-  if (!options.to) {
-    return { success: false, error: "Recipient email is required" };
-  }
-
-  if (!options.subject) {
-    return { success: false, error: "Email subject is required" };
-  }
-
+function validateOptions(options: SendEmailOptions) {
+  if (!options.to) throw new Error("Recipient email is required");
+  if (!options.subject) throw new Error("Email subject is required");
   if (!options.html && !options.text) {
-    return { success: false, error: "Email content (html or text) is required" };
+    throw new Error("Email content (html or text) is required");
   }
+}
 
-  // Use configured from email as default
-  const from = options.from || appConfig.RESEND_FROM_EMAIL;
+/**
+ * Helper: Build the final payload for the Resend API.
+ */
+function buildPayload(options: SendEmailOptions, from: string) {
+  const payload: Record<string, any> = {
+    from,
+    to: Array.isArray(options.to) ? options.to : [options.to],
+    subject: options.subject,
+  };
 
-  // Generate idempotency key if not provided
-  const idempotencyKey = options.idempotencyKey || generateIdempotencyKey();
+  if (options.html) payload.html = options.html;
+  if (options.text) payload.text = options.text;
+  if (options.replyTo) payload.replyTo = options.replyTo;
+  if (options.cc) payload.cc = options.cc;
+  if (options.bcc) payload.bcc = options.bcc;
+  if (options.attachments) payload.attachments = options.attachments;
 
-  // Normalize recipients to array
-  const to = Array.isArray(options.to) ? options.to : [options.to];
+  return payload;
+}
 
-  // Check if we're in test/mock mode
-  const isTestEnvironment = process.env.EMAIL_MOCK === "true";
-
-  if (isTestEnvironment) {
-    console.log("[EMAIL MOCK] Would send email:", {
-      to,
-      subject: options.subject,
-      from,
-      idempotencyKey,
-    });
-    return { success: true, messageId: `mock-${Date.now()}` };
-  }
-
-  // Check if Resend is configured
-  if (!appConfig.RESEND_API_KEY) {
-    console.error("[EMAIL ERROR] RESEND_API_KEY is not configured");
-    return { success: false, error: "Email service is not configured" };
-  }
-
+/**
+ * Core: Sends a single email with automatic retry logic.
+ */
+async function sendWithRetry(payload: any, idempotencyKey: string): Promise<string> {
   let lastError: Error | null = null;
 
-  // Retry loop with exponential backoff
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
-      console.log(`[EMAIL] Sending email attempt ${attempt}/${MAX_RETRIES} to:`, to);
+      const { data, error } = await resend.emails.send(payload, { idempotencyKey });
 
-      // Build email payload dynamically with only defined fields
-      const emailPayload: Record<string, unknown> = {
-        from,
-        to,
-        subject: options.subject,
-      };
-
-      // Only add optional fields if they are defined
-      if (options.html) emailPayload.html = options.html;
-      if (options.text) emailPayload.text = options.text;
-      if (options.replyTo) emailPayload.replyTo = options.replyTo;
-      if (options.cc) emailPayload.cc = options.cc;
-      if (options.bcc) emailPayload.bcc = options.bcc;
-      if (options.attachments) emailPayload.attachments = options.attachments;
-
-      const { data, error } = await resend.emails.send(
-        emailPayload as unknown as Parameters<typeof resend.emails.send>[0],
-        {
-          idempotencyKey,
-        }
-      );
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data?.id) {
-        console.log(`[EMAIL] Successfully sent email with ID: ${data.id}`);
-        return { success: true, messageId: data.id };
-      }
+      if (error) throw new Error(error.message);
+      if (data?.id) return data.id;
 
       throw new Error("No message ID returned from Resend");
     } catch (error) {
       lastError = error as Error;
 
-      const isRetryable = isRetryableError(error);
-      const isLastAttempt = attempt === MAX_RETRIES;
-
-      console.error(`[EMAIL ERROR] Attempt ${attempt} failed:`, {
-        error: lastError.message,
-        isRetryable,
-        isLastAttempt,
-      });
-
-      // Don't retry on the last attempt or if error is not retryable
-      if (isLastAttempt || !isRetryable) {
-        break;
+      if (attempt === MAX_RETRIES || !isRetryableError(error)) {
+        throw lastError;
       }
 
-      // Calculate exponential backoff delay
       const backoffDelay = INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt - 1);
-      console.log(`[EMAIL] Retrying in ${backoffDelay}ms...`);
+      console.log(`[EMAIL] Attempt ${attempt} failed, retrying in ${backoffDelay}ms...`);
       await delay(backoffDelay);
     }
   }
+  throw lastError || new Error("Unknown email error");
+}
 
-  // All retries exhausted or non-retryable error
-  console.error(`[EMAIL ERROR] Failed to send email after ${MAX_RETRIES} attempts`);
+/**
+ * Main: Send an email using Resend API.
+ */
+export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
+  try {
+    // 1. Validate
+    validateOptions(options);
 
-  // Return generic error message to client, log detailed error internally
-  return {
-    success: false,
-    error: "Failed to send email. Please try again later.",
-  };
+    // 2. Prepare
+    const from = options.from || appConfig.RESEND_FROM_EMAIL;
+    const idempotencyKey = options.idempotencyKey || generateIdempotencyKey();
+    const payload = buildPayload(options, from);
+
+    // 3. Mock Mode Check
+    if (process.env.EMAIL_MOCK === "true") {
+      console.log("[EMAIL MOCK] Email ready to send:", { to: payload.to, subject: payload.subject });
+      return { success: true, messageId: `mock-${Date.now()}` };
+    }
+
+    // 4. Send (with retries)
+    if (!appConfig.RESEND_API_KEY) {
+      throw new Error("Email service is not configured (RESEND_API_KEY missing)");
+    }
+
+    const messageId = await sendWithRetry(payload, idempotencyKey);
+    return { success: true, messageId };
+
+  } catch (error: any) {
+    console.error("[EMAIL ERROR] Final Failure:", error.message);
+    return {
+      success: false,
+      error: error.message || "Failed to send email. Please try again later.",
+    };
+  }
 }
 
 /**

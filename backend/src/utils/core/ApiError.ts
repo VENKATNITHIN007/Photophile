@@ -11,12 +11,15 @@ class ApiError extends Error {
     public readonly stack?: string;
     public message = "Something went wrong";
 
+    // createas new empty object 
+    // constuctor is for passing values to the new object which can be acessed using this 
     constructor(
         statusCode: number = 500,
         message: string = "Something went wrong",
         errors: unknown = "",
         stack = ""
     ) {
+        // to that new object add properties of parent when used super and its compulsary
         // giving message to js default error object using super so that it attches msg to the front of error 
         super(message);
         this.success = false;
