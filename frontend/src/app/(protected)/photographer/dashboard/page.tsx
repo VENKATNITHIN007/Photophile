@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { RoleGate } from "@/components/shared/RoleGate";
-import { usePhotographerBookingsQuery, useUpdateBookingStatusMutation } from "@/lib/query/bookings";
-import { useMyPortfolioQuery, useAddPortfolioItemMutation } from "@/lib/query/portfolio";
-import { useMyPhotographerProfileQuery, useUpdatePhotographerProfileMutation } from "@/lib/query/photographer-profile";
+import { useMyPortfolioQuery, useAddPortfolioItemMutation } from "@/features/photographer-profile/queries/portfolio.queries";
+import { useMyProfileQuery, useUpdateProfileMutation } from "@/features/photographer-profile/queries/profile.queries";
 
 
 interface Profile {
@@ -15,25 +14,22 @@ interface Profile {
 }
 
 export default function PhotographerDashboard() {
-  
-  
-  const { data: bookings = [], isLoading: bookingsLoading, error: bookingsError } = usePhotographerBookingsQuery();
   const { data: portfolio = [], isLoading: portfolioLoading, error: portfolioError } = useMyPortfolioQuery();
-  const { data: profile, isLoading: profileLoading, error: profileError } = useMyPhotographerProfileQuery();
+  const { data: profile, isLoading: profileLoading, error: profileError } = useMyProfileQuery();
 
-  const [activeTab, setActiveTab] = useState<"bookings" | "portfolio" | "profile">("bookings");
+  const [activeTab, setActiveTab] = useState<"portfolio" | "profile">("portfolio");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
   // Form States
   const [newPortfolio, setNewPortfolio] = useState({ mediaUrl: "", mediaType: "image", category: "" });
   const [editProfile, setEditProfile] = useState<Profile>({ bio: "", location: "", priceFrom: 0 });
-  const updateBookingStatusMutation = useUpdateBookingStatusMutation();
+
   const addPortfolioMutation = useAddPortfolioItemMutation();
-  const updateProfileMutation = useUpdatePhotographerProfileMutation();
+  const updateProfileMutation = useUpdateProfileMutation();
+
   const isAddingPortfolio = addPortfolioMutation.isPending;
   const isUpdatingProfile = updateProfileMutation.isPending;
-  const isUpdatingStatus = updateBookingStatusMutation.isPending;
 
   useEffect(() => {
     if (!profile) return;
@@ -44,16 +40,6 @@ export default function PhotographerDashboard() {
       specialties: profile.specialties || [],
     });
   }, [profile]);
-
-  const handleUpdateBookingStatus = async (bookingId: string, status: string) => {
-    try {
-      await updateBookingStatusMutation.mutateAsync({ bookingId, status });
-      setSuccessMsg(`Booking ${status} successfully`);
-      setTimeout(() => setSuccessMsg(""), 3000);
-    } catch {
-      setError("Failed to update booking status");
-    }
-  };
 
   const handleAddPortfolio = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +64,7 @@ export default function PhotographerDashboard() {
     }
   };
 
-  const isLoading = bookingsLoading || portfolioLoading || profileLoading;
+  const isLoading = portfolioLoading || profileLoading;
 
   return (
     <RoleGate allowedRoles={["photographer"]}>
@@ -87,10 +73,10 @@ export default function PhotographerDashboard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-8">Photographer Dashboard</h1>
 
           {error && <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">{error}</div>}
-          {bookingsError || portfolioError || profileError ? (
+          {portfolioError || profileError ? (
             <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
-              {(bookingsError || portfolioError || profileError) instanceof Error
-                ? (bookingsError || portfolioError || profileError)?.message
+              {(portfolioError || profileError) instanceof Error
+                ? (portfolioError || profileError)?.message
                 : "Failed to load dashboard data"}
             </div>
           ) : null}
@@ -99,14 +85,14 @@ export default function PhotographerDashboard() {
           {/* Navigation Tabs */}
           <div className="border-b border-gray-200 mb-8">
             <nav className="-mb-px flex space-x-8">
-              {["bookings", "portfolio", "profile"].map((tab) => (
+              {["portfolio", "profile"].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab as "bookings" | "portfolio" | "profile")}
+                  onClick={() => setActiveTab(tab as "portfolio" | "profile")}
                   className={`
                     whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm capitalize
-                    ${activeTab === tab 
-                      ? "border-blue-500 text-blue-600" 
+                    ${activeTab === tab
+                      ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                     }
                   `}
@@ -123,66 +109,11 @@ export default function PhotographerDashboard() {
             </div>
           ) : (
             <div className="bg-white shadow rounded-lg p-6">
-              {/* Bookings Tab */}
-              {activeTab === "bookings" && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4 text-black">Incoming Bookings</h2>
-                  {bookings.length === 0 ? (
-                    <p className="text-gray-500">No bookings found.</p>
-                  ) : (
-                    <div className="space-y-4">
-                      {bookings.map((booking) => (
-                        <div key={booking._id} className="border rounded-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                          <div>
-                            <p className="font-medium text-black">
-                              Date: {new Date(booking.eventDate).toLocaleDateString()}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Client: {(typeof booking.userId === 'object' && booking.userId !== null ? booking.userId.fullName || booking.userId.email : booking.userId) || 'Unknown'}
-                            </p>
-                            {booking.message && (
-                              <p className="text-sm text-gray-500 mt-1 italic">&quot;{booking.message}&quot;</p>
-                            )}
-                            <span className={`inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-full ${
-                              booking.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                              booking.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                              booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
-                              {booking.status}
-                            </span>
-                          </div>
-                          
-                          {booking.status === 'pending' && (
-                            <div className="mt-4 sm:mt-0 flex space-x-2">
-                              <button
-                                onClick={() => handleUpdateBookingStatus(booking._id, 'accepted')}
-                                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
-                                disabled={isUpdatingStatus}
-                              >
-                                Accept
-                              </button>
-                              <button
-                                onClick={() => handleUpdateBookingStatus(booking._id, 'rejected')}
-                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
-                                disabled={isUpdatingStatus}
-                              >
-                                Reject
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Portfolio Tab */}
               {activeTab === "portfolio" && (
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-black">Manage Portfolio</h2>
-                  
+
                   {/* Add New Item */}
                   <form onSubmit={handleAddPortfolio} className="mb-8 bg-gray-50 p-4 rounded-md border">
                     <h3 className="font-medium mb-3 text-black">Add New Media</h3>
@@ -195,7 +126,7 @@ export default function PhotographerDashboard() {
                           className="w-full border-gray-300 rounded-md shadow-sm p-2 border text-black"
                           placeholder="https://example.com/image.jpg"
                           value={newPortfolio.mediaUrl}
-                          onChange={(e) => setNewPortfolio({...newPortfolio, mediaUrl: e.target.value})}
+                          onChange={(e) => setNewPortfolio({ ...newPortfolio, mediaUrl: e.target.value })}
                           disabled={isAddingPortfolio}
                         />
                       </div>
@@ -204,7 +135,7 @@ export default function PhotographerDashboard() {
                         <select
                           className="w-full border-gray-300 rounded-md shadow-sm p-2 border text-black"
                           value={newPortfolio.mediaType}
-                          onChange={(e) => setNewPortfolio({...newPortfolio, mediaType: e.target.value})}
+                          onChange={(e) => setNewPortfolio({ ...newPortfolio, mediaType: e.target.value })}
                           disabled={isAddingPortfolio}
                         >
                           <option value="image">Image</option>
@@ -218,7 +149,7 @@ export default function PhotographerDashboard() {
                           className="w-full border-gray-300 rounded-md shadow-sm p-2 border text-black"
                           placeholder="e.g. Wedding, Portrait"
                           value={newPortfolio.category}
-                          onChange={(e) => setNewPortfolio({...newPortfolio, category: e.target.value})}
+                          onChange={(e) => setNewPortfolio({ ...newPortfolio, category: e.target.value })}
                           disabled={isAddingPortfolio}
                         />
                       </div>
@@ -268,18 +199,18 @@ export default function PhotographerDashboard() {
                       <textarea
                         className="w-full border-gray-300 rounded-md shadow-sm p-2 border text-black min-h-[100px]"
                         value={editProfile.bio || ""}
-                        onChange={(e) => setEditProfile({...editProfile, bio: e.target.value})}
+                        onChange={(e) => setEditProfile({ ...editProfile, bio: e.target.value })}
                         disabled={isUpdatingProfile}
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
                       <input
                         type="text"
                         className="w-full border-gray-300 rounded-md shadow-sm p-2 border text-black"
                         value={editProfile.location || ""}
-                        onChange={(e) => setEditProfile({...editProfile, location: e.target.value})}
+                        onChange={(e) => setEditProfile({ ...editProfile, location: e.target.value })}
                         disabled={isUpdatingProfile}
                       />
                     </div>
@@ -291,7 +222,7 @@ export default function PhotographerDashboard() {
                         min="0"
                         className="w-full border-gray-300 rounded-md shadow-sm p-2 border text-black"
                         value={editProfile.priceFrom || 0}
-                        onChange={(e) => setEditProfile({...editProfile, priceFrom: Number(e.target.value)})}
+                        onChange={(e) => setEditProfile({ ...editProfile, priceFrom: Number(e.target.value) })}
                         disabled={isUpdatingProfile}
                       />
                     </div>

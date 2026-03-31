@@ -12,13 +12,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { KeyRound, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
-import { useResetPasswordMutation } from "@/features/auth/queries/auth.mutations";
+import { useResetPasswordMutation } from "@/features/auth/queries/auth.queries";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
-  
+
   const { success, error: showError } = useToast();
   const [submitted, setSubmitted] = useState(false);
 
@@ -48,10 +48,10 @@ function ResetPasswordForm() {
 
     try {
       await resetPasswordMutation.mutateAsync({ token: data.token, newPassword: data.newPassword });
-      
+
       setSubmitted(true);
       success("Password reset successfully! Redirecting to login...");
-      
+
       // Redirect to login after 2 seconds
       setTimeout(() => {
         router.push("/login");
@@ -136,7 +136,7 @@ function ResetPasswordForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Hidden token field */}
               <input type="hidden" {...form.register("token")} />
-              
+
               <FormInput
                 control={form.control}
                 name="newPassword"
@@ -155,7 +155,7 @@ function ResetPasswordForm() {
                   <li>One special character</li>
                 </ul>
               </div>
-              
+
               <FormInput
                 control={form.control}
                 name="confirmPassword"
@@ -164,7 +164,7 @@ function ResetPasswordForm() {
                 placeholder="••••••••"
                 disabled={resetPasswordMutation.isPending}
               />
-              
+
               <Button type="submit" className="w-full" disabled={resetPasswordMutation.isPending}>
                 {resetPasswordMutation.isPending ? "Resetting..." : "Reset password"}
               </Button>

@@ -7,20 +7,11 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, Mail, Camera } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
+import { useUpdateProfileMutation } from "@/features/auth/queries/auth.queries";
 import { RoleGate } from "@/components/shared/RoleGate";
-import { useMyBookingsQuery, useCancelBookingMutation } from "@/lib/query/bookings";
-import { useMutation } from "@tanstack/react-query";
-import { updateProfile } from "@/lib/api/users";
-
-
 export default function UserDashboard() {
   const { user, checkAuth, isEmailVerified, resendVerificationEmail } = useAuth();
-  const { data: bookings = [], isLoading, error: bookingsError } = useMyBookingsQuery();
-  const cancelMutation = useCancelBookingMutation();
-  const updateProfileMutation = useMutation({
-    mutationFn: updateProfile,
-    onSuccess: () => checkAuth(),
-  });
+  const updateProfileMutation = useUpdateProfileMutation();
 
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -44,21 +35,10 @@ export default function UserDashboard() {
       setProfileSuccess("");
       await updateProfileMutation.mutateAsync({ fullName, phoneNumber, avatar });
       setProfileSuccess("Profile updated successfully");
-    } catch (error: unknown) {
+    } catch (unusedError: unknown) {
       showError("Failed to update profile");
     } finally {
       updateProfileMutation.reset();
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending": return "bg-yellow-100 text-yellow-800";
-      case "accepted": return "bg-blue-100 text-blue-800";
-      case "completed": return "bg-green-100 text-green-800";
-      case "rejected":
-      case "cancelled": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -67,7 +47,7 @@ export default function UserDashboard() {
       setResendingEmail(true);
       await resendVerificationEmail();
       success("Verification email sent", "Check your inbox for the verification link");
-    } catch (err) {
+    } catch {
       showError("Failed to send verification email", "Please try again later");
     } finally {
       setResendingEmail(false);
@@ -76,17 +56,11 @@ export default function UserDashboard() {
 
   return (
     <RoleGate allowedRoles={["user", "admin"]}>
-      <div className="max-w-6xl mx-auto p-6 space-y-8">
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
           <p className="text-gray-600">Welcome back, {user?.name}</p>
         </div>
-
-        {bookingsError ? (
-          <div className="p-4 bg-red-50 text-red-700 rounded-md">
-            {bookingsError instanceof Error ? bookingsError.message : "Failed to load bookings"}
-          </div>
-        ) : null}
 
         {/* Email Verification Banner */}
         {!isEmailVerified && (
@@ -120,150 +94,91 @@ export default function UserDashboard() {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-1">
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 border-b pb-2">Profile Settings</h2>
-              
-              {profileSuccess && (
-                <div className="mb-4 p-3 bg-green-50 text-green-700 rounded text-sm">
-                  {profileSuccess}
-                </div>
-              )}
+        <div className="bg-white shadow-xl border border-gray-100 rounded-2xl p-8 max-w-2xl mx-auto">
+          <h2 className="text-2xl font-bold mb-6 border-b pb-4 text-gray-800">Profile Settings</h2>
 
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={user?.email || ""}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    type="text"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Avatar URL</label>
-                  <input
-                    type="url"
-                    value={avatar}
-                    onChange={(e) => setAvatar(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/avatar.jpg"
-                  />
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={updateProfileMutation.isPending}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-                >
-                  {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
-                </button>
-
-                {/* Become Photographer Button */}
-                {user?.role === "user" && (
-                  <div className="pt-4 border-t border-gray-200 mt-4">
-                    <p className="text-sm text-gray-600 mb-3">
-                      Want to offer your photography services?
-                    </p>
-                    <Link href="/photographer/onboard">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full border-purple-600 text-purple-700 hover:bg-purple-50"
-                      >
-                        <Camera className="mr-2 h-4 w-4" />
-                        Become a Photographer
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </form>
+          {profileSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-700 rounded-xl text-sm font-medium animate-in fade-in slide-in-from-top-1">
+              {profileSuccess}
             </div>
-          </div>
+          )}
 
-          <div className="md:col-span-2">
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4 border-b pb-2">My Bookings</h2>
-              
-              {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-                </div>
-              ) : bookings.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  You don&apos;t have any bookings yet.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div key={booking._id} className="border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-lg">
-                            {booking.photographerId?.userId?.fullName || "Photographer"}
-                          </h3>
-                          <span className={`text-xs px-2 py-1 rounded-full uppercase font-medium ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Date:</span> {new Date(booking.eventDate).toLocaleDateString()}
-                        </p>
-                        {booking.message && (
-                          <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                            &quot;{booking.message}&quot;
-                          </p>
-                        )}
-                      </div>
-                      
-                      {booking.status === "pending" && (
-                        <div className="flex gap-2 shrink-0">
-                          <button 
-                            className="px-3 py-1.5 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition"
-                            onClick={async () => {
-                              if (confirm("Are you sure you want to cancel this booking?")) {
-                                try {
-                                  await cancelMutation.mutateAsync(booking._id);
-                                } catch {
-                                  showError("Failed to cancel booking");
-                                }
-                              }
-                            }}
-                            disabled={cancelMutation.isPending}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+          <form onSubmit={handleUpdateProfile} className="space-y-6">
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                <input
+                  type="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-400 cursor-not-allowed"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                <input
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                  placeholder="+1 (555) 000-0000"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Avatar URL</label>
+                <input
+                  type="url"
+                  value={avatar}
+                  onChange={(e) => setAvatar(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                  placeholder="https://example.com/avatar.jpg"
+                />
+              </div>
             </div>
-          </div>
+
+            <Button
+              type="submit"
+              disabled={updateProfileMutation.isPending}
+              className="w-full py-6 text-lg font-semibold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50"
+            >
+              {updateProfileMutation.isPending ? "Updating..." : "Save Changes"}
+            </Button>
+
+            {/* Become Photographer Button */}
+            {user?.role === "user" && (
+              <div className="pt-8 border-t border-gray-100 mt-6">
+                <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
+                  <h3 className="text-lg font-bold text-amber-900 mb-2">Want to showcase your work?</h3>
+                  <p className="text-sm text-amber-800/80 mb-4">
+                    Join our community of professional photographers and start building your portfolio today.
+                  </p>
+                  <Link href="/photographer/onboard">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full bg-white border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-800 font-semibold"
+                    >
+                      <Camera className="mr-2 h-4 w-4" />
+                      Become a Photographer
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+          </form>
         </div>
       </div>
     </RoleGate>

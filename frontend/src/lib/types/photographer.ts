@@ -41,16 +41,3 @@ export interface PortfolioItem {
   category?: string;
 }
 
-export interface ReviewItem {
-  _id: string;
-  userId: UserSummary;
-  rating: number;
-  comment?: string;
-  createdAt: string;
-}
-
-export interface ReviewsData {
-  reviews: ReviewItem[];
-  averageRating: number;
-  totalReviews: number;
-}

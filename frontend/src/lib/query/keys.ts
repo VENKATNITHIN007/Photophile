@@ -1,10 +1,18 @@
+import type { BrowsePhotographersParams } from "@/lib/api/photographers";
+
+
 export const queryKeys = {
-  photographersList: (params: Record<string, unknown>) => ["photographers", "list", params] as const,
-  photographerProfile: (username: string) => ["photographers", "profile", username] as const,
-  photographerPortfolio: (username: string) => ["photographers", "portfolio", username] as const,
-  photographerReviews: (username: string) => ["photographers", "reviews", username] as const,
-  myBookings: () => ["bookings", "me"] as const,
-  photographerBookings: () => ["bookings", "photographer"] as const,
-  myPortfolio: () => ["portfolio", "me"] as const,
+  session: () => ["auth", "session"] as const,
+
+  // ── Browsing (public) ────────────────────────────────────────────
+  photographersList: (params: BrowsePhotographersParams) =>
+    ["photographers", "list", params] as const,
+  photographerProfile: (username: string) =>
+    ["photographers", "profile", username] as const,
+  photographerPortfolio: (username: string) =>
+    ["photographers", "portfolio", username] as const,
+
+  // ── Photographer Dashboard (private / "me") ──────────────────────
   myPhotographerProfile: () => ["photographers", "me"] as const,
+  myPortfolio: () => ["portfolio", "me"] as const,
 };

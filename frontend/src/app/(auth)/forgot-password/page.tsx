@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
-import { useForgotPasswordMutation } from "@/features/auth/queries/auth.mutations";
+import { useForgotPasswordMutation } from "@/features/auth/queries/auth.queries";
 
 export default function ForgotPasswordPage() {
   const { success } = useToast();

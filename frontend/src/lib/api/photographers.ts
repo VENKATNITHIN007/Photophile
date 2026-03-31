@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import type { PhotographerListItem, Pagination, PhotographerProfile, PortfolioItem, ReviewsData } from "@/lib/types/photographer";
+import type { PhotographerListItem, Pagination, PhotographerProfile, PortfolioItem } from "@/lib/types/photographer";
 
 export interface BrowsePhotographersParams {
   search?: string;
@@ -40,13 +40,6 @@ export async function getPhotographerPortfolio(username: string) {
   return (response.data.data || []) as PortfolioItem[];
 }
 
-export async function getPhotographerReviews(username: string) {
-  const response = await apiClient.get(`/reviews/${username}`);
-  if (response.data?.success === false) {
-    throw new Error(response.data?.message || "Failed to fetch reviews");
-  }
-  return response.data.data as ReviewsData;
-}
 
 export interface CreatePhotographerProfilePayload {
   username: string;

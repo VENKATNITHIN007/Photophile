@@ -13,7 +13,7 @@ import { FormInput } from "@/components/forms/FormInput";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRegisterMutation } from "@/features/auth/queries/auth.mutations";
+import { useRegisterMutation } from "@/features/auth/queries/auth.queries";
 
 export default function RegisterPage() {
   const { user, checkAuth, loading: authLoading } = useAuth();

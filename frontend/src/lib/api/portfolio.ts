@@ -22,3 +22,30 @@ export async function addPortfolioItem(payload: AddPortfolioItemPayload) {
   }
   return response.data.data;
 }
+
+export interface UpdatePortfolioItemPayload {
+  category?: string;
+}
+
+export async function updatePortfolioItem(
+  itemId: string,
+  payload: UpdatePortfolioItemPayload,
+) {
+  const response = await apiClient.patch(`/portfolio/${itemId}`, payload);
+  if (response.data?.success === false) {
+    throw new Error(
+      response.data?.message || "Failed to update portfolio item",
+    );
+  }
+  return response.data.data;
+}
+
+export async function deletePortfolioItem(itemId: string) {
+  const response = await apiClient.delete(`/portfolio/${itemId}`);
+  if (response.data?.success === false) {
+    throw new Error(
+      response.data?.message || "Failed to delete portfolio item",
+    );
+  }
+  return response.data.data;
+}

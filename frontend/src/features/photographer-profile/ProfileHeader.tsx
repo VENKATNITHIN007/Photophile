@@ -1,16 +1,13 @@
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import type { PhotographerProfile, ReviewsData } from "@/lib/types/photographer";
+import type { PhotographerProfile } from "@/lib/types/photographer";
 
 interface ProfileHeaderProps {
   profile: PhotographerProfile;
-  reviewsData?: ReviewsData | null;
 }
 
-export function ProfileHeader({ profile, reviewsData }: ProfileHeaderProps) {
+export function ProfileHeader({ profile }: ProfileHeaderProps) {
   const user = profile.userId;
 
   return (
@@ -34,7 +31,7 @@ export function ProfileHeader({ profile, reviewsData }: ProfileHeaderProps) {
             <p className="text-lg text-muted-foreground">@{profile.username}</p>
           </div>
 
-          {(profile.location || profile.specialties?.length) && (
+          {(profile.location || (profile.specialties && profile.specialties.length > 0)) && (
             <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-sm text-gray-600">
               {profile.location && (
                 <div className="flex items-center gap-1.5 bg-gray-100 px-3 py-1 rounded-full">
@@ -62,18 +59,6 @@ export function ProfileHeader({ profile, reviewsData }: ProfileHeaderProps) {
             </div>
           )}
 
-          {reviewsData && reviewsData.totalReviews > 0 && (
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <div className="flex items-center text-amber-500">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              </div>
-              <span className="font-medium text-gray-900">{reviewsData.averageRating}</span>
-              <span className="text-muted-foreground">({reviewsData.totalReviews} reviews)</span>
-            </div>
-          )}
-
           {profile.bio && (
             <p className="text-gray-700 leading-relaxed max-w-2xl mt-4">{profile.bio}</p>
           )}
@@ -81,12 +66,6 @@ export function ProfileHeader({ profile, reviewsData }: ProfileHeaderProps) {
           {profile.priceFrom && (
             <div className="text-lg font-medium text-gray-900 mt-2">Starting from ${profile.priceFrom}/hr</div>
           )}
-        </div>
-
-        <div className="shrink-0 self-center md:self-start">
-          <Button asChild size="lg" className="px-8 shadow-md">
-            <Link href={`/book/${profile.username}`}>Book Now</Link>
-          </Button>
         </div>
       </CardContent>
     </Card>

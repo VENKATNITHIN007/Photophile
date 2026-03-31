@@ -6,13 +6,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import { useVerifyEmailMutation } from "@/features/auth/queries/auth.mutations";
+import { useVerifyEmailMutation } from "@/features/auth/queries/auth.queries";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const { mutateAsync } = useVerifyEmailMutation();
-  
+
   const [status, setStatus] = useState<"loading" | "success" | "error" | "invalid">("loading");
   const [message, setMessage] = useState("");
 

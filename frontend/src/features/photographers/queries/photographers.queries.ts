@@ -1,21 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import {
   browsePhotographers,
   getPhotographerPortfolio,
   getPhotographerProfile,
-  getPhotographerReviews,
   type BrowsePhotographersParams,
 } from "@/lib/api/photographers";
 import { queryKeys } from "@/lib/query/keys";
 
+/** Browse / search the public photographer directory. */
 export function usePhotographersQuery(params: BrowsePhotographersParams) {
   return useQuery({
     queryKey: queryKeys.photographersList(params),
     queryFn: () => browsePhotographers(params),
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 }
 
+/** Fetch a single photographer's public profile by username. */
 export function usePhotographerProfileQuery(username: string) {
   return useQuery({
     queryKey: queryKeys.photographerProfile(username),
@@ -24,18 +25,11 @@ export function usePhotographerProfileQuery(username: string) {
   });
 }
 
+/** Fetch a photographer's public portfolio by username. */
 export function usePhotographerPortfolioQuery(username: string) {
   return useQuery({
     queryKey: queryKeys.photographerPortfolio(username),
     queryFn: () => getPhotographerPortfolio(username),
-    enabled: Boolean(username),
-  });
-}
-
-export function usePhotographerReviewsQuery(username: string) {
-  return useQuery({
-    queryKey: queryKeys.photographerReviews(username),
-    queryFn: () => getPhotographerReviews(username),
     enabled: Boolean(username),
   });
 }

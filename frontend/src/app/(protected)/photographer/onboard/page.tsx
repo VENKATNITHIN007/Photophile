@@ -11,26 +11,26 @@ import { FormMultiSelect } from "@/components/forms/FormMultiSelect";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useCreatePhotographerProfileMutation } from "@/lib/query/photographer-profile";
+import { useCreateProfileMutation } from "@/features/photographer-profile/queries/profile.queries";
 import { RoleGate } from "@/components/shared/RoleGate";
 
 const CITIES = [
-  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", 
-  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow", 
-  "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal", 
+  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
+  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
+  "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal",
   "Visakhapatnam", "Patna", "Vadodara", "Ghaziabad", "Ludhiana"
 ].map(city => ({ label: city, value: city.toLowerCase() }));
 
 const SPECIALTIES = [
-  "Wedding", "Portrait", "Event", "Commercial", "Fashion", 
-  "Nature", "Real Estate", "Food", "Sports", "Product", 
+  "Wedding", "Portrait", "Event", "Commercial", "Fashion",
+  "Nature", "Real Estate", "Food", "Sports", "Product",
   "Newborn", "Maternity", "Corporate", "Concert"
 ].map(spec => ({ label: spec, value: spec.toLowerCase() }));
 
 export default function PhotographerOnboardingPage() {
   const router = useRouter();
   const { success, error: showError } = useToast();
-  const createProfileMutation = useCreatePhotographerProfileMutation();
+  const createProfileMutation = useCreateProfileMutation();
 
   const form = useForm<PhotographerOnboardingInput>({
     resolver: zodResolver(photographerOnboardingSchema),
@@ -64,7 +64,7 @@ export default function PhotographerOnboardingPage() {
           <CardHeader>
             <CardTitle className="text-3xl font-extrabold text-center">Become a Photographer</CardTitle>
             <CardDescription className="text-center text-lg mt-2">
-              Set up your profile to start receiving bookings. Keep it simple for now!
+              Set up your profile to start showcasing your work. Keep it simple for now!
             </CardDescription>
           </CardHeader>
           <CardContent>

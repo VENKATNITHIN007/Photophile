@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ProfileHeader } from "@/features/photographer-profile/ProfileHeader";
 import { PortfolioGrid } from "@/features/photographer-profile/PortfolioGrid";
-import { ReviewsList } from "@/features/photographer-profile/ReviewsList";
 import {
   usePhotographerPortfolioQuery,
   usePhotographerProfileQuery,
-  usePhotographerReviewsQuery,
 } from "@/features/photographers/queries/photographers.queries";
 
 interface PhotographerProfilePageProps {
@@ -24,7 +22,6 @@ export function PhotographerProfilePage({ username }: PhotographerProfilePagePro
     error: profileError,
   } = usePhotographerProfileQuery(username);
   const { data: portfolio, isLoading: portfolioLoading } = usePhotographerPortfolioQuery(username);
-  const { data: reviewsData } = usePhotographerReviewsQuery(username);
 
   if (profileLoading || portfolioLoading) {
     return (
@@ -83,9 +80,8 @@ export function PhotographerProfilePage({ username }: PhotographerProfilePagePro
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-12">
-        <ProfileHeader profile={profile} reviewsData={reviewsData} />
+        <ProfileHeader profile={profile} />
         <PortfolioGrid portfolio={portfolio || []} />
-        <ReviewsList reviewsData={reviewsData} />
       </div>
     </div>
   );

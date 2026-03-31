@@ -26,7 +26,6 @@ import {
   User,
   LogOut,
   Settings,
-  Calendar,
   Heart,
   ChevronDown,
 } from "lucide-react";
@@ -54,13 +53,11 @@ const defaultLinks: NavLink[] = [
 
 const authenticatedLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard", requiresAuth: true },
-  { href: "/bookings", label: "My Bookings", requiresAuth: true },
   { href: "/favorites", label: "Favorites", requiresAuth: true, icon: <Heart className="size-4" /> },
 ];
 
 const photographerLinks: NavLink[] = [
   { href: "/portfolio", label: "My Portfolio", requiresAuth: true, roles: ["photographer"] },
-  { href: "/schedule", label: "Schedule", requiresAuth: true, roles: ["photographer"], icon: <Calendar className="size-4" /> },
 ];
 
 export function Navbar({
@@ -130,11 +127,10 @@ export function Navbar({
             <Link
               key={link.href}
               href={link.href}
-              className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
-                isActive(link.href)
-                  ? "text-foreground bg-accent"
-                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-              }`}
+              className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-lg ${isActive(link.href)
+                ? "text-foreground bg-accent"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                }`}
             >
               {link.label}
               {isActive(link.href) && (
@@ -275,11 +271,10 @@ export function Navbar({
                       <SheetClose asChild key={link.href}>
                         <Link
                           href={link.href}
-                          className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                            isActive(link.href)
-                              ? "bg-accent text-foreground"
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                          }`}
+                          className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors ${isActive(link.href)
+                            ? "bg-accent text-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                            }`}
                         >
                           {link.icon}
                           {link.label}
