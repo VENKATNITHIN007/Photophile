@@ -34,6 +34,12 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             return res.status(401).json(new ApiError(401, ERRORS.AUTH.REQUIRED));
         }
 
+        // Enforce email verification for all authenticated routes except logout
+        // We check the endsWith to be safe against different mount points like /api/v1/auth/logout
+        if (!user.isEmailVerified && !req.path.endsWith("/logout")) {
+            throw new ApiError(403, ERRORS.AUTH.EMAIL_NOT_VERIFIED);
+        }
+
         req.user = user;
 
         next()

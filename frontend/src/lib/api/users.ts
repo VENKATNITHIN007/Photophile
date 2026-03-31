@@ -1,4 +1,4 @@
-import { privateApiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type { User } from "@/lib/types/auth";
 
 export interface UpdateProfilePayload {
@@ -8,7 +8,7 @@ export interface UpdateProfilePayload {
 }
 
 export async function updateProfile(payload: UpdateProfilePayload) {
-  const response = await privateApiClient.put("/users/profile", payload);
+  const response = await apiClient.put("/users/profile", payload);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to update profile");
   }

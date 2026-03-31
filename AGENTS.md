@@ -1,12 +1,19 @@
 # PHOTOPHILE - PROJECT KNOWLEDGE BASE
 
-**Generated:** 2026-03-01
+**Generated:** 2026-03-31
 **Type:** Full-Stack Photography Marketplace
 **Stack:** Next.js 15 (Frontend) + Express/TypeScript (Backend)
 
 ## Overview
 
 Photophile (codename: Dukan) connects photographers with clients. Photographers create profiles, upload portfolios, manage bookings. Clients discover, book, and review photographers.
+
+## Current Status (2026-03-31)
+
+- **Backend build:** `npm run build` passes (`npx tsc -b`)
+- **Frontend build:** `npm run build` fails on a TypeScript error in `frontend/src/app/(protected)/dashboard/page.tsx` where `booking.photographerId` is typed as `string | BookingPhotographerSummary` and `.userId` is accessed without narrowing
+- **Frontend lint warnings:** `frontend/src/app/(protected)/dashboard/page.tsx` has unused catch variables (`error`, `err`)
+- **Implemented surface area:** backend exposes auth, users, photographers, portfolio, reviews, and bookings routes; frontend includes public discovery/booking pages plus auth and protected dashboards
 
 ---
 
@@ -424,7 +431,8 @@ Base: `/api/v1`
 
 | Resource | Path | Description |
 |----------|------|-------------|
-| Auth | `/users` | Register, login, refresh |
+| Auth | `/auth` | CSRF, register, login, refresh, email verification, password reset, logout |
+| Users | `/users` | Current user and profile update |
 | Photographers | `/photographers` | Profiles, search |
 | Portfolio | `/portfolio` | Uploads, CRUD |
 | Bookings | `/bookings` | Create, manage |
@@ -485,10 +493,10 @@ npm run build       # Next.js build
 
 ## Testing
 
-**Note:** Testing is not yet implemented in this project. When adding tests, consider:
-- Backend: Jest + Supertest for API testing
-- Frontend: Jest + React Testing Library
-- E2E: Playwright for critical user flows
+**Current state:**
+- Backend: no automated test suite configured yet
+- Frontend: Playwright is configured (`frontend/playwright.config.ts`) with e2e specs in `frontend/e2e/`
+- `frontend/package.json` includes `test` and `test:ui` scripts
 
 ---
 
@@ -499,5 +507,5 @@ npm run build       # Next.js build
 - **Auth:** JWT access token (6h expiry) + refresh token (10d)
 - **Uploads:** Multer + Cloudinary for images
 - **Database:** MongoDB with Mongoose
-- **Status:** Frontend WIP, Backend mostly complete
+- **Status:** Backend compiles successfully; frontend currently blocked by one TypeScript error on dashboard bookings rendering
 - **Documentation:** See `docs/decisions.md` for architectural decisions and `docs/patterns.md` for detailed coding patterns

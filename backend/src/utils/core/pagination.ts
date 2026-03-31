@@ -31,7 +31,7 @@ export const paginate = async <T>(
   options: PaginationOptions = {},
 ): Promise<PaginatedResult<T>> => {
 
-  
+
   const page = Math.max(DEFAULT_PAGE, options.page || DEFAULT_PAGE);
   const limit = Math.min(
     MAX_LIMIT,

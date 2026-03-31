@@ -1,122 +1,109 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-
-declare module 'axios' {
-  interface AxiosRequestConfig {
-    skipAuthRefresh?: boolean;
-    skipAuthFailureRedirect?: boolean;
-  }
-
-  interface InternalAxiosRequestConfig {
-    skipAuthRefresh?: boolean;
-    skipAuthFailureRedirect?: boolean;
-  }
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-
-export const publicApiClient = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-export const privateApiClient = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import axios, { AxiosError, AxiosHeaders, InternalAxiosRequestConfig } from "axios";
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
-const AUTH_REFRESH_SKIP_PATHS = [
-  '/users/login',
-  '/users/register',
-  '/users/forgot-password',
-  '/users/reset-password',
-  '/users/verify-email',
-  '/users/verify-email/send',
-  '/users/refresh-token',
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
+
+const AUTH_ENDPOINTS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/verify-email",
+  "/auth/verify-email/send",
+  "/auth/refresh-token",
 ];
 
-// Optionally, we can set up an interceptor to refresh tokens
-// For HTTP-only cookies, the server handles refresh logic on its end usually,
-// but if we have a dedicated /refresh endpoint, we can call it on 401:
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const CSRF_COOKIE_NAME = "csrfToken";
+const CSRF_HEADER_NAME = "x-csrf-token";
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
+const getCookieValue = (cookieName: string): string | null => {
+  if (typeof document === "undefined") {
+    return null;
+  }
 
-const processQueue = (error: AxiosError | null, token: string | null = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
+  const cookies = document.cookie.split(";");
+  for (const cookie of cookies) {
+    const [name, ...rest] = cookie.trim().split("=");
+    if (name === cookieName) {
+      return decodeURIComponent(rest.join("="));
     }
-  });
-  failedQueue = [];
+  }
+
+  return null;
 };
 
-privateApiClient.interceptors.response.use(
+export const apiClient = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+apiClient.interceptors.request.use(async (config) => {
+  const method = (config.method ?? "GET").toUpperCase();
+
+  if (SAFE_METHODS.has(method) || typeof window === "undefined") {
+    return config;
+  }
+
+  let csrfToken = getCookieValue(CSRF_COOKIE_NAME);
+  if (!csrfToken) {
+    try {
+      await apiClient.get("/auth/csrf");
+      csrfToken = getCookieValue(CSRF_COOKIE_NAME);
+    } catch {
+      return config;
+    }
+  }
+
+  if (!csrfToken) {
+    return config;
+  }
+
+  const headers = AxiosHeaders.from(config.headers);
+  headers.set(CSRF_HEADER_NAME, csrfToken);
+  config.headers = headers;
+
+  return config;
+});
+
+apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-    const requestUrl = originalRequest?.url ?? '';
-    const shouldSkipRefresh =
-      !originalRequest ||
-      originalRequest.skipAuthRefresh ||
-      AUTH_REFRESH_SKIP_PATHS.some((path) => requestUrl.includes(path));
-
-    if (error.response?.status === 401 && !shouldSkipRefresh && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise(function(resolve, reject) {
-          failedQueue.push({ resolve, reject });
-        }).then(() => {
-          return privateApiClient(originalRequest);
-        }).catch(err => {
-          return Promise.reject(err);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Attempt to refresh token using HTTP-only cookie
-        await axios.post(`${API_URL}/users/refresh-token`, {}, { withCredentials: true });
-        
-        processQueue(null);
-        return privateApiClient(originalRequest);
-      } catch (err) {
-        processQueue(err as AxiosError, null);
-
-        if (typeof window !== 'undefined' && !originalRequest.skipAuthFailureRedirect) {
-          const pathname = window.location.pathname;
-          const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/register');
-
-          if (!isAuthPath) {
-            const next = `${window.location.pathname}${window.location.search}`;
-            window.location.assign(`/login?redirect=${encodeURIComponent(next)}`);
-          }
-        }
-
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
-      }
+    if (!originalRequest || error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
-  }
-);
+    const requestUrl = originalRequest.url ?? "";
+    const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => requestUrl.includes(path));
+    if (isAuthEndpoint) {
+      return Promise.reject(error);
+    }
 
-export const apiClient = privateApiClient;
+    originalRequest._retry = true;
+
+    try {
+      await axios.post(`${API_URL}/auth/refresh-token`, {}, { withCredentials: true });
+      return apiClient(originalRequest);
+    } catch (refreshError) {
+      if (typeof window !== "undefined") {
+        const pathname = window.location.pathname;
+        const isAuthPath = pathname.startsWith("/login") || pathname.startsWith("/register");
+
+        if (!isAuthPath) {
+          const next = `${window.location.pathname}${window.location.search}`;
+          window.location.assign(`/login?redirect=${encodeURIComponent(next)}`);
+        }
+      }
+
+      return Promise.reject(refreshError);
+    }
+  },
+);

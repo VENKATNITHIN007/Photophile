@@ -19,7 +19,7 @@ type AuthUser = {
   role?: "user" | "photographer";
 };
 
-const toAuthUser = (user: IUser & { _id: Types.ObjectId }): AuthUser => ({
+const mapUserToAuth = (user: IUser & { _id: Types.ObjectId }): AuthUser => ({
   _id: user._id,
   fullName: user.fullName,
   avatar: user.avatar,
@@ -39,7 +39,7 @@ export const authService = {
       throw new ApiError(401, ERRORS.AUTH.WRONG_PASSWORD);
     }
 
-    const authUser = toAuthUser(user);
+    const authUser = mapUserToAuth(user);
     const tokens = await generateTokens(authUser as JWT_AUTH);
 
     return { user: authUser, tokens };
@@ -55,8 +55,13 @@ export const authService = {
         throw new ApiError(500, ERRORS.AUTH.REGISTRATION_FAILED);
       }
 
-      const authUser = toAuthUser(user as IUser & { _id: Types.ObjectId });
+      const authUser = mapUserToAuth(user as IUser & { _id: Types.ObjectId });
       const tokens = await generateTokens(authUser as JWT_AUTH);
+
+      // Automatically trigger verification email sending (don't await to avoid registration lag) calls the below function
+      this.sendVerificationEmail(user.email).catch((err) => {
+        console.error("[AUTO-EMAIL ERROR] Failed to trigger verification email:", err);
+      });
 
       return { user: authUser, tokens };
     } catch (error: unknown) {
@@ -99,7 +104,7 @@ export const authService = {
       throw new ApiError(401, ERRORS.AUTH.REFRESH_TOKEN_INVALID);
     }
 
-    const authUser = toAuthUser(user as IUser & { _id: Types.ObjectId });
+    const authUser = mapUserToAuth(user as IUser & { _id: Types.ObjectId });
     const tokens = await generateTokens(authUser as JWT_AUTH);
 
     return { user: authUser, tokens };

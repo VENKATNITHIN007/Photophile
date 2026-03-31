@@ -13,7 +13,7 @@ type UserProfileUpdate = {
   currentPassword?: string;
 };
 
-const toUserResponse = (user: IUser & { _id: Types.ObjectId }) => {
+const mapUserToProfile = (user: IUser & { _id: Types.ObjectId }) => {
   return {
     _id: user._id,
     fullName: user.fullName,
@@ -63,6 +63,6 @@ export const userService = {
       throw new ApiError(404, ERRORS.AUTH.USER_NOT_FOUND);
     }
 
-    return toUserResponse(updatedUser as IUser & { _id: Types.ObjectId });
+    return mapUserToProfile(updatedUser as IUser & { _id: Types.ObjectId });
   },
 };

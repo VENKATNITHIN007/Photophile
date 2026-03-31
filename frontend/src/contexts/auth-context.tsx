@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      const rawUserData = (await getCurrentUser({ skipAuthFailureRedirect: true })) as BackendUser;
+      const rawUserData = (await getCurrentUser()) as BackendUser;
       const userData = normalizeUser(rawUserData);
       setUser(userData);
       setIsEmailVerified(userData.isEmailVerified ?? false);

@@ -1,4 +1,4 @@
-import { privateApiClient, publicApiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 import type { PhotographerListItem, Pagination, PhotographerProfile, PortfolioItem, ReviewsData } from "@/lib/types/photographer";
 
 export interface BrowsePhotographersParams {
@@ -17,7 +17,7 @@ export interface BrowsePhotographersResponse {
 }
 
 export async function browsePhotographers(params: BrowsePhotographersParams) {
-  const response = await publicApiClient.get("/photographers/browse", { params });
+  const response = await apiClient.get("/photographers/browse", { params });
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to fetch photographers");
   }
@@ -25,7 +25,7 @@ export async function browsePhotographers(params: BrowsePhotographersParams) {
 }
 
 export async function getPhotographerProfile(username: string) {
-  const response = await publicApiClient.get(`/photographers/${username}`);
+  const response = await apiClient.get(`/photographers/${username}`);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to fetch photographer profile");
   }
@@ -33,7 +33,7 @@ export async function getPhotographerProfile(username: string) {
 }
 
 export async function getPhotographerPortfolio(username: string) {
-  const response = await publicApiClient.get(`/portfolio/${username}`);
+  const response = await apiClient.get(`/portfolio/${username}`);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to fetch portfolio");
   }
@@ -41,7 +41,7 @@ export async function getPhotographerPortfolio(username: string) {
 }
 
 export async function getPhotographerReviews(username: string) {
-  const response = await publicApiClient.get(`/reviews/${username}`);
+  const response = await apiClient.get(`/reviews/${username}`);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to fetch reviews");
   }
@@ -63,7 +63,7 @@ export interface UpdatePhotographerProfilePayload {
 }
 
 export async function createPhotographerProfile(payload: CreatePhotographerProfilePayload) {
-  const response = await privateApiClient.post("/photographers/create", payload);
+  const response = await apiClient.post("/photographers/create", payload);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to create photographer profile");
   }
@@ -71,7 +71,7 @@ export async function createPhotographerProfile(payload: CreatePhotographerProfi
 }
 
 export async function getMyPhotographerProfile() {
-  const response = await privateApiClient.get("/photographers/profile");
+  const response = await apiClient.get("/photographers/profile");
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to load photographer profile");
   }
@@ -79,7 +79,7 @@ export async function getMyPhotographerProfile() {
 }
 
 export async function updatePhotographerProfile(payload: UpdatePhotographerProfilePayload) {
-  const response = await privateApiClient.patch("/photographers/update", payload);
+  const response = await apiClient.patch("/photographers/update", payload);
   if (response.data?.success === false) {
     throw new Error(response.data?.message || "Failed to update photographer profile");
   }
