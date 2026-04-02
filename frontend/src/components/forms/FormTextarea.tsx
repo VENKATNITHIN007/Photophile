@@ -1,13 +1,12 @@
 import React from "react";
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { Control, FieldValues, Path } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
 interface FormTextareaProps<T extends FieldValues> {
   control: Control<T>;
@@ -28,26 +27,28 @@ export function FormTextarea<T extends FieldValues>({
   disabled = false,
   rows = 4,
 }: FormTextareaProps<T>) {
+  const fieldId = String(name).replace(/\./g, "-");
+
   return (
-    <FormField
+    <Controller
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder={placeholder}
-              disabled={disabled}
-              rows={rows}
-              className="resize-none"
-              {...field}
-              value={field.value || ""}
-            />
-          </FormControl>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
-          <FormMessage />
-        </FormItem>
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
+          <Textarea
+            id={fieldId}
+            placeholder={placeholder}
+            disabled={disabled}
+            rows={rows}
+            className="resize-none"
+            aria-invalid={fieldState.invalid}
+            {...field}
+            value={field.value || ""}
+          />
+          {description && <FieldDescription>{description}</FieldDescription>}
+          <FieldError errors={[fieldState.error]} />
+        </Field>
       )}
     />
   );

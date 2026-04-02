@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, ForgotPasswordInput } from "@/lib/validations/auth";
-import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/forms/FormInput";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -80,21 +79,19 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormInput
-                control={form.control}
-                name="email"
-                label="Email address"
-                type="email"
-                placeholder="name@example.com"
-                disabled={forgotPasswordMutation.isPending}
-              />
-              <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
-                {forgotPasswordMutation.isPending ? "Sending..." : "Send reset instructions"}
-              </Button>
-            </form>
-          </Form>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormInput
+              control={form.control}
+              name="email"
+              label="Email address"
+              type="email"
+              placeholder="name@example.com"
+              disabled={forgotPasswordMutation.isPending}
+            />
+            <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
+              {forgotPasswordMutation.isPending ? "Sending..." : "Send reset instructions"}
+            </Button>
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center text-sm">
           <Link
