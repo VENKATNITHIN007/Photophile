@@ -8,7 +8,6 @@ import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
-import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/forms/FormInput";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -69,29 +68,27 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormInput
-                control={form.control}
-                name="email"
-                label="Email address"
-                type="email"
-                placeholder="name@example.com"
-                disabled={loginMutation.isPending}
-              />
-              <FormInput
-                control={form.control}
-                name="password"
-                label="Password"
-                type="password"
-                placeholder="••••••••"
-                disabled={loginMutation.isPending}
-              />
-              <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-                {loginMutation.isPending ? "Signing in..." : "Sign in"}
-              </Button>
-            </form>
-          </Form>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormInput
+              control={form.control}
+              name="email"
+              label="Email address"
+              type="email"
+              placeholder="name@example.com"
+              disabled={loginMutation.isPending}
+            />
+            <FormInput
+              control={form.control}
+              name="password"
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              disabled={loginMutation.isPending}
+            />
+            <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+              {loginMutation.isPending ? "Signing in..." : "Sign in"}
+            </Button>
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center text-sm text-gray-600">
           <p>

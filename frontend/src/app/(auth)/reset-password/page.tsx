@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, ResetPasswordInput } from "@/lib/validations/auth";
-import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/forms/FormInput";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -132,44 +131,42 @@ function ResetPasswordForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Hidden token field */}
-              <input type="hidden" {...form.register("token")} />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Hidden token field */}
+            <input type="hidden" {...form.register("token")} />
 
-              <FormInput
-                control={form.control}
-                name="newPassword"
-                label="New password"
-                type="password"
-                placeholder="••••••••"
-                disabled={resetPasswordMutation.isPending}
-              />
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>Password must contain:</p>
-                <ul className="list-disc list-inside space-y-0.5 ml-1">
-                  <li>At least 8 characters</li>
-                  <li>One uppercase letter</li>
-                  <li>One lowercase letter</li>
-                  <li>One number</li>
-                  <li>One special character</li>
-                </ul>
-              </div>
+            <FormInput
+              control={form.control}
+              name="newPassword"
+              label="New password"
+              type="password"
+              placeholder="••••••••"
+              disabled={resetPasswordMutation.isPending}
+            />
+            <div className="text-xs text-gray-500 space-y-1">
+              <p>Password must contain:</p>
+              <ul className="list-disc list-inside space-y-0.5 ml-1">
+                <li>At least 8 characters</li>
+                <li>One uppercase letter</li>
+                <li>One lowercase letter</li>
+                <li>One number</li>
+                <li>One special character</li>
+              </ul>
+            </div>
 
-              <FormInput
-                control={form.control}
-                name="confirmPassword"
-                label="Confirm password"
-                type="password"
-                placeholder="••••••••"
-                disabled={resetPasswordMutation.isPending}
-              />
+            <FormInput
+              control={form.control}
+              name="confirmPassword"
+              label="Confirm password"
+              type="password"
+              placeholder="••••••••"
+              disabled={resetPasswordMutation.isPending}
+            />
 
-              <Button type="submit" className="w-full" disabled={resetPasswordMutation.isPending}>
-                {resetPasswordMutation.isPending ? "Resetting..." : "Reset password"}
-              </Button>
-            </form>
-          </Form>
+            <Button type="submit" className="w-full" disabled={resetPasswordMutation.isPending}>
+              {resetPasswordMutation.isPending ? "Resetting..." : "Reset password"}
+            </Button>
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center text-sm">
           <Link

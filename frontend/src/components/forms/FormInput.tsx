@@ -1,13 +1,12 @@
 import React from "react";
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Control, FieldValues, Path } from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 
 interface FormInputProps<T extends FieldValues> {
   control: Control<T>;
@@ -28,25 +27,27 @@ export function FormInput<T extends FieldValues>({
   description,
   disabled = false,
 }: FormInputProps<T>) {
+  const fieldId = String(name).replace(/\./g, "-");
+
   return (
-    <FormField
+    <Controller
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <Input
-              type={type}
-              placeholder={placeholder}
-              disabled={disabled}
-              {...field}
-              value={field.value || ""}
-            />
-          </FormControl>
-          {description && <p className="text-sm text-muted-foreground">{description}</p>}
-          <FormMessage />
-        </FormItem>
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
+          <Input
+            id={fieldId}
+            type={type}
+            placeholder={placeholder}
+            disabled={disabled}
+            aria-invalid={fieldState.invalid}
+            {...field}
+            value={field.value || ""}
+          />
+          {description && <FieldDescription>{description}</FieldDescription>}
+          <FieldError errors={[fieldState.error]} />
+        </Field>
       )}
     />
   );

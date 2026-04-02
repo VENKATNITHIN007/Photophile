@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { photographerOnboardingSchema, PhotographerOnboardingInput } from "@/lib/validations/photographer";
-import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/forms/FormInput";
 import { FormSelect } from "@/components/forms/FormSelect";
 import { FormMultiSelect } from "@/components/forms/FormMultiSelect";
@@ -68,66 +67,64 @@ export default function PhotographerOnboardingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="space-y-6">
-                  <FormInput
-                    control={form.control}
-                    name="username"
-                    label="Username"
-                    placeholder="your_unique_handle"
-                    description="This will be your unique URL: lensloom.com/photographers/[username]"
-                    disabled={createProfileMutation.isPending}
-                  />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <div className="space-y-6">
+                <FormInput
+                  control={form.control}
+                  name="username"
+                  label="Username"
+                  placeholder="your_unique_handle"
+                  description="This will be your unique URL: lensloom.com/photographers/[username]"
+                  disabled={createProfileMutation.isPending}
+                />
 
-                  <FormSelect
-                    control={form.control}
-                    name="location"
-                    label="Primary Location"
-                    placeholder="Select a city"
-                    options={CITIES}
-                    disabled={createProfileMutation.isPending}
-                  />
+                <FormSelect
+                  control={form.control}
+                  name="location"
+                  label="Primary Location"
+                  placeholder="Select a city"
+                  options={CITIES}
+                  disabled={createProfileMutation.isPending}
+                />
 
-                  <FormMultiSelect
-                    control={form.control}
-                    name="specialties"
-                    label="Specialties"
-                    options={SPECIALTIES}
-                    description="Select up to 3 specialties."
-                    disabled={createProfileMutation.isPending}
-                  />
+                <FormMultiSelect
+                  control={form.control}
+                  name="specialties"
+                  label="Specialties"
+                  options={SPECIALTIES}
+                  description="Select up to 3 specialties."
+                  disabled={createProfileMutation.isPending}
+                />
 
-                  <FormInput
-                    control={form.control}
-                    name="priceFrom"
-                    label="Starting Price ($/hr)"
-                    type="number"
-                    placeholder="e.g. 150"
-                    description="Optional. You can always update this later."
-                    disabled={createProfileMutation.isPending}
-                  />
-                </div>
+                <FormInput
+                  control={form.control}
+                  name="priceFrom"
+                  label="Starting Price ($/hr)"
+                  type="number"
+                  placeholder="e.g. 150"
+                  description="Optional. You can always update this later."
+                  disabled={createProfileMutation.isPending}
+                />
+              </div>
 
-                <div className="pt-4 flex items-center justify-end space-x-4 border-t">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => router.back()}
-                    disabled={createProfileMutation.isPending}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={createProfileMutation.isPending}
-                    className="px-8"
-                  >
-                    {createProfileMutation.isPending ? "Creating Profile..." : "Create Profile"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
+              <div className="pt-4 flex items-center justify-end space-x-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={createProfileMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createProfileMutation.isPending}
+                  className="px-8"
+                >
+                  {createProfileMutation.isPending ? "Creating Profile..." : "Create Profile"}
+                </Button>
+              </div>
+            </form>
           </CardContent>
         </Card>
       </div>
