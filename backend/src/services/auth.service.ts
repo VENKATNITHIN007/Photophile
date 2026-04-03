@@ -239,7 +239,7 @@ export const authService = {
       throw new ApiError(400, ERRORS.AUTH.RESET_TOKEN_INVALID);
     }
 
-    user.password = await bcrypt.hash(newPassword, 12);
+    user.password = newPassword;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     user.refreshToken = undefined;

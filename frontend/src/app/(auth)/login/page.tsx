@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useLoginMutation } from "@/features/auth/queries/auth.queries";
 
 export default function LoginPage() {
-  const { user, checkAuth, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isEmailVerified } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { success, error: showError } = useToast();
@@ -31,14 +31,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/dashboard");
+      router.push(isEmailVerified ? "/dashboard" : "/verify-email/pending");
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, isEmailVerified]);
 
   const onSubmit = async (data: LoginInput) => {
     try {
       await loginMutation.mutateAsync(data);
-      await checkAuth();
       router.push(searchParams.get("redirect") || "/dashboard");
       success("Logged in successfully");
     } catch (err) {
@@ -85,6 +84,11 @@ export default function LoginPage() {
               placeholder="••••••••"
               disabled={loginMutation.isPending}
             />
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm font-medium text-gray-600 hover:text-black hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
               {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>

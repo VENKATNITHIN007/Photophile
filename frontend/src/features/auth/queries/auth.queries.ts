@@ -10,8 +10,9 @@ import {
     verifyEmailToken,
 } from "@/lib/api/auth";
 import { updateProfile, type UpdateProfilePayload } from "@/lib/api/users";
-import type { LoginCredentials, RegisterData } from "@/lib/types/auth";
+import type { BackendUser, LoginCredentials, RegisterData } from "@/lib/types/auth";
 import { queryKeys } from "@/lib/query/keys";
+import { normalizeUser } from "@/features/auth/utils/normalize-user";
 
 // ── Queries ────────────────────────────────────────────────────────
 
@@ -19,8 +20,11 @@ export function useCurrentUserQuery(enabled = true) {
     return useQuery({
         queryKey: queryKeys.session(),
         queryFn: getCurrentUser,
+        select: (rawUser) => normalizeUser(rawUser as BackendUser),
         enabled,
         retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
         staleTime: 5 * 60 * 1000,
     });
 }

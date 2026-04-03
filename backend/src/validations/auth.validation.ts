@@ -107,10 +107,6 @@ export const ResetPasswordSchema = z.object({
     .refine((pwd) => /[a-z]/.test(pwd), { message: "Need lowercase" })
     .refine((pwd) => /\d/.test(pwd), { message: "Need number" })
     .refine((pwd) => /[!@#$%^&*]/.test(pwd), { message: "Need special char" }),
-    confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
 });
 
 export type sendVerificationEmailType = z.infer<typeof SendVerificationEmailSchema>;

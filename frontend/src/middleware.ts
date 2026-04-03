@@ -5,7 +5,7 @@ import { decodeAuthToken } from "@/lib/jwt";
 // Paths that require authentication
 const PROTECTED_PATHS = [
   "/dashboard",
-  "/photographer",
+  "/photographer/dashboard",
 ];
 
 // Paths that should redirect authenticated users away (auth pages)

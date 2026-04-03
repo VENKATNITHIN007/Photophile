@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, Mail, Camera } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
-import { useUpdateProfileMutation } from "@/features/auth/queries/auth.queries";
+import { useSendVerificationEmailMutation, useUpdateProfileMutation } from "@/features/auth/queries/auth.queries";
 import { RoleGate } from "@/components/shared/RoleGate";
 export default function UserDashboard() {
-  const { user, checkAuth, isEmailVerified, resendVerificationEmail } = useAuth();
+  const { user, isEmailVerified } = useAuth();
   const updateProfileMutation = useUpdateProfileMutation();
+  const sendVerificationEmailMutation = useSendVerificationEmailMutation();
 
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -35,7 +36,7 @@ export default function UserDashboard() {
       setProfileSuccess("");
       await updateProfileMutation.mutateAsync({ fullName, phoneNumber, avatar });
       setProfileSuccess("Profile updated successfully");
-    } catch (unusedError: unknown) {
+    } catch {
       showError("Failed to update profile");
     } finally {
       updateProfileMutation.reset();
@@ -45,7 +46,10 @@ export default function UserDashboard() {
   const handleResendVerification = async () => {
     try {
       setResendingEmail(true);
-      await resendVerificationEmail();
+      if (!user?.email) {
+        throw new Error("User email not available");
+      }
+      await sendVerificationEmailMutation.mutateAsync(user.email);
       success("Verification email sent", "Check your inbox for the verification link");
     } catch {
       showError("Failed to send verification email", "Please try again later");
@@ -55,7 +59,7 @@ export default function UserDashboard() {
   };
 
   return (
-    <RoleGate allowedRoles={["user", "admin"]}>
+    <RoleGate allowedRoles={["user", "photographer"]}>
       <div className="max-w-4xl mx-auto p-6 space-y-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
@@ -152,7 +156,7 @@ export default function UserDashboard() {
             <Button
               type="submit"
               disabled={updateProfileMutation.isPending}
-              className="w-full py-6 text-lg font-semibold bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50"
+              className="w-full py-6 text-lg font-semibold bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50"
             >
               {updateProfileMutation.isPending ? "Updating..." : "Save Changes"}
             </Button>
