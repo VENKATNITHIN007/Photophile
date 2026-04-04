@@ -5,13 +5,13 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 
-const VERIFIED_ONLY_PATH_PREFIXES = [
+const GUARDED_PATH_PREFIXES = [
   "/dashboard",
   "/photographer/dashboard",
 ];
 
-const isVerifiedOnlyPath = (pathname: string): boolean => {
-  return VERIFIED_ONLY_PATH_PREFIXES.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+const isGuardedPath = (pathname: string): boolean => {
+  return GUARDED_PATH_PREFIXES.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 };
 
 export function VerificationGate({ children }: { children: ReactNode }) {
@@ -20,14 +20,23 @@ export function VerificationGate({ children }: { children: ReactNode }) {
   const { user, loading, isEmailVerified } = useAuth();
 
   useEffect(() => {
-    if (loading || !user || isEmailVerified || !isVerifiedOnlyPath(pathname)) {
+    if (loading || !isGuardedPath(pathname)) {
       return;
     }
 
-    router.replace("/verify-email/pending");
+    if (!user) {
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const redirectTarget = search ? `${pathname}?${search}` : pathname;
+      router.replace(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
+      return;
+    }
+
+    if (!isEmailVerified) {
+      router.replace("/verify-email/pending");
+    }
   }, [loading, user, isEmailVerified, pathname, router]);
 
-  if (!loading && user && !isEmailVerified && isVerifiedOnlyPath(pathname)) {
+  if (!loading && isGuardedPath(pathname) && (!user || !isEmailVerified)) {
     return null;
   }
 
