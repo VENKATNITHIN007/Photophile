@@ -48,7 +48,7 @@ export interface NavbarProps {
 
 const defaultLinks: NavLink[] = [
   { href: "/photographers", label: "Photographers" },
-  { href: "/about", label: "About" },
+  { href: "/become-photographer", label: "Become a Photographer" },
 ];
 
 const authenticatedLinks: NavLink[] = [

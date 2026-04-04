@@ -22,7 +22,7 @@ export function FinalCta() {
             variant="outline"
             className="rounded-full bg-transparent text-white border-white hover:bg-white/10 hover:text-white h-14 px-8 text-base"
           >
-            <Link href="/register">Join as a Professional</Link>
+            <Link href="/become-photographer">Join as a Professional</Link>
           </Button>
         </div>
       </div>

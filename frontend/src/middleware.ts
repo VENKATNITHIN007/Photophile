@@ -6,6 +6,7 @@ import { verifyAuthToken } from "@/lib/jwt";
 const PROTECTED_PATHS = [
   "/dashboard",
   "/photographer/dashboard",
+  "/photographer/onboard",
 ];
 
 // Paths that should redirect authenticated users away (auth pages)
