@@ -5,6 +5,8 @@ import {
   updatePhotographerProfile,
 } from "@/lib/api/photographers";
 import { queryKeys } from "@/lib/query/keys";
+import type { User } from "@/lib/types/auth";
+import type { PhotographerProfile } from "@/lib/types/photographer";
 
 // ── Queries ────────────────────────────────────────────────────────
 
@@ -23,9 +25,24 @@ export function useCreateProfileMutation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createPhotographerProfile,
-    onSuccess: () => {
+    onSuccess: (createdProfile) => {
+      qc.setQueryData<PhotographerProfile>(
+        queryKeys.myPhotographerProfile(),
+        createdProfile,
+      );
+
+      qc.setQueryData<User | null>(queryKeys.session(), (currentUser) => {
+        if (!currentUser) {
+          return currentUser;
+        }
+
+        return {
+          ...currentUser,
+          role: "photographer",
+        };
+      });
+
       qc.invalidateQueries({ queryKey: queryKeys.myPhotographerProfile() });
-      // Role may change after becoming a photographer
       qc.invalidateQueries({ queryKey: queryKeys.session() });
     },
   });
@@ -41,4 +58,3 @@ export function useUpdateProfileMutation() {
     },
   });
 }
-

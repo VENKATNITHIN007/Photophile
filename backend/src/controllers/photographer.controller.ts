@@ -14,25 +14,34 @@ import { ERRORS } from "../constants/error";
  */
 export const createPhotographerProfile = asyncHandler(
   async (req: Request, res: Response) => {
-    const { userId, username, bio, location, specialties, priceFrom } =
-      req.body;
-    const user = await User.findById(userId);
+    if (!req.user?._id) {
+      throw new ApiError(401, ERRORS.AUTH.REQUIRED);
+    }
+
+    const { username, bio, location, specialties, priceFrom } = req.body;
+    const user = await User.findById(req.user._id);
+
     if (!user) {
       throw new ApiError(404, ERRORS.AUTH.USER_NOT_FOUND);
     }
+
     const existingProfile = await Photographer.findOne({ userId: user._id });
+
     if (existingProfile) {
       throw new ApiError(
         409,
         ERRORS.PHOTOGRAPHER.PROFILE_EXISTS,
       );
     }
+
     const usernameExists = await Photographer.findOne({
       username: username.toLowerCase(),
     });
+
     if (usernameExists) {
       throw new ApiError(409, ERRORS.PHOTOGRAPHER.USERNAME_TAKEN);
     }
+
     const photographerData: IPhotographer = {
       userId: user._id,
       username: username.toLowerCase(),
@@ -41,7 +50,14 @@ export const createPhotographerProfile = asyncHandler(
       specialties,
       priceFrom,
     };
+
     const photographer = await Photographer.create(photographerData);
+
+    if (user.role !== "photographer") {
+      user.role = "photographer";
+      await user.save();
+    }
+
     return res
       .status(201)
       .json(
