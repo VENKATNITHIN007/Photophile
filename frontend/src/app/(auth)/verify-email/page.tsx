@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { useVerifyEmailMutation } from "@/features/auth/queries/auth.queries";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get("token");
   const { mutateAsync } = useVerifyEmailMutation();
 
@@ -36,6 +37,20 @@ function VerifyEmailContent() {
 
     verifyEmail();
   }, [token, mutateAsync]);
+
+  useEffect(() => {
+    if (status !== "success") {
+      return;
+    }
+
+    const redirectTimer = window.setTimeout(() => {
+      router.push("/dashboard");
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(redirectTimer);
+    };
+  }, [status, router]);
 
   if (status === "loading") {
     return (
@@ -109,7 +124,7 @@ function VerifyEmailContent() {
           <CardDescription>{message}</CardDescription>
         </CardHeader>
         <CardContent className="text-center text-sm text-gray-600">
-          <p>You can now access all features of your account.</p>
+          <p>You can now access all features of your account. Redirecting you to dashboard...</p>
         </CardContent>
         <CardFooter className="flex flex-col items-center justify-center gap-2">
           <Button asChild className="w-full">

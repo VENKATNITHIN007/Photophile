@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { decodeAuthToken } from "@/lib/jwt";
+import { verifyAuthToken } from "@/lib/jwt";
 
 // Paths that require authentication
 const PROTECTED_PATHS = [
   "/dashboard",
-  "/photographer",
+  "/photographer/dashboard",
 ];
 
 // Paths that should redirect authenticated users away (auth pages)
@@ -28,11 +28,22 @@ function isAuthPath(pathname: string): boolean {
   );
 }
 
-function isTokenValid(token: string): boolean {
-  const payload = decodeAuthToken(token);
-  if (!payload) return false;
-  if (typeof payload.exp !== "number") return true;
-  return Date.now() < payload.exp * 1000;
+// this is a helper function to check if the redirect path is safe , it dont accept full urls, if there are full urls , the http//local is ingored and full url is used , so it returns null in , even for our domain , so in this case we have to pass only relative paths like /dashboard etc not pass full urls like http://photophile.com/dashboard ingores htpp//local and returns null, full urls are not allowed it prevent redirect attacks 
+
+function getSafeRedirectPath(redirect: string | null): string | null {
+  if (!redirect) return null;
+
+  try {
+
+    // http://local is used only for redirect paths , its not used if the redirect path is full url like evil.site or photophile.com/dashboard which is not allowed 
+    // this is done to prevent open redirect attacks
+    const normalized = new URL(redirect, "http://local");
+    if (normalized.origin !== "http://local") return null;
+    if (isAuthPath(normalized.pathname)) return null;
+    return `${normalized.pathname}${normalized.search}`;
+  } catch {
+    return null;
+  }
 }
 
 export async function middleware(request: NextRequest) {
@@ -41,19 +52,20 @@ export async function middleware(request: NextRequest) {
   // Get access token from cookies
   const accessToken = request.cookies.get("accessToken")?.value;
   
-  const isAuthenticated = Boolean(accessToken && isTokenValid(accessToken));
+  const isAuthenticated = Boolean(accessToken && (await verifyAuthToken(accessToken)));
   
   // Handle protected routes - redirect to login if not authenticated
   if (isProtectedPath(pathname) && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
     // Store the original URL to redirect back after login
-    loginUrl.searchParams.set("redirect", pathname);
+    loginUrl.searchParams.set("redirect", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
   }
   
-  // Handle auth routes - redirect to dashboard if already authenticated
+  // Handle auth routes - redirect authenticated users away from auth pages
   if (isAuthPath(pathname) && isAuthenticated) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const redirectPath = getSafeRedirectPath(request.nextUrl.searchParams.get("redirect"));
+    return NextResponse.redirect(new URL(redirectPath || "/dashboard", request.url));
   }
 
   return NextResponse.next();

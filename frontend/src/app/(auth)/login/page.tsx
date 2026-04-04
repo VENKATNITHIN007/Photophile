@@ -14,12 +14,32 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLoginMutation } from "@/features/auth/queries/auth.queries";
 
+function getSafeRedirectPath(redirect: string | null): string | null {
+  if (!redirect) return null;
+
+  try {
+    const normalized = new URL(redirect, "http://local");
+    if (normalized.origin !== "http://local") return null;
+
+    const authPaths = ["/login", "/register"];
+    const isAuthRedirect = authPaths.some(
+      (path) => normalized.pathname === path || normalized.pathname.startsWith(`${path}/`)
+    );
+
+    if (isAuthRedirect) return null;
+    return `${normalized.pathname}${normalized.search}`;
+  } catch {
+    return null;
+  }
+}
+
 export default function LoginPage() {
-  const { user, checkAuth, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isEmailVerified } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { success, error: showError } = useToast();
   const loginMutation = useLoginMutation();
+  const redirectPath = getSafeRedirectPath(searchParams.get("redirect"));
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -31,15 +51,14 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/dashboard");
+      router.replace(isEmailVerified ? (redirectPath || "/dashboard") : "/verify-email/pending");
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, isEmailVerified, redirectPath]);
 
   const onSubmit = async (data: LoginInput) => {
     try {
       await loginMutation.mutateAsync(data);
-      await checkAuth();
-      router.push(searchParams.get("redirect") || "/dashboard");
+      router.replace(redirectPath || "/dashboard");
       success("Logged in successfully");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {
@@ -85,6 +104,11 @@ export default function LoginPage() {
               placeholder="••••••••"
               disabled={loginMutation.isPending}
             />
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm font-medium text-gray-600 hover:text-black hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
               {loginMutation.isPending ? "Signing in..." : "Sign in"}
             </Button>

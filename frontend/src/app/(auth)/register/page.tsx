@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/auth-context";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { AxiosError } from "axios";
@@ -15,9 +15,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useRegisterMutation } from "@/features/auth/queries/auth.queries";
 
 export default function RegisterPage() {
-  const { user, checkAuth, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isEmailVerified } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { success, error: showError } = useToast();
   const registerMutation = useRegisterMutation();
 
@@ -33,9 +32,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      router.push("/dashboard");
+      router.push(isEmailVerified ? "/dashboard" : "/verify-email/pending");
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, isEmailVerified]);
 
   const onSubmit = async (data: RegisterInput) => {
     try {
@@ -44,9 +43,8 @@ export default function RegisterPage() {
         email: data.email,
         password: data.password,
       });
-      await checkAuth();
-      router.push(searchParams.get("redirect") || "/dashboard");
-      success("Account created successfully");
+      router.push("/verify-email/pending");
+      success("Account created. Please verify your email.");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {
         showError(err.response.data.message);

@@ -16,9 +16,21 @@ const AUTH_ENDPOINTS = [
   "/auth/refresh-token",
 ];
 
+const PUBLIC_AUTH_PAGES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+];
+
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 const CSRF_COOKIE_NAME = "csrfToken";
 const CSRF_HEADER_NAME = "x-csrf-token";
+const REFRESH_FAILURE_COOLDOWN_MS = 30_000;
+
+let refreshPromise: Promise<void> | null = null;
+let refreshBlockedUntil = 0;
 
 const getCookieValue = (cookieName: string): string | null => {
   if (typeof document === "undefined") {
@@ -90,12 +102,31 @@ apiClient.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      await axios.post(`${API_URL}/auth/refresh-token`, {}, { withCredentials: true });
+      if (Date.now() < refreshBlockedUntil) {
+        throw error;
+      }
+
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post(`${API_URL}/auth/refresh-token`, {}, { withCredentials: true })
+          .then(() => {
+            refreshBlockedUntil = 0;
+          })
+          .catch((refreshError) => {
+            refreshBlockedUntil = Date.now() + REFRESH_FAILURE_COOLDOWN_MS;
+            throw refreshError;
+          })
+          .finally(() => {
+            refreshPromise = null;
+          });
+      }
+
+      await refreshPromise;
       return apiClient(originalRequest);
     } catch (refreshError) {
       if (typeof window !== "undefined") {
         const pathname = window.location.pathname;
-        const isAuthPath = pathname.startsWith("/login") || pathname.startsWith("/register");
+        const isAuthPath = PUBLIC_AUTH_PAGES.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 
         if (!isAuthPath) {
           const next = `${window.location.pathname}${window.location.search}`;

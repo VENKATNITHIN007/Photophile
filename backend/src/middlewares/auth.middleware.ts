@@ -4,7 +4,12 @@ import ApiError from "../utils/core/ApiError";
 import User from "../models/user.model";
 import { verifyToken } from "../utils/auth/jwt.util";
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+type AuthMiddlewareOptions = {
+    requireVerifiedEmail?: boolean;
+};
+
+const createAuthMiddleware = ({ requireVerifiedEmail = true }: AuthMiddlewareOptions = {}) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
         let bearerToken: string | undefined;
@@ -34,9 +39,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
             return res.status(401).json(new ApiError(401, ERRORS.AUTH.REQUIRED));
         }
 
-        // Enforce email verification for all authenticated routes except logout
-        // We check the endsWith to be safe against different mount points like /api/v1/auth/logout
-        if (!user.isEmailVerified && !req.path.endsWith("/logout")) {
+        if (requireVerifiedEmail && !user.isEmailVerified && !req.path.endsWith("/logout")) {
             throw new ApiError(403, ERRORS.AUTH.EMAIL_NOT_VERIFIED);
         }
 
@@ -47,4 +50,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     } catch (error) {
         next(error)
     }
-}
+};
+};
+
+export const authMiddleware = createAuthMiddleware();
+export const authMiddlewareAllowUnverified = createAuthMiddleware({ requireVerifiedEmail: false });

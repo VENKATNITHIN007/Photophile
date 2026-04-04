@@ -5,14 +5,14 @@ import {
 } from "../controllers/user.controller";
 import { validateRequest } from "../middlewares/validateRequest.middleware";
 import { UpdateProfileSchema } from "../validations/auth.validation";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import { authMiddleware, authMiddlewareAllowUnverified } from "../middlewares/auth.middleware";
 
 const userRouter = Router();
 
-// Protected routes
+userRouter.get("/me", authMiddlewareAllowUnverified, currentUser);
+
 userRouter
   .use(authMiddleware)
-  .get("/me", currentUser)
   .put("/profile", validateRequest(UpdateProfileSchema), updateProfile);
 
 export default userRouter;
