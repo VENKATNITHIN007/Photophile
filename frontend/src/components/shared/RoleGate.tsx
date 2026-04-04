@@ -7,9 +7,10 @@ import { useAuth, type UserRole } from "@/contexts/auth-context";
 interface RoleGateProps {
   children: React.ReactNode;
   allowedRoles?: UserRole[];
+  redirectTo?: string;
 }
 
-export function RoleGate({ children, allowedRoles }: RoleGateProps) {
+export function RoleGate({ children, allowedRoles, redirectTo = "/dashboard" }: RoleGateProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -20,9 +21,9 @@ export function RoleGate({ children, allowedRoles }: RoleGateProps) {
     }
 
     if (!loading && user && allowedRoles && !allowedRoles.includes(user.role)) {
-      router.push("/dashboard");
+      router.replace(redirectTo);
     }
-  }, [user, loading, router, allowedRoles]);
+  }, [user, loading, router, allowedRoles, redirectTo]);
 
   if (loading) {
     return (

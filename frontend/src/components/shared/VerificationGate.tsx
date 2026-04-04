@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 const GUARDED_PATH_PREFIXES = [
   "/dashboard",
   "/photographer/dashboard",
+  "/photographer/onboard",
 ];
 
 const isGuardedPath = (pathname: string): boolean => {
@@ -26,7 +27,7 @@ export function VerificationGate({ children }: { children: ReactNode }) {
 
     if (!user) {
       const search = typeof window !== "undefined" ? window.location.search : "";
-      const redirectTarget = search ? `${pathname}?${search}` : pathname;
+      const redirectTarget = search ? `${pathname}${search}` : pathname;
       router.replace(`/login?redirect=${encodeURIComponent(redirectTarget)}`);
       return;
     }
