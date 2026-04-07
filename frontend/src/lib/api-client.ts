@@ -6,7 +6,7 @@ type RetryableRequestConfig = InternalAxiosRequestConfig & {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
-const AUTH_ENDPOINTS = [
+const SKIP_REFRESH_ENDPOINTS = [
   "/auth/login",
   "/auth/register",
   "/auth/forgot-password",
@@ -14,6 +14,7 @@ const AUTH_ENDPOINTS = [
   "/auth/verify-email",
   "/auth/verify-email/send",
   "/auth/refresh-token",
+  "/users/me",
 ];
 
 const PUBLIC_AUTH_PAGES = [
@@ -94,8 +95,8 @@ apiClient.interceptors.response.use(
     }
 
     const requestUrl = originalRequest.url ?? "";
-    const isAuthEndpoint = AUTH_ENDPOINTS.some((path) => requestUrl.includes(path));
-    if (isAuthEndpoint) {
+    const shouldSkipRefresh = SKIP_REFRESH_ENDPOINTS.some((path) => requestUrl.includes(path));
+    if (shouldSkipRefresh) {
       return Promise.reject(error);
     }
 
@@ -107,8 +108,8 @@ apiClient.interceptors.response.use(
       }
 
       if (!refreshPromise) {
-        refreshPromise = axios
-          .post(`${API_URL}/auth/refresh-token`, {}, { withCredentials: true })
+        refreshPromise = apiClient
+          .post("/auth/refresh-token", {})
           .then(() => {
             refreshBlockedUntil = 0;
           })
