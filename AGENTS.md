@@ -6,14 +6,43 @@
 
 ## Overview
 
-Photophile (codename: Dukan) connects photographers with clients. Photographers create profiles, upload portfolios, manage bookings. Clients discover, book, and review photographers.
+Photophile (codename: Dukan) connects photographers with clients. Photographers create profiles and showcase portfolios, while clients discover photographers and contact them directly.
 
-## Current Status (2026-03-31)
+## Product Direction (Persisted Context)
+
+Current MVP scope is profile-first and portfolio-first:
+
+- No booking flow in MVP
+- No review/rating flow in MVP
+- Primary goal: great photographer profile pages and portfolio showcase
+
+### MVP Goals
+
+- Photographers can register/login
+- Photographers can create/edit profile and manage portfolio
+- Each photographer has a public shareable URL: `/photographers/[username]`
+- Public profile should feel like a mini-website and act as the highlighted page
+- Visitors/customers can browse photographers without authentication
+- Visitor authentication is optional in MVP
+- Main conversion is direct contact with photographers (email/phone/WhatsApp/social)
+
+### Priority
+
+1. Public photographer page quality and shareability
+2. Portfolio upload and presentation quality
+3. Direct contact CTAs and lead capture
+4. Discovery/browse experience
+5. Keep auth simple and focused on photographer management only
+
+### Agent Instruction
+
+When proposing features or implementation plans, prioritize the MVP scope above and avoid introducing booking/review complexity unless explicitly requested.
+
+## Current Status (2026-04-07)
 
 - **Backend build:** `npm run build` passes (`npx tsc -b`)
-- **Frontend build:** `npm run build` fails on a TypeScript error in `frontend/src/app/(protected)/dashboard/page.tsx` where `booking.photographerId` is typed as `string | BookingPhotographerSummary` and `.userId` is accessed without narrowing
-- **Frontend lint warnings:** `frontend/src/app/(protected)/dashboard/page.tsx` has unused catch variables (`error`, `err`)
-- **Implemented surface area:** backend exposes auth, users, photographers, portfolio, reviews, and bookings routes; frontend includes public discovery/booking pages plus auth and protected dashboards
+- **Frontend build:** `npm run build` passes
+- **Implemented surface area:** backend exposes auth, users, photographers, portfolio, reviews, and bookings routes; current MVP focus is public profiles, portfolio presentation, and direct contact
 
 ---
 

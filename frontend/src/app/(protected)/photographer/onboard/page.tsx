@@ -3,15 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { photographerOnboardingSchema, PhotographerOnboardingInput } from "@/lib/validations/photographer";
-import { FormInput } from "@/components/forms/FormInput";
-import { FormSelect } from "@/components/forms/FormSelect";
-import { FormMultiSelect } from "@/components/forms/FormMultiSelect";
+import { photographerOnboardingSchema, type PhotographerOnboardingInput } from "@/lib/validations/photographer";
+import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RoleGate } from "@/components/shared/RoleGate";
-import { useCreateProfileMutation } from "@/features/photographer-profile/queries/profile.queries";
+import { RoleGate } from "@/components/guards/RoleGate";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/features/auth";
+import { useCreateProfileMutation } from "@/features/photographer-studio/studio.queries";
 
 const CITIES = [
   "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
@@ -29,6 +28,7 @@ const SPECIALTIES = [
 export default function PhotographerOnboardingPage() {
   const router = useRouter();
   const { success, error: showError } = useToast();
+  const { user, loading } = useAuth();
   const createProfileMutation = useCreateProfileMutation();
 
   const form = useForm<PhotographerOnboardingInput>({
@@ -67,45 +67,42 @@ export default function PhotographerOnboardingPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="space-y-6">
-                <FormInput
-                  control={form.control}
-                  name="username"
-                  label="Username"
-                  placeholder="your_unique_handle"
-                  description="This will be your unique URL: lensloom.com/photographers/[username]"
-                  disabled={createProfileMutation.isPending}
-                />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Form.Input
+                control={form.control}
+                name="username"
+                label="Username"
+                placeholder="your_handle"
+                description="Public URL: /photographers/[username]"
+                disabled={createProfileMutation.isPending}
+              />
 
-                <FormSelect
-                  control={form.control}
-                  name="location"
-                  label="Primary Location"
-                  placeholder="Select a city"
-                  options={CITIES}
-                  disabled={createProfileMutation.isPending}
-                />
+              <Form.Select
+                control={form.control}
+                name="location"
+                label="Primary location"
+                placeholder="Select city"
+                options={CITIES}
+                disabled={createProfileMutation.isPending}
+              />
 
-                <FormMultiSelect
-                  control={form.control}
-                  name="specialties"
-                  label="Specialties"
-                  options={SPECIALTIES}
-                  description="Select up to 3 specialties."
-                  disabled={createProfileMutation.isPending}
-                />
+              <Form.MultiSelect
+                control={form.control}
+                name="specialties"
+                label="Specialties"
+                options={SPECIALTIES}
+                description="Select up to 3"
+                disabled={createProfileMutation.isPending}
+              />
 
-                <FormInput
-                  control={form.control}
-                  name="priceFrom"
-                  label="Starting Price ($/hr)"
-                  type="number"
-                  placeholder="e.g. 150"
-                  description="Optional. You can always update this later."
-                  disabled={createProfileMutation.isPending}
-                />
-              </div>
+              <Form.Input
+                control={form.control}
+                name="priceFrom"
+                label="Starting price ($/hr)"
+                type="number"
+                placeholder="e.g. 150"
+                disabled={createProfileMutation.isPending}
+              />
 
               <div className="flex items-center justify-end space-x-4 border-t pt-4">
                 <Button
@@ -116,12 +113,8 @@ export default function PhotographerOnboardingPage() {
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={createProfileMutation.isPending}
-                  className="px-8"
-                >
-                  {createProfileMutation.isPending ? "Creating Profile..." : "Create Profile"}
+                <Button type="submit" className="bg-amber-600 text-white hover:bg-amber-700" disabled={createProfileMutation.isPending}>
+                  {createProfileMutation.isPending ? "Creating..." : "Create profile"}
                 </Button>
               </div>
             </form>
