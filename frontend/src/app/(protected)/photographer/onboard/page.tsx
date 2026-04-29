@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,44 +13,23 @@ import { useAuth } from "@/features/auth";
 import { useCreateProfileMutation } from "@/features/photographer-studio/studio.queries";
 
 const CITIES = [
-  "Mumbai",
-  "Delhi",
-  "Bangalore",
-  "Hyderabad",
-  "Chennai",
-  "Kolkata",
-  "Pune",
-  "Ahmedabad",
-  "Jaipur",
-  "Lucknow",
+  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
+  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
+  "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal",
+  "Visakhapatnam", "Patna", "Vadodara", "Ghaziabad", "Ludhiana",
 ].map((city) => ({ label: city, value: city.toLowerCase() }));
 
 const SPECIALTIES = [
-  "Wedding",
-  "Portrait",
-  "Event",
-  "Commercial",
-  "Fashion",
-  "Food",
-  "Product",
-  "Corporate",
-].map((specialty) => ({ label: specialty, value: specialty.toLowerCase() }));
+  "Wedding", "Portrait", "Event", "Commercial", "Fashion",
+  "Nature", "Real Estate", "Food", "Sports", "Product",
+  "Newborn", "Maternity", "Corporate", "Concert",
+].map((spec) => ({ label: spec, value: spec.toLowerCase() }));
 
 export default function PhotographerOnboardingPage() {
   const router = useRouter();
   const { success, error: showError } = useToast();
   const { user, loading } = useAuth();
   const createProfileMutation = useCreateProfileMutation();
-
-  useEffect(() => {
-    if (loading || !user) {
-      return;
-    }
-
-    if (user.role === "photographer") {
-      router.replace("/photographer/dashboard");
-    }
-  }, [loading, user, router]);
 
   const form = useForm<PhotographerOnboardingInput>({
     resolver: zodResolver(photographerOnboardingSchema),
@@ -71,22 +49,21 @@ export default function PhotographerOnboardingPage() {
         specialties: data.specialties,
         priceFrom: data.priceFrom ? Number(data.priceFrom) : undefined,
       });
-
-      success("Profile created", "Now upload your portfolio.");
+      success("Profile created successfully!");
       router.replace("/photographer/dashboard");
-    } catch (error) {
-      showError((error as Error).message || "Failed to create profile");
+    } catch (err: unknown) {
+      showError((err as Error).message || "Failed to create profile");
     }
   };
 
   return (
     <RoleGate allowedRoles={["user"]} redirectTo="/photographer/dashboard">
-      <div className="flex min-h-screen items-start justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+      <div className="flex min-h-screen flex-col items-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
         <Card className="w-full max-w-2xl">
           <CardHeader>
-            <CardTitle className="text-center text-3xl font-bold">Become a Photographer</CardTitle>
-            <CardDescription className="text-center text-base">
-              Set up your public profile. You can update details later from your dashboard.
+            <CardTitle className="text-center text-3xl font-extrabold">Become a Photographer</CardTitle>
+            <CardDescription className="mt-2 text-center text-lg">
+              Set up your profile to start showcasing your work. Keep it simple for now!
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -127,8 +104,13 @@ export default function PhotographerOnboardingPage() {
                 disabled={createProfileMutation.isPending}
               />
 
-              <div className="flex items-center justify-end gap-3 border-t pt-4">
-                <Button type="button" variant="outline" onClick={() => router.back()} disabled={createProfileMutation.isPending}>
+              <div className="flex items-center justify-end space-x-4 border-t pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.back()}
+                  disabled={createProfileMutation.isPending}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" className="bg-amber-600 text-white hover:bg-amber-700" disabled={createProfileMutation.isPending}>
