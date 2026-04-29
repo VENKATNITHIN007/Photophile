@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RoleGate } from "@/components/shared/RoleGate";
-import { useMyPortfolioQuery, useAddPortfolioItemMutation } from "@/features/photographer-profile/queries/portfolio.queries";
-import { useMyProfileQuery, useUpdateProfileMutation } from "@/features/photographer-profile/queries/profile.queries";
+import { Page } from "@/components/Page";
+import { DataState } from "@/components/DataState";
+import { RoleGate } from "@/components/guards/RoleGate";
+import { useMyPortfolioQuery, useAddPortfolioItemMutation, useMyProfileQuery, useUpdateProfileMutation } from "@/features/photographer-studio/studio.queries";
 
 
 interface Profile {
@@ -68,17 +69,16 @@ export default function PhotographerDashboard() {
 
   return (
     <RoleGate allowedRoles={["photographer"]}>
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Photographer Dashboard</h1>
+      <Page>
+        <Page.Body className="max-w-5xl flex-col pt-10">
+          <Page.Title className="mb-8">Photographer Dashboard</Page.Title>
 
-          {error && <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">{error}</div>}
+          {error && <DataState.Error message={error} className="mb-6" />}
           {portfolioError || profileError ? (
-            <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
-              {(portfolioError || profileError) instanceof Error
-                ? (portfolioError || profileError)?.message
-                : "Failed to load dashboard data"}
-            </div>
+            <DataState.Error 
+              message={(portfolioError || profileError) instanceof Error ? (portfolioError || profileError)?.message : "Failed to load dashboard data"} 
+              className="mb-6" 
+            />
           ) : null}
           {successMsg && <div className="bg-green-50 text-green-600 p-4 rounded-md mb-6">{successMsg}</div>}
 
@@ -104,11 +104,9 @@ export default function PhotographerDashboard() {
           </div>
 
           {isLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-            </div>
+            <DataState.Loading />
           ) : (
-            <div className="bg-white shadow rounded-lg p-6">
+            <Page.Surface className="p-6 shadow">
               {/* Portfolio Tab */}
               {activeTab === "portfolio" && (
                 <div>
@@ -237,10 +235,10 @@ export default function PhotographerDashboard() {
                   </form>
                 </div>
               )}
-            </div>
+            </Page.Surface>
           )}
-        </div>
-      </div>
+        </Page.Body>
+      </Page>
     </RoleGate>
   );
 }

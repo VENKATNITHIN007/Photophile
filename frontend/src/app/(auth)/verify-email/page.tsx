@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import { useVerifyEmailMutation } from "@/features/auth/queries/auth.queries";
+import { useVerifyEmailMutation } from "@/features/auth";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();

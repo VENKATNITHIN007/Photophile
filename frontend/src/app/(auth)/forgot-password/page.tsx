@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, ForgotPasswordInput } from "@/lib/validations/auth";
-import { FormInput } from "@/components/forms/FormInput";
+import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
-import { useForgotPasswordMutation } from "@/features/auth/queries/auth.queries";
+import { useForgotPasswordMutation } from "@/features/auth";
 
 export default function ForgotPasswordPage() {
   const { success } = useToast();
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormInput
+            <Form.Input
               control={form.control}
               name="email"
               label="Email address"

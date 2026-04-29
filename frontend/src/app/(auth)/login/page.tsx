@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth, useLoginMutation } from "@/features/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -8,11 +8,11 @@ import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
-import { FormInput } from "@/components/forms/FormInput";
+import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLoginMutation } from "@/features/auth/queries/auth.queries";
+
 
 function getSafeRedirectPath(redirect: string | null): string | null {
   if (!redirect) return null;
@@ -88,7 +88,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormInput
+            <Form.Input
               control={form.control}
               name="email"
               label="Email address"
@@ -96,7 +96,7 @@ export default function LoginPage() {
               placeholder="name@example.com"
               disabled={loginMutation.isPending}
             />
-            <FormInput
+            <Form.Input
               control={form.control}
               name="password"
               label="Password"

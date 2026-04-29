@@ -1,5 +1,5 @@
-import { PhotographersPage } from "@/features/photographers/PhotographersPage";
+import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
 
 export default function PhotographersRoutePage() {
-  return <PhotographersPage />;
+  return <DiscoveryPage />;
 }

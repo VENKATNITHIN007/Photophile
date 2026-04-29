@@ -4,54 +4,54 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { photographerOnboardingSchema, PhotographerOnboardingInput } from "@/lib/validations/photographer";
-import { FormInput } from "@/components/forms/FormInput";
-import { FormSelect } from "@/components/forms/FormSelect";
-import { FormMultiSelect } from "@/components/forms/FormMultiSelect";
+import { photographerOnboardingSchema, type PhotographerOnboardingInput } from "@/lib/validations/photographer";
+import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RoleGate } from "@/components/shared/RoleGate";
-import { useCreateProfileMutation } from "@/features/photographer-profile/queries/profile.queries";
+import { RoleGate } from "@/components/guards/RoleGate";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/features/auth";
+import { useCreateProfileMutation } from "@/features/photographer-studio/studio.queries";
 
 const CITIES = [
-  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
-  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
-  "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal",
-  "Visakhapatnam", "Patna", "Vadodara", "Ghaziabad", "Ludhiana"
-].map(city => ({ label: city, value: city.toLowerCase() }));
+  "Mumbai",
+  "Delhi",
+  "Bangalore",
+  "Hyderabad",
+  "Chennai",
+  "Kolkata",
+  "Pune",
+  "Ahmedabad",
+  "Jaipur",
+  "Lucknow",
+].map((city) => ({ label: city, value: city.toLowerCase() }));
 
 const SPECIALTIES = [
-  "Wedding", "Portrait", "Event", "Commercial", "Fashion",
-  "Nature", "Real Estate", "Food", "Sports", "Product",
-  "Newborn", "Maternity", "Corporate", "Concert"
-].map(spec => ({ label: spec, value: spec.toLowerCase() }));
+  "Wedding",
+  "Portrait",
+  "Event",
+  "Commercial",
+  "Fashion",
+  "Food",
+  "Product",
+  "Corporate",
+].map((specialty) => ({ label: specialty, value: specialty.toLowerCase() }));
 
 export default function PhotographerOnboardingPage() {
   const router = useRouter();
-  const { user, loading, isEmailVerified } = useAuth();
   const { success, error: showError } = useToast();
+  const { user, loading } = useAuth();
   const createProfileMutation = useCreateProfileMutation();
 
   useEffect(() => {
-    if (loading) {
-      return;
-    }
-
-    if (!user) {
-      router.replace("/login?redirect=/photographer/onboard");
-      return;
-    }
-
-    if (!isEmailVerified) {
-      router.replace("/verify-email/pending");
+    if (loading || !user) {
       return;
     }
 
     if (user.role === "photographer") {
       router.replace("/photographer/dashboard");
     }
-  }, [loading, user, isEmailVerified, router]);
+  }, [loading, user, router]);
 
   const form = useForm<PhotographerOnboardingInput>({
     resolver: zodResolver(photographerOnboardingSchema),
@@ -71,158 +71,74 @@ export default function PhotographerOnboardingPage() {
         specialties: data.specialties,
         priceFrom: data.priceFrom ? Number(data.priceFrom) : undefined,
       });
-      success("Profile created successfully!");
-      router.push("/photographer/dashboard");
-    } catch (err: unknown) {
-      showError((err as Error).message || "Failed to create profile");
+
+      success("Profile created", "Now upload your portfolio.");
+      router.replace("/photographer/dashboard");
+    } catch (error) {
+      showError((error as Error).message || "Failed to create profile");
     }
   };
 
   return (
     <RoleGate allowedRoles={["user"]} redirectTo="/photographer/dashboard">
-      <div className="flex min-h-screen flex-col items-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="flex min-h-screen items-start justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
         <Card className="w-full max-w-2xl">
           <CardHeader>
-            <CardTitle className="text-3xl font-extrabold text-center">Become a Photographer</CardTitle>
-            <CardDescription className="text-center text-lg mt-2">
-              Set up your profile to start showcasing your work. Keep it simple for now!
+            <CardTitle className="text-center text-3xl font-bold">Become a Photographer</CardTitle>
+            <CardDescription className="text-center text-base">
+              Set up your public profile. You can update details later from your dashboard.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="space-y-6">
-                <FormInput
-                  control={form.control}
-                  name="username"
-                  label="Username"
-                  placeholder="your_unique_handle"
-                  description="This will be your unique URL: lensloom.com/photographers/[username]"
-                  disabled={createProfileMutation.isPending}
-                />
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <Form.Input
+                control={form.control}
+                name="username"
+                label="Username"
+                placeholder="your_handle"
+                description="Public URL: /photographers/[username]"
+                disabled={createProfileMutation.isPending}
+              />
 
-                <FormSelect
-                  control={form.control}
-                  name="location"
-                  label="Primary Location"
-                  placeholder="Select a city"
-                  options={CITIES}
-                  disabled={createProfileMutation.isPending}
-                />
+              <Form.Select
+                control={form.control}
+                name="location"
+                label="Primary location"
+                placeholder="Select city"
+                options={CITIES}
+                disabled={createProfileMutation.isPending}
+              />
 
-                <FormMultiSelect
-                  control={form.control}
-                  name="specialties"
-                  label="Specialties"
-                  options={SPECIALTIES}
-                  description="Select up to 3 specialties."
-                  disabled={createProfileMutation.isPending}
-                />
+              <Form.MultiSelect
+                control={form.control}
+                name="specialties"
+                label="Specialties"
+                options={SPECIALTIES}
+                description="Select up to 3"
+                disabled={createProfileMutation.isPending}
+              />
 
-                <FormInput
-                  control={form.control}
-                  name="priceFrom"
-                  label="Starting Price ($/hr)"
-                  type="number"
-                  placeholder="e.g. 150"
-                  description="Optional. You can always update this later."
-                  disabled={createProfileMutation.isPending}
-                />
-              </div>
+              <Form.Input
+                control={form.control}
+                name="priceFrom"
+                label="Starting price ($/hr)"
+                type="number"
+                placeholder="e.g. 150"
+                disabled={createProfileMutation.isPending}
+              />
 
-              <div className="pt-4 flex items-center justify-end space-x-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.back()}
-                  disabled={createProfileMutation.isPending}
-                >
+              <div className="flex items-center justify-end gap-3 border-t pt-4">
+                <Button type="button" variant="outline" onClick={() => router.back()} disabled={createProfileMutation.isPending}>
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={createProfileMutation.isPending}
-                  className="px-8"
-                >
-                  {createProfileMutation.isPending ? "Creating Profile..." : "Create Profile"}
+                <Button type="submit" className="bg-amber-600 text-white hover:bg-amber-700" disabled={createProfileMutation.isPending}>
+                  {createProfileMutation.isPending ? "Creating..." : "Create profile"}
                 </Button>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
-    );
-  }
-
-  return (
-    <div className="flex min-h-screen flex-col items-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <Card className="w-full max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-3xl font-extrabold text-center">Become a Photographer</CardTitle>
-          <CardDescription className="text-center text-lg mt-2">
-            Set up your profile to start showcasing your work. Keep it simple for now!
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <div className="space-y-6">
-              <FormInput
-                control={form.control}
-                name="username"
-                label="Username"
-                placeholder="your_unique_handle"
-                description="This will be your unique URL: lensloom.com/photographers/[username]"
-                disabled={createProfileMutation.isPending}
-              />
-
-              <FormSelect
-                control={form.control}
-                name="location"
-                label="Primary Location"
-                placeholder="Select a city"
-                options={CITIES}
-                disabled={createProfileMutation.isPending}
-              />
-
-              <FormMultiSelect
-                control={form.control}
-                name="specialties"
-                label="Specialties"
-                options={SPECIALTIES}
-                description="Select up to 3 specialties."
-                disabled={createProfileMutation.isPending}
-              />
-
-              <FormInput
-                control={form.control}
-                name="priceFrom"
-                label="Starting Price ($/hr)"
-                type="number"
-                placeholder="e.g. 150"
-                description="Optional. You can always update this later."
-                disabled={createProfileMutation.isPending}
-              />
-            </div>
-
-            <div className="pt-4 flex items-center justify-end space-x-4 border-t">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-                disabled={createProfileMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createProfileMutation.isPending}
-                className="px-8"
-              >
-                {createProfileMutation.isPending ? "Creating Profile..." : "Create Profile"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    </RoleGate>
   );
 }

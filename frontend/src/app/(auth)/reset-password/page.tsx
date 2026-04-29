@@ -6,12 +6,12 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, ResetPasswordInput } from "@/lib/validations/auth";
-import { FormInput } from "@/components/forms/FormInput";
+import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { KeyRound, ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
-import { useResetPasswordMutation } from "@/features/auth/queries/auth.queries";
+import { useResetPasswordMutation } from "@/features/auth";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -135,7 +135,7 @@ function ResetPasswordForm() {
             {/* Hidden token field */}
             <input type="hidden" {...form.register("token")} />
 
-            <FormInput
+            <Form.Input
               control={form.control}
               name="newPassword"
               label="New password"
@@ -154,7 +154,7 @@ function ResetPasswordForm() {
               </ul>
             </div>
 
-            <FormInput
+            <Form.Input
               control={form.control}
               name="confirmPassword"
               label="Confirm password"

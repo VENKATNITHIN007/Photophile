@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth, useRegisterMutation } from "@/features/auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
@@ -8,11 +8,11 @@ import { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterInput } from "@/lib/validations/auth";
-import { FormInput } from "@/components/forms/FormInput";
+import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useRegisterMutation } from "@/features/auth/queries/auth.queries";
+
 
 export default function RegisterPage() {
   const { user, loading: authLoading, isEmailVerified } = useAuth();
@@ -73,14 +73,14 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormInput
+            <Form.Input
               control={form.control}
               name="fullName"
               label="Full Name"
               placeholder="John Doe"
               disabled={registerMutation.isPending}
             />
-            <FormInput
+            <Form.Input
               control={form.control}
               name="email"
               label="Email address"
@@ -88,7 +88,7 @@ export default function RegisterPage() {
               placeholder="name@example.com"
               disabled={registerMutation.isPending}
             />
-            <FormInput
+            <Form.Input
               control={form.control}
               name="password"
               label="Password"
@@ -96,7 +96,7 @@ export default function RegisterPage() {
               placeholder="••••••••"
               disabled={registerMutation.isPending}
             />
-            <FormInput
+            <Form.Input
               control={form.control}
               name="confirmPassword"
               label="Confirm Password"

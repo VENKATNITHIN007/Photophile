@@ -1,4 +1,4 @@
-import type { BrowsePhotographersParams } from "@/lib/api/photographers";
+import type { BrowsePhotographersParams } from "@/features/discovery/photographers.api";
 
 
 export const queryKeys = {
