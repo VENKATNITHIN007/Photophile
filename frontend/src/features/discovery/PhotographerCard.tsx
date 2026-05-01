@@ -16,7 +16,7 @@ export function PhotographerCard({ photographer }: PhotographerCardProps) {
   const username = photographer.username;
 
   return (
-    <Link href={`/photographers/${username}`} className="block h-full">
+    <Link href={`/photographers/${username}`} className="block h-full" data-testid="photographer-card">
       <Card variant="interactive" className="h-full">
         <CardHeader className="p-5 border-b bg-muted/30">
           <Page.Stack className="items-center gap-3">
