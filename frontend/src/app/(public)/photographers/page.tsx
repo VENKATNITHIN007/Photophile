@@ -1,6 +1,23 @@
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import { Page } from "@/components/Page";
 import { DiscoverySearchInput, DiscoveryFilters, DiscoveryResults } from "@/features/discovery/Discovery";
+import { PhotographerGridSkeleton } from "@/features/discovery/PhotographerCardSkeleton";
 
+// ── Item #14: SEO metadata ─────────────────────────────────────────
+export const metadata: Metadata = {
+  title: "Browse Photographers | Photophile",
+  description:
+    "Discover professional photographers by specialty, location, and budget. View portfolios and contact them directly.",
+  openGraph: {
+    title: "Browse Photographers | Photophile",
+    description:
+      "Discover professional photographers by specialty, location, and budget. View portfolios and contact them directly.",
+    type: "website",
+  },
+};
+
+// ── Page ───────────────────────────────────────────────────────────
 export default function PhotographersRoutePage() {
   return (
     <Page>
@@ -23,8 +40,12 @@ export default function PhotographersRoutePage() {
           <DiscoveryFilters />
         </Page.Aside>
 
+        {/* Item #15: Suspense boundary — page shell renders instantly,
+            results show skeleton until the client component mounts + fetches. */}
         <Page.Section>
-          <DiscoveryResults />
+          <Suspense fallback={<PhotographerGridSkeleton />}>
+            <DiscoveryResults />
+          </Suspense>
         </Page.Section>
       </Page.Body>
     </Page>
