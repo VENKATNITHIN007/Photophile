@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataState } from "@/components/DataState";
@@ -9,9 +9,27 @@ import { PhotographerGrid } from "./PhotographerGrid";
 import { PaginationControls } from "./PaginationControls";
 import { usePhotographersQuery } from "./photographers.queries";
 import { usePhotographerFilters } from "./photographers.store";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { BrowsePhotographersParams } from "./photographers.api";
 
-// --- SUB-COMPONENTS ---
+// ── Helpers ────────────────────────────────────────────────────────
+
+/**
+ * Sanitize a price string: return `undefined` if the value is empty, NaN,
+ * negative, or not a finite number. Otherwise return the trimmed string.
+ */
+function sanitizePrice(raw: string): string | undefined {
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+
+  const num = Number(trimmed);
+  if (!Number.isFinite(num) || num < 0) return undefined;
+
+  return trimmed;
+}
+
+// ── Sub-components ─────────────────────────────────────────────────
+
 export function DiscoverySearchInput() {
   const { search, setSearch } = usePhotographerFilters();
   return (
@@ -55,26 +73,35 @@ export function DiscoveryFilters() {
 }
 
 export function DiscoveryResults() {
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const { search, location, specialty, minPrice, maxPrice, page, setPage, reset } = usePhotographerFilters();
+  const { search, location, specialty, minPrice, maxPrice, page, setPage, reset, hydrateFromURL } =
+    usePhotographerFilters();
 
-  // Debounce the search input
+  // Hydrate filters from URL on first mount (makes the page refresh-safe)
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearch(search);
-    }, 350);
-    return () => clearTimeout(handler);
-  }, [search]);
+    hydrateFromURL();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const queryParams: BrowsePhotographersParams = {
-    search: debouncedSearch || undefined,
-    location: location !== "all" ? location : undefined,
-    specialty: specialty !== "all" ? specialty : undefined,
-    minPrice: minPrice || undefined,
-    maxPrice: maxPrice || undefined,
-    page,
-    limit: 12,
-  };
+  // --- Priority 1.1: Extracted useDebounce hook ---
+  const debouncedSearch = useDebounce(search, 350);
+
+  // --- Priority 1.4: Validate price before API call ---
+  const safeMinPrice = sanitizePrice(minPrice);
+  const safeMaxPrice = sanitizePrice(maxPrice);
+
+  // --- Priority 1.2: Memoize queryParams to prevent React Query cache churn ---
+  const queryParams: BrowsePhotographersParams = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      location: location !== "all" ? location : undefined,
+      specialty: specialty !== "all" ? specialty : undefined,
+      minPrice: safeMinPrice,
+      maxPrice: safeMaxPrice,
+      page,
+      limit: 12,
+    }),
+    [debouncedSearch, location, specialty, safeMinPrice, safeMaxPrice, page],
+  );
 
   const { data, isLoading, error, refetch } = usePhotographersQuery(queryParams);
   const photographers = data?.photographers || [];
@@ -82,9 +109,9 @@ export function DiscoveryResults() {
 
   if (error) {
     return (
-      <DataState.Error 
-        message={error instanceof Error ? error.message : "Failed to load photographers"} 
-        onRetry={() => refetch()} 
+      <DataState.Error
+        message={error instanceof Error ? error.message : "Failed to load photographers"}
+        onRetry={() => refetch()}
       />
     );
   }
