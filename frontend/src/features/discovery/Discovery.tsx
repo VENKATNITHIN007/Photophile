@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo } from "react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DataState } from "@/components/DataState";
 import { FilterSidebar } from "./FilterSidebar";
 import { PhotographerGrid } from "./PhotographerGrid";
+import { PhotographerGridSkeleton } from "./PhotographerCardSkeleton";
 import { PaginationControls } from "./PaginationControls";
 import { usePhotographersQuery } from "./photographers.queries";
 import { usePhotographerFilters } from "./photographers.store";
@@ -107,6 +109,15 @@ export function DiscoveryResults() {
   const photographers = data?.photographers || [];
   const pagination = data?.pagination || null;
 
+  // --- Priority 2.6: Surface errors as toasts so they're visible above the fold ---
+  useEffect(() => {
+    if (error) {
+      toast.error("Failed to load photographers", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    }
+  }, [error]);
+
   if (error) {
     return (
       <DataState.Error
@@ -116,8 +127,9 @@ export function DiscoveryResults() {
     );
   }
 
+  // --- Priority 2.5: Skeleton grid instead of generic spinner ---
   if (isLoading) {
-    return <DataState.Loading />;
+    return <PhotographerGridSkeleton />;
   }
 
   if (photographers.length === 0) {

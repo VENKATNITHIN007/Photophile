@@ -95,5 +95,3 @@ export function PaginationControls({ pagination, page, onPageChange }: Paginatio
     </div>
   );
 }
-
-export default PaginationControls;

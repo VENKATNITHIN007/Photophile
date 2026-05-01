@@ -74,5 +74,3 @@ export function PhotographerCard({ photographer }: PhotographerCardProps) {
     </Link>
   );
 }
-
-export default PhotographerCard;
