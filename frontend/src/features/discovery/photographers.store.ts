@@ -1,12 +1,18 @@
 import { create } from "zustand";
 
-interface PhotographerFiltersState {
+// ── Types ──────────────────────────────────────────────────────────
+
+/** Data-only slice (no actions). Used for defaults, URL sync, and partials. */
+interface FilterValues {
   search: string;
   location: string;
   specialty: string;
   minPrice: string;
   maxPrice: string;
   page: number;
+}
+
+interface PhotographerFiltersState extends FilterValues {
   setSearch: (value: string) => void;
   setLocation: (value: string) => void;
   setSpecialty: (value: string) => void;
@@ -14,9 +20,12 @@ interface PhotographerFiltersState {
   setMaxPrice: (value: string) => void;
   setPage: (value: number) => void;
   reset: () => void;
+  /** Hydrate the store from the current URL search params. */
+  hydrateFromURL: () => void;
 }
 
-const initialState = {
+// ── Defaults ───────────────────────────────────────────────────────
+const DEFAULTS: FilterValues = {
   search: "",
   location: "all",
   specialty: "all",
@@ -25,13 +34,103 @@ const initialState = {
   page: 1,
 };
 
-export const usePhotographerFilters = create<PhotographerFiltersState>((set) => ({
-  ...initialState,
-  setSearch: (value) => set({ search: value, page: 1 }),
-  setLocation: (value) => set({ location: value, page: 1 }),
-  setSpecialty: (value) => set({ specialty: value, page: 1 }),
-  setMinPrice: (value) => set({ minPrice: value, page: 1 }),
-  setMaxPrice: (value) => set({ maxPrice: value, page: 1 }),
-  setPage: (value) => set({ page: value }),
-  reset: () => set(initialState),
-}));
+// ── URL helpers ────────────────────────────────────────────────────
+
+/** Read filter state from the current URL search params. */
+function readFiltersFromURL(): Partial<FilterValues> {
+  if (typeof window === "undefined") return {};
+
+  const params = new URLSearchParams(window.location.search);
+  const parsed: Partial<FilterValues> = {};
+
+  const search = params.get("search");
+  if (search) parsed.search = search;
+
+  const location = params.get("location");
+  if (location) parsed.location = location;
+
+  const specialty = params.get("specialty");
+  if (specialty) parsed.specialty = specialty;
+
+  const minPrice = params.get("minPrice");
+  if (minPrice) parsed.minPrice = minPrice;
+
+  const maxPrice = params.get("maxPrice");
+  if (maxPrice) parsed.maxPrice = maxPrice;
+
+  const page = params.get("page");
+  if (page) {
+    const n = parseInt(page, 10);
+    if (!Number.isNaN(n) && n >= 1) parsed.page = n;
+  }
+
+  return parsed;
+}
+
+/**
+ * Push filter state into the URL search params (replaceState, no navigation).
+ * Only writes non-default values so the URL stays clean.
+ */
+function writeFiltersToURL(state: FilterValues) {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams();
+
+  if (state.search)                   params.set("search", state.search);
+  if (state.location !== "all")       params.set("location", state.location);
+  if (state.specialty !== "all")      params.set("specialty", state.specialty);
+  if (state.minPrice)                 params.set("minPrice", state.minPrice);
+  if (state.maxPrice)                 params.set("maxPrice", state.maxPrice);
+  if (state.page > 1)                params.set("page", String(state.page));
+
+  const qs = params.toString();
+  const url = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+
+  window.history.replaceState(null, "", url);
+}
+
+// ── Store ──────────────────────────────────────────────────────────
+
+/** Helper: set state + sync URL in one shot. */
+function setAndSync(
+  set: (partial: Partial<PhotographerFiltersState>) => void,
+  get: () => PhotographerFiltersState,
+  partial: Partial<FilterValues>,
+) {
+  set(partial);
+  // Build snapshot from the store *after* the set
+  const next = get();
+  writeFiltersToURL({
+    search: next.search,
+    location: next.location,
+    specialty: next.specialty,
+    minPrice: next.minPrice,
+    maxPrice: next.maxPrice,
+    page: next.page,
+  });
+}
+
+export const usePhotographerFilters = create<PhotographerFiltersState>(
+  (set, get) => ({
+    ...DEFAULTS,
+
+    setSearch:    (value) => setAndSync(set, get, { search: value, page: 1 }),
+    setLocation:  (value) => setAndSync(set, get, { location: value, page: 1 }),
+    setSpecialty: (value) => setAndSync(set, get, { specialty: value, page: 1 }),
+    setMinPrice:  (value) => setAndSync(set, get, { minPrice: value, page: 1 }),
+    setMaxPrice:  (value) => setAndSync(set, get, { maxPrice: value, page: 1 }),
+    setPage:      (value) => setAndSync(set, get, { page: value }),
+
+    reset: () => {
+      set(DEFAULTS);
+      writeFiltersToURL(DEFAULTS);
+    },
+
+    hydrateFromURL: () => {
+      const fromURL = readFiltersFromURL();
+      if (Object.keys(fromURL).length > 0) {
+        set(fromURL);
+      }
+    },
+  }),
+);

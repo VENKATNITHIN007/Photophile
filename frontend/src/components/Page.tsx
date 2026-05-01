@@ -38,6 +38,19 @@ const Aside = ({ className, ...props }: ComponentPropsWithoutRef<"aside">) => (
   <aside className={cn("w-full shrink-0 space-y-6 md:w-64", className)} {...props} />
 );
 
+// 5. Layout Primitives
+const Stack = ({ className, ...props }: ComponentPropsWithoutRef<"div">) => (
+  <div className={cn("flex flex-col gap-6", className)} {...props} />
+);
+
+const Row = ({ className, ...props }: ComponentPropsWithoutRef<"div">) => (
+  <div className={cn("flex flex-row items-center gap-4", className)} {...props} />
+);
+
+const Grid = ({ className, ...props }: ComponentPropsWithoutRef<"div">) => (
+  <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6", className)} {...props} />
+);
+
 // Final Compound Export
 export const Page = Object.assign(PageRoot, {
   Header,
@@ -46,5 +59,8 @@ export const Page = Object.assign(PageRoot, {
   Body,
   Section,
   Aside,
+  Stack,
+  Row,
+  Grid,
   Surface: Card,
 });

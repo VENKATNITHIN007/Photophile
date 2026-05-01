@@ -1,5 +1,53 @@
-import { DiscoveryPage } from "@/features/discovery/DiscoveryPage";
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { Page } from "@/components/Page";
+import { DiscoverySearchInput, DiscoveryFilters, DiscoveryResults } from "@/features/discovery/Discovery";
+import { PhotographerGridSkeleton } from "@/features/discovery/PhotographerCardSkeleton";
 
+// ── Item #14: SEO metadata ─────────────────────────────────────────
+export const metadata: Metadata = {
+  title: "Browse Photographers | Photophile",
+  description:
+    "Discover professional photographers by specialty, location, and budget. View portfolios and contact them directly.",
+  openGraph: {
+    title: "Browse Photographers | Photophile",
+    description:
+      "Discover professional photographers by specialty, location, and budget. View portfolios and contact them directly.",
+    type: "website",
+  },
+};
+
+// ── Page ───────────────────────────────────────────────────────────
 export default function PhotographersRoutePage() {
-  return <DiscoveryPage />;
+  return (
+    <Page>
+      <Page.Header>
+        <Page.Stack className="gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-700">Discovery</p>
+          <Page.Title>Find photographers</Page.Title>
+          <Page.Description>
+            Browse by category, location, and budget. Open profiles to view full portfolio and contact details.
+          </Page.Description>
+        </Page.Stack>
+
+        <div className="mt-4">
+          <DiscoverySearchInput />
+        </div>
+      </Page.Header>
+
+      <Page.Body>
+        <Page.Aside>
+          <DiscoveryFilters />
+        </Page.Aside>
+
+        {/* Item #15: Suspense boundary — page shell renders instantly,
+            results show skeleton until the client component mounts + fetches. */}
+        <Page.Section>
+          <Suspense fallback={<PhotographerGridSkeleton />}>
+            <DiscoveryResults />
+          </Suspense>
+        </Page.Section>
+      </Page.Body>
+    </Page>
+  );
 }

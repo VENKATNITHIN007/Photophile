@@ -14,5 +14,3 @@ export function PhotographerGrid({ photographers }: PhotographerGridProps) {
     </div>
   );
 }
-
-export default PhotographerGrid;

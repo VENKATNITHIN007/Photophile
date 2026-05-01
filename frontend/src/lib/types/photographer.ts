@@ -30,7 +30,7 @@ export interface PhotographerProfile {
   username: string;
   bio?: string;
   location?: string;
-  specialties?: string[];
+  specialties: string[];
   priceFrom?: number;
 }
 
