@@ -16,6 +16,10 @@ Current MVP scope is profile-first and portfolio-first:
 - No review/rating flow in MVP
 - Primary goal: great photographer profile pages and portfolio showcase
 
+### Roadmap & Master Plan
+
+See [docs/master-plan.md](file:///home/nobita/projects/Photophile/docs/master-plan.md) for the detailed refactoring and development roadmap.
+
 ### MVP Goals
 
 - Photographers can register/login
