@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/features/auth";
 import { Toaster } from "@/components/ui/sonner";
-import { Navbar } from "@/components/layout/Navbar";
 import { QueryProvider } from "@/lib/QueryProvider";
 import { VerificationGate } from "@/components/guards/VerificationGate";
 
@@ -13,13 +12,13 @@ const geistSans = Geist({
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "LensLoom | Find Your Perfect Photographer",
-  description: "Connecting clients with top-tier professional photographers.",
+  title: "Photophile | India's Leading Photography Marketplace",
+  description: "The all-in-one studio management platform for professional photographers.",
 };
 
 export default function RootLayout({
@@ -34,7 +33,6 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
-            <Navbar />
             <Toaster position="top-right" richColors />
             <VerificationGate>{children}</VerificationGate>
           </AuthProvider>
