@@ -5,13 +5,15 @@ import Link from "next/link";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/lib/constants/routes";
+import { LogOut } from "lucide-react";
 
 /**
- * Context-Aware Header Actions (Editorial Style).
- * Sharp corners, monochrome palette.
+ * Context-Aware Header Actions.
+ * Dynamically displays buttons based on authentication status.
+ * Includes a logout control for authenticated users.
  */
 export function HeaderActions() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const isAuthenticated = !!user;
 
   // Skeleton state while loading auth
@@ -22,10 +24,10 @@ export function HeaderActions() {
   // GUEST VIEW
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <Link 
           href={ROUTES.AUTH.LOGIN} 
-          className="text-sm font-medium tracking-wide text-gray-500 hover:text-black transition-colors uppercase"
+          className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
         >
           Sign In
         </Link>
@@ -38,37 +40,65 @@ export function HeaderActions() {
     );
   }
 
+  const dashboardHref = user?.role === "photographer" ? ROUTES.STUDIO.MANAGE : ROUTES.STUDIO.DASHBOARD;
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "U";
+
   // PHOTOGRAPHER VIEW
   if (user?.role === "photographer") {
     return (
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-4">
         <Link 
           href={ROUTES.STUDIO.MANAGE}
-          className="text-sm font-medium tracking-wide text-gray-500 hover:text-black transition-colors uppercase"
+          className="hidden sm:inline-block text-sm font-medium text-gray-600 hover:text-black transition-colors"
         >
           Manage Studio
         </Link>
-        <div className="size-10 bg-black flex items-center justify-center text-white font-medium text-lg uppercase">
-          {user.name?.[0]}
-        </div>
+        <Link href={dashboardHref}>
+          <div className="size-10 bg-amber-100 text-amber-800 font-bold rounded-full flex items-center justify-center text-sm uppercase">
+            {initials}
+          </div>
+        </Link>
+        <button 
+          onClick={logout}
+          className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-red-600 transition-colors"
+          title="Sign out"
+        >
+          <LogOut className="size-4" />
+          <span className="hidden sm:inline">Logout</span>
+        </button>
       </div>
     );
   }
 
   // REGULAR USER VIEW
   return (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-4">
       <Link 
         href={ROUTES.STUDIO.ONBOARD}
-        className="text-sm font-medium tracking-wide text-gray-500 hover:text-black transition-colors uppercase"
+        className="hidden sm:inline-block text-sm font-medium text-gray-600 hover:text-black transition-colors"
       >
         Start Your Studio
       </Link>
-      <Link href={ROUTES.STUDIO.DASHBOARD}>
-        <div className="size-10 bg-gray-100 flex items-center justify-center text-black font-medium border border-gray-200 hover:border-black transition-all uppercase">
-          {user?.name?.[0] || "U"}
+      <Link href={dashboardHref}>
+        <div className="size-10 bg-amber-100 text-amber-800 font-bold rounded-full flex items-center justify-center text-sm uppercase">
+          {initials}
         </div>
       </Link>
+      <button 
+        onClick={logout}
+        className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-red-600 transition-colors"
+        title="Sign out"
+      >
+        <LogOut className="size-4" />
+        <span className="hidden sm:inline">Logout</span>
+      </button>
     </div>
   );
 }
