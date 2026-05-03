@@ -1,17 +1,19 @@
 import { Hero } from "@/features/landing/Hero";
-import { CategoryHighlights } from "@/features/landing/CategoryHighlights";
-import { WhyPhotophile } from "@/features/landing/WhyPhotophile";
-import { FinalCta } from "@/features/landing/FinalCta";
-import { Footer } from "@/components/layout/Footer";
+import { CategoryGrid } from "@/features/landing/CategoryGrid";
+import { OnboardingCTA } from "@/features/landing/OnboardingCTA";
 
-export default function Home() {
+/**
+ * Premium Landing Page (Minimalist & High-Impact).
+ * 1. Hero (Premium Gradient + depth)
+ * 2. CategoryGrid (Visual Image Cards)
+ * 3. OnboardingCTA (The Bridge with 2 key points)
+ */
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-900">
+    <>
       <Hero />
-      <CategoryHighlights />
-      <WhyPhotophile />
-      <FinalCta />
-      <Footer />
-    </div>
+      <CategoryGrid />
+      <OnboardingCTA />
+    </>
   );
 }
