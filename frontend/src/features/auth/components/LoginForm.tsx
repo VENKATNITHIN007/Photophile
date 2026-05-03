@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
 import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLoginMutation } from "@/features/auth";
+import { queryKeys } from "@/lib/query/keys";
 
 import { AuthShell } from "./AuthShell";
 
@@ -23,6 +25,7 @@ export function LoginForm() {
   const redirect = searchParams.get("redirect");
   const { success, error: showError } = useToast();
   const loginMutation = useLoginMutation();
+  const queryClient = useQueryClient();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -37,6 +40,10 @@ export function LoginForm() {
       const response = await loginMutation.mutateAsync(data);
       success("Logged in successfully!");
       
+      // Await the session refetch so VerificationGate sees
+      // the authenticated user before we navigate.
+      await queryClient.refetchQueries({ queryKey: queryKeys.session() });
+
       const safeRedirect = getSafeRedirectPath(redirect);
       if (safeRedirect) {
         router.push(safeRedirect);
