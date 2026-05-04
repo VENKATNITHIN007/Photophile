@@ -40,7 +40,7 @@ export function HeaderActions() {
     );
   }
 
-  const dashboardHref = user?.role === "photographer" ? ROUTES.STUDIO.MANAGE : ROUTES.STUDIO.DASHBOARD;
+  const dashboardHref = user?.role === "photographer" ? ROUTES.STUDIO.MANAGE : ROUTES.STUDIO.PROFILE;
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -53,24 +53,24 @@ export function HeaderActions() {
   // PHOTOGRAPHER VIEW
   if (user?.role === "photographer") {
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         <Link 
           href={ROUTES.STUDIO.MANAGE}
-          className="hidden sm:inline-block text-sm font-medium text-gray-600 hover:text-black transition-colors"
+          className="hidden sm:inline-block text-xs uppercase tracking-widest font-light text-gray-500 hover:text-black transition-colors"
         >
-          Manage Studio
+          Studio Dashboard
         </Link>
-        <Link href={dashboardHref}>
-          <div className="size-10 bg-amber-100 text-amber-800 font-bold rounded-full flex items-center justify-center text-sm uppercase">
+        <Link href={dashboardHref} className="hover:opacity-80 transition-opacity">
+          <div className="size-10 border border-black font-light rounded-none flex items-center justify-center text-xs tracking-tighter">
             {initials}
           </div>
         </Link>
         <button 
           onClick={logout}
-          className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-red-600 transition-colors"
+          className="flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] font-light text-gray-400 hover:text-red-600 transition-colors"
           title="Sign out"
         >
-          <LogOut className="size-4" />
+          <LogOut className="size-3" />
           <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
@@ -79,24 +79,24 @@ export function HeaderActions() {
 
   // REGULAR USER VIEW
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-6">
       <Link 
         href={ROUTES.STUDIO.ONBOARD}
-        className="hidden sm:inline-block text-sm font-medium text-gray-600 hover:text-black transition-colors"
+        className="hidden sm:inline-block text-xs uppercase tracking-widest font-light text-gray-500 hover:text-black transition-colors"
       >
         Start Your Studio
       </Link>
-      <Link href={dashboardHref}>
-        <div className="size-10 bg-amber-100 text-amber-800 font-bold rounded-full flex items-center justify-center text-sm uppercase">
+      <Link href={dashboardHref} className="hover:opacity-80 transition-opacity">
+        <div className="size-10 border border-black font-light rounded-none flex items-center justify-center text-xs tracking-tighter">
           {initials}
         </div>
       </Link>
       <button 
         onClick={logout}
-        className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-red-600 transition-colors"
+        className="flex items-center gap-1.5 text-xs uppercase tracking-[0.2em] font-light text-gray-400 hover:text-red-600 transition-colors"
         title="Sign out"
       >
-        <LogOut className="size-4" />
+        <LogOut className="size-3" />
         <span className="hidden sm:inline">Logout</span>
       </button>
     </div>

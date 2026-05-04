@@ -35,7 +35,9 @@ export function useLoginMutation() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: (payload: LoginCredentials) => loginUser(payload),
-        onSuccess: () => {
+        onSuccess: (data) => {
+            // data is { user: ... }
+            qc.setQueryData(queryKeys.session(), data.user);
             qc.invalidateQueries({ queryKey: queryKeys.session() });
         },
     });
@@ -45,7 +47,9 @@ export function useRegisterMutation() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: (payload: RegisterData) => registerUser(payload),
-        onSuccess: () => {
+        onSuccess: (data) => {
+            // data is { user: ... }
+            qc.setQueryData(queryKeys.session(), data.user);
             qc.invalidateQueries({ queryKey: queryKeys.session() });
         },
     });

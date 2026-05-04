@@ -13,7 +13,7 @@ export type UserType = IUser;
 /**
  * JWT Auth Payload
  */
-export type JWT_AUTH = Pick<IUser, "_id" | "fullName" | "avatar" | "role">;
+export type JWT_AUTH = Pick<IUser, "_id" | "fullName" | "avatar" | "role" | "isEmailVerified">;
 
 /**
  * RoleType

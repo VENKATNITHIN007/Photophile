@@ -16,7 +16,7 @@ export const ROUTES = {
   },
   
   STUDIO: {
-    DASHBOARD: "/dashboard",
+    PROFILE: "/profile",
     ONBOARD: "/photographer/onboard",
     MANAGE: "/photographer/dashboard",
     PORTFOLIO: "/photographer/portfolio",

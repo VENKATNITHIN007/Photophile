@@ -32,7 +32,7 @@ export function MobileNav() {
   const { user, loading, logout } = useAuth();
   const isAuthenticated = !!user;
 
-  const dashboardHref = user?.role === "photographer" ? ROUTES.STUDIO.MANAGE : ROUTES.STUDIO.DASHBOARD;
+  const dashboardHref = user?.role === "photographer" ? ROUTES.STUDIO.MANAGE : ROUTES.STUDIO.PROFILE;
 
   return (
     <Sheet>
@@ -76,12 +76,14 @@ export function MobileNav() {
               <>
                 <SheetClose asChild>
                   <Button asChild variant="outline" className="w-full">
-                    <Link href={dashboardHref}>Dashboard</Link>
+                    <Link href={dashboardHref}>
+                      {user?.role === "photographer" ? "Studio Dashboard" : "Profile Settings"}
+                    </Link>
                   </Button>
                 </SheetClose>
                 <SheetClose asChild>
-                  <Button variant="ghost" className="w-full justify-start" onClick={logout}>
-                    <LogOut className="mr-2 size-4" />
+                  <Button variant="ghost" className="w-full justify-start border-t border-gray-100" onClick={logout}>
+                    <LogOut className="mr-2 size-3" />
                     Logout
                   </Button>
                 </SheetClose>
