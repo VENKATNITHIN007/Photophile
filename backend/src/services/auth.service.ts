@@ -17,6 +17,7 @@ type AuthUser = {
   fullName: string;
   avatar?: string | null;
   role?: "user" | "photographer";
+  isEmailVerified: boolean;
 };
 
 const mapUserToAuth = (user: IUser & { _id: Types.ObjectId }): AuthUser => ({
@@ -24,6 +25,7 @@ const mapUserToAuth = (user: IUser & { _id: Types.ObjectId }): AuthUser => ({
   fullName: user.fullName,
   avatar: user.avatar,
   role: user.role,
+  isEmailVerified: user.isEmailVerified,
 });
 
 export const authService = {
