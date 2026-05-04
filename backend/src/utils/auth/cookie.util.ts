@@ -2,10 +2,10 @@ import { appConfig } from "../../config";
 import { parseDurationToMs } from "../core/time.util";
 
 const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
-const cookieSameSite = (process.env.COOKIE_SAMESITE || "strict").toLowerCase();
+const cookieSameSite = (process.env.COOKIE_SAMESITE || "lax").toLowerCase();
 const resolvedSameSite = (cookieSameSite === "none" || cookieSameSite === "lax" || cookieSameSite === "strict")
     ? (cookieSameSite as "none" | "lax" | "strict")
-    : "strict";
+    : "lax";
 
 export const clearCookieOptions = {
     httpOnly: true,

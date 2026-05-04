@@ -10,8 +10,7 @@ import { loginSchema, LoginInput } from "@/lib/validations/auth";
 import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useLoginMutation } from "@/features/auth";
-import { queryKeys } from "@/lib/query/keys";
+import { useLoginMutation, getAuthRedirect, getSafeRedirectPath } from "@/features/auth";
 
 import { AuthShell } from "./AuthShell";
 
@@ -25,7 +24,6 @@ export function LoginForm() {
   const redirect = searchParams.get("redirect");
   const { success, error: showError } = useToast();
   const loginMutation = useLoginMutation();
-  const queryClient = useQueryClient();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -40,18 +38,10 @@ export function LoginForm() {
       const response = await loginMutation.mutateAsync(data);
       success("Logged in successfully!");
       
-      // Await the session refetch so VerificationGate sees
-      // the authenticated user before we navigate.
-      await queryClient.refetchQueries({ queryKey: queryKeys.session() });
-
       const safeRedirect = getSafeRedirectPath(redirect);
-      if (safeRedirect) {
-        router.push(safeRedirect);
-      } else if (response.user.role === "photographer") {
-        router.push("/photographer/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      const target = safeRedirect || getAuthRedirect(response.user);
+
+      router.push(target);
     } catch (err: any) {
       showError(err.message || "Invalid email or password.");
     }
@@ -109,15 +99,4 @@ export function LoginForm() {
       </form>
     </AuthShell>
   );
-}
-
-/**
- * Utility to prevent open redirect vulnerabilities.
- */
-function getSafeRedirectPath(redirect: string | null): string | null {
-  if (!redirect) return null;
-  if (redirect.startsWith("/") && !redirect.startsWith("//")) {
-    return redirect;
-  }
-  return null;
 }

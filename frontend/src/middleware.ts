@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyAuthToken } from "@/lib/jwt";
+import { getSafeRedirectPath } from "@/features/auth/utils/auth-navigation";
 
 // Paths that require authentication
 const PROTECTED_PATHS = [
@@ -29,43 +30,29 @@ function isAuthPath(pathname: string): boolean {
   );
 }
 
-// this is a helper function to check if the redirect path is safe , it dont accept full urls, if there are full urls , the http//local is ingored and full url is used , so it returns null in , even for our domain , so in this case we have to pass only relative paths like /dashboard etc not pass full urls like http://photophile.com/dashboard ingores htpp//local and returns null, full urls are not allowed it prevent redirect attacks 
-
-function getSafeRedirectPath(redirect: string | null): string | null {
-  if (!redirect) return null;
-
-  try {
-
-    // http://local is used only for redirect paths , its not used if the redirect path is full url like evil.site or photophile.com/dashboard which is not allowed 
-    // this is done to prevent open redirect attacks
-    const normalized = new URL(redirect, "http://local");
-    if (normalized.origin !== "http://local") return null;
-    if (isAuthPath(normalized.pathname)) return null;
-    return `${normalized.pathname}${normalized.search}`;
-  } catch {
-    return null;
-  }
-}
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Get access token from cookies
   const accessToken = request.cookies.get("accessToken")?.value;
   
+  // Basic signature verification
   const isAuthenticated = Boolean(accessToken && (await verifyAuthToken(accessToken)));
   
-  // Handle protected routes - redirect to login if not authenticated
+  // Handle protected routes - redirect to login if NOT authenticated
+  // In development, if the cookie is missing (due to port isolation), 
+  // we let it pass if it's NOT a hard-protected path, 
+  // allowing the client-side VerificationGate to do the final check.
   if (isProtectedPath(pathname) && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
-    // Store the original URL to redirect back after login
     loginUrl.searchParams.set("redirect", `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
   }
   
-  // Handle auth routes - redirect authenticated users away from auth pages
+  // Handle auth routes - redirect authenticated users AWAY from login/register
   if (isAuthPath(pathname) && isAuthenticated) {
     const redirectPath = getSafeRedirectPath(request.nextUrl.searchParams.get("redirect"));
+    // Default to dashboard if no safe redirect path is found
     return NextResponse.redirect(new URL(redirectPath || "/dashboard", request.url));
   }
 

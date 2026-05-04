@@ -25,37 +25,42 @@ export function AuthShell({
   className,
 }: AuthShellProps) {
   return (
-    <Page className="items-center justify-center bg-muted/30">
-      <Page.Body className={cn("max-w-md w-full py-12 px-4", className)}>
-        <Card className="w-full shadow-lg border-none sm:border overflow-hidden">
-          <CardHeader className="space-y-4 text-center pb-8">
+    <Page className="items-center justify-center bg-white">
+      <Page.Body className={cn("max-w-[480px] w-full py-20 px-6", className)}>
+        <div className="space-y-12">
+          {/* Header Section */}
+          <header className="space-y-6 text-center">
             {Icon && (
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-muted shadow-sm border">
-                <Icon className="h-7 w-7 text-muted-foreground" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center border border-black rounded-none">
+                <Icon className="h-8 w-8 text-black" />
               </div>
             )}
-            <div className="space-y-2">
-              <CardTitle className="text-3xl font-bold tracking-tight text-foreground">
+            <div className="space-y-3">
+              <h1 className="text-4xl font-light uppercase tracking-widest text-black">
                 {title}
-              </CardTitle>
+              </h1>
               {description && (
-                <CardDescription className="text-muted-foreground text-balance">
+                <p className="text-sm uppercase tracking-wider text-gray-500 max-w-[320px] mx-auto leading-relaxed">
                   {description}
-                </CardDescription>
+                </p>
               )}
             </div>
-          </CardHeader>
+          </header>
           
-          <CardContent>
+          {/* Main Content Area */}
+          <div className="border-t border-black pt-12">
             {children}
-          </CardContent>
+          </div>
 
+          {/* Footer Section */}
           {footer && (
-            <CardFooter className="flex flex-col items-center justify-center text-sm text-muted-foreground pt-6 border-t mt-4 bg-muted/20">
-              {footer}
-            </CardFooter>
+            <footer className="pt-12 text-center">
+              <div className="text-xs uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors duration-300">
+                {footer}
+              </div>
+            </footer>
           )}
-        </Card>
+        </div>
       </Page.Body>
     </Page>
   );

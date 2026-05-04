@@ -8,7 +8,7 @@ import { registerSchema, RegisterInput } from "@/lib/validations/auth";
 import { Form } from "@/components/Form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useRegisterMutation } from "@/features/auth";
+import { useRegisterMutation, getAuthRedirect } from "@/features/auth";
 import { AxiosError } from "axios";
 
 import { AuthShell } from "./AuthShell";
@@ -34,12 +34,15 @@ export function RegisterForm() {
 
   const onSubmit = async (data: RegisterInput) => {
     try {
-      await registerMutation.mutateAsync({
+      const response = await registerMutation.mutateAsync({
         fullName: data.fullName,
         email: data.email,
         password: data.password,
       });
-      router.push("/verify-email/pending");
+      
+      const target = getAuthRedirect(response.user);
+      router.push(target);
+      
       success("Account created. Please verify your email.");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.message) {

@@ -8,9 +8,9 @@ function Input({ className, type, variant = "default", ...props }: React.Compone
       type={type}
       data-slot="input"
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input w-full min-w-0 bg-transparent transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-        variant === "default" && "h-9 rounded-md border px-3 py-1 text-base shadow-xs focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive md:text-sm",
-        variant === "search" && "h-12 rounded-full border-2 border-gray-200 px-6 text-base bg-white shadow-sm focus-visible:border-amber-500 focus-visible:ring-2 focus-visible:ring-amber-500/20 transition-all",
+        "file:text-foreground placeholder:text-gray-400 selection:bg-black selection:text-white w-full min-w-0 bg-transparent transition-all duration-300 outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
+        variant === "default" && "h-12 rounded-none border border-gray-200 px-4 py-2 text-sm font-light focus:border-black",
+        variant === "search" && "h-14 rounded-none border border-gray-200 px-6 text-base bg-white focus:border-black transition-all",
         className
       )}
       {...props}

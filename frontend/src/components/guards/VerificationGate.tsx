@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/features/auth";
+import { useAuth, getAuthRedirect } from "@/features/auth";
 
 const GUARDED_PATH_PREFIXES = [
   "/dashboard",
@@ -18,7 +18,7 @@ const isGuardedPath = (pathname: string): boolean => {
 export function VerificationGate({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, isEmailVerified } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (loading || !isGuardedPath(pathname)) {
@@ -32,12 +32,17 @@ export function VerificationGate({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (!isEmailVerified) {
-      router.replace("/verify-email/pending");
+    const target = getAuthRedirect(user);
+    if (target !== pathname && !pathname.startsWith(target)) {
+      // Only redirect if the current path is NOT the correct target
+      // This prevents loops if target is a subpath of the current path
+      router.replace(target);
     }
-  }, [loading, user, isEmailVerified, pathname, router]);
+  }, [loading, user, pathname, router]);
 
-  if (!loading && isGuardedPath(pathname) && (!user || !isEmailVerified)) {
+  const isAuthorized = user && getAuthRedirect(user) === pathname;
+
+  if (!loading && isGuardedPath(pathname) && !isAuthorized) {
     return null;
   }
 
