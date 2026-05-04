@@ -24,18 +24,13 @@ export function HeaderActions() {
   // GUEST VIEW
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-6">
         <Link 
           href={ROUTES.AUTH.LOGIN} 
-          className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
+          className="text-xs uppercase tracking-widest font-light text-gray-500 hover:text-black transition-colors"
         >
           Sign In
         </Link>
-        <Button asChild className="bg-black hover:bg-gray-800 text-white font-medium px-6 h-10 rounded-none uppercase tracking-wide text-xs">
-          <Link href={ROUTES.AUTH.REGISTER}>
-            Get Started
-          </Link>
-        </Button>
       </div>
     );
   }

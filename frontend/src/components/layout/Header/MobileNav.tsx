@@ -19,7 +19,7 @@ import {
 
 const NAV_ITEMS = [
   { label: "Explore Photographers", href: ROUTES.DISCOVERY },
-  { label: "For Professionals", href: ROUTES.BECOME_PHOTOGRAPHER },
+  { label: "Become a Photographer", href: ROUTES.BECOME_PHOTOGRAPHER },
 ];
 
 /**
@@ -89,18 +89,11 @@ export function MobileNav() {
                 </SheetClose>
               </>
             ) : (
-              <>
-                <SheetClose asChild>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href={ROUTES.AUTH.LOGIN}>Sign In</Link>
-                  </Button>
-                </SheetClose>
-                <SheetClose asChild>
-                  <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
-                    <Link href={ROUTES.AUTH.REGISTER}>Get Started</Link>
-                  </Button>
-                </SheetClose>
-              </>
+              <SheetClose asChild>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={ROUTES.AUTH.LOGIN}>Sign In</Link>
+                </Button>
+              </SheetClose>
             )}
           </div>
         </div>
