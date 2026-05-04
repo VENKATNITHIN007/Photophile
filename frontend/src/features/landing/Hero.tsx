@@ -46,7 +46,7 @@ export function Hero() {
           </Button>
           
           <Button asChild size="lg" className="w-full sm:w-auto h-14 px-10 text-base font-semibold bg-transparent border border-white text-white hover:bg-white/10 hover:text-white rounded-none backdrop-blur-sm">
-            <Link href={ROUTES.AUTH.REGISTER} className="flex items-center text-white hover:text-white">
+            <Link href={ROUTES.BECOME_PHOTOGRAPHER} className="flex items-center text-white hover:text-white">
               Join as Photographer
               <ArrowRight className="ml-2 size-4" />
             </Link>

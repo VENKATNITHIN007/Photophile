@@ -81,7 +81,7 @@ export function HeaderActions() {
   return (
     <div className="flex items-center gap-6">
       <Link 
-        href={ROUTES.STUDIO.ONBOARD}
+        href={ROUTES.BECOME_PHOTOGRAPHER}
         className="hidden sm:inline-block text-xs uppercase tracking-widest font-light text-gray-500 hover:text-black transition-colors"
       >
         Start Your Studio

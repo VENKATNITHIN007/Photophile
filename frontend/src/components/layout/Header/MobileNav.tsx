@@ -19,7 +19,7 @@ import {
 
 const NAV_ITEMS = [
   { label: "Explore Photographers", href: ROUTES.DISCOVERY },
-  { label: "For Professionals", href: ROUTES.STUDIO.ONBOARD },
+  { label: "For Professionals", href: ROUTES.BECOME_PHOTOGRAPHER },
 ];
 
 /**

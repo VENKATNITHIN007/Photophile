@@ -5,6 +5,7 @@
 export const ROUTES = {
   HOME: "/",
   DISCOVERY: "/photographers",
+  BECOME_PHOTOGRAPHER: "/become-photographer",
   
   AUTH: {
     LOGIN: "/login",

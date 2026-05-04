@@ -34,8 +34,8 @@ export function OnboardingCTA() {
 
         <div className="shrink-0 w-full md:w-auto">
           <Button asChild size="lg" className="w-full h-16 px-12 text-lg font-medium bg-white hover:bg-gray-200 text-black rounded-none">
-            <Link href={ROUTES.AUTH.REGISTER}>
-              Create Account
+            <Link href={ROUTES.BECOME_PHOTOGRAPHER}>
+              Create Your Studio
               <ArrowRight className="ml-3 size-5" />
             </Link>
           </Button>
