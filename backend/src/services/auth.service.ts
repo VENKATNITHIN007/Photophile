@@ -25,7 +25,7 @@ const mapUserToAuth = (user: IUser & { _id: Types.ObjectId }): AuthUser => ({
   fullName: user.fullName,
   avatar: user.avatar,
   role: user.role,
-  isEmailVerified: user.isEmailVerified,
+  isEmailVerified: user.isEmailVerified ?? false,
 });
 
 export const authService = {
