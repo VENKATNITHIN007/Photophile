@@ -21,7 +21,18 @@ function sanitizePrice(raw: string): string | undefined {
 export function DiscoveryResults() {
   const { search, location, specialty, minPrice, maxPrice, page, setPage, reset, hydrateFromURL } = usePhotographerFilters();
 
-  useEffect(() => { hydrateFromURL(); }, [hydrateFromURL]);
+  // Hydrate once on mount
+  useEffect(() => {
+    hydrateFromURL();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+  // Scroll to top when page changes for better UX
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
 
   const debouncedSearch = useDebounce(search, 350);
   const safeMinPrice = sanitizePrice(minPrice);

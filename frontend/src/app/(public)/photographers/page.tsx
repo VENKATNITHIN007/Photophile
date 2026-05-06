@@ -41,9 +41,10 @@ export default function PhotographersRoutePage() {
       </Page.Header>
 
       <Page.Body>
-        <Page.Aside>
+        <Page.Aside className="hidden md:flex">
           <Discovery.Filters />
         </Page.Aside>
+
 
         {/* Item #15: Suspense boundary — page shell renders instantly,
             results show skeleton until the client component mounts + fetches. */}
