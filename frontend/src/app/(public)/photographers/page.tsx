@@ -2,7 +2,9 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Page } from "@/components/Page";
 import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
-import { DiscoverySearchInput, DiscoveryFilters, DiscoveryResults } from "@/features/discovery/Discovery";
+import { Discovery } from "@/features/discovery/Discovery";
+
+
 
 import { PhotographerGridSkeleton } from "@/features/discovery/PhotographerCardSkeleton";
 
@@ -33,13 +35,14 @@ export default function PhotographersRoutePage() {
         </Page.Stack>
 
         <div className="mt-4">
-          <DiscoverySearchInput />
+          <Discovery.Search />
+          <Discovery.Summary />
         </div>
       </Page.Header>
 
       <Page.Body>
         <Page.Aside>
-          <DiscoveryFilters />
+          <Discovery.Filters />
         </Page.Aside>
 
         {/* Item #15: Suspense boundary — page shell renders instantly,
@@ -47,7 +50,7 @@ export default function PhotographersRoutePage() {
         <Page.Section>
           <QueryErrorBoundary>
             <Suspense fallback={<PhotographerGridSkeleton />}>
-              <DiscoveryResults />
+              <Discovery.Results />
             </Suspense>
           </QueryErrorBoundary>
         </Page.Section>

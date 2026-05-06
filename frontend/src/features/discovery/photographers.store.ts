@@ -22,6 +22,8 @@ interface PhotographerFiltersState extends FilterValues {
   reset: () => void;
   /** Hydrate the store from the current URL search params. */
   hydrateFromURL: () => void;
+  /** Helper to check if any filters are active (excluding page). */
+  hasActiveFilters: boolean;
 }
 
 // ── Defaults ───────────────────────────────────────────────────────
@@ -100,6 +102,17 @@ function setAndSync(
   set(partial);
   // Build snapshot from the store *after* the set
   const next = get();
+  
+  // Update active status
+  const hasActive = 
+    next.search !== DEFAULTS.search ||
+    next.location !== DEFAULTS.location ||
+    next.specialty !== DEFAULTS.specialty ||
+    next.minPrice !== DEFAULTS.minPrice ||
+    next.maxPrice !== DEFAULTS.maxPrice;
+
+  set({ hasActiveFilters: hasActive } as Partial<PhotographerFiltersState>);
+
   writeFiltersToURL({
     search: next.search,
     location: next.location,
@@ -113,6 +126,7 @@ function setAndSync(
 export const usePhotographerFilters = create<PhotographerFiltersState>(
   (set, get) => ({
     ...DEFAULTS,
+    hasActiveFilters: false,
 
     setSearch:    (value) => setAndSync(set, get, { search: value, page: 1 }),
     setLocation:  (value) => setAndSync(set, get, { location: value, page: 1 }),
@@ -122,7 +136,7 @@ export const usePhotographerFilters = create<PhotographerFiltersState>(
     setPage:      (value) => setAndSync(set, get, { page: value }),
 
     reset: () => {
-      set(DEFAULTS);
+      set({ ...DEFAULTS, hasActiveFilters: false });
       writeFiltersToURL(DEFAULTS);
     },
 
@@ -130,6 +144,15 @@ export const usePhotographerFilters = create<PhotographerFiltersState>(
       const fromURL = readFiltersFromURL();
       if (Object.keys(fromURL).length > 0) {
         set(fromURL);
+        // Also update hasActiveFilters after hydration
+        const next = get();
+        const hasActive = 
+          next.search !== DEFAULTS.search ||
+          next.location !== DEFAULTS.location ||
+          next.specialty !== DEFAULTS.specialty ||
+          next.minPrice !== DEFAULTS.minPrice ||
+          next.maxPrice !== DEFAULTS.maxPrice;
+        set({ hasActiveFilters: hasActive } as Partial<PhotographerFiltersState>);
       }
     },
   }),
