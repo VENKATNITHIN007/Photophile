@@ -27,6 +27,7 @@ interface PhotographerFiltersState extends FilterValues {
 }
 
 // ── Defaults ───────────────────────────────────────────────────────
+
 const DEFAULTS: FilterValues = {
   search: "",
   location: "all",
@@ -100,10 +101,8 @@ function setAndSync(
   partial: Partial<FilterValues>,
 ) {
   set(partial);
-  // Build snapshot from the store *after* the set
   const next = get();
   
-  // Update active status
   const hasActive = 
     next.search !== DEFAULTS.search ||
     next.location !== DEFAULTS.location ||
@@ -123,37 +122,47 @@ function setAndSync(
   });
 }
 
-export const usePhotographerFilters = create<PhotographerFiltersState>(
-  (set, get) => ({
-    ...DEFAULTS,
-    hasActiveFilters: false,
+let searchTimeout: NodeJS.Timeout;
 
-    setSearch:    (value) => setAndSync(set, get, { search: value, page: 1 }),
-    setLocation:  (value) => setAndSync(set, get, { location: value, page: 1 }),
-    setSpecialty: (value) => setAndSync(set, get, { specialty: value, page: 1 }),
-    setMinPrice:  (value) => setAndSync(set, get, { minPrice: value, page: 1 }),
-    setMaxPrice:  (value) => setAndSync(set, get, { maxPrice: value, page: 1 }),
-    setPage:      (value) => setAndSync(set, get, { page: value }),
+export const usePhotographerFilters = create<PhotographerFiltersState>((set, get) => ({
+  ...DEFAULTS,
+  hasActiveFilters: false,
 
-    reset: () => {
-      set({ ...DEFAULTS, hasActiveFilters: false });
-      writeFiltersToURL(DEFAULTS);
-    },
+  setSearch: (value) => {
+    // Update store state immediately for UI responsiveness
+    set({ search: value, page: 1 });
+    
+    // Debounce the URL update to avoid redundant fetches while typing
+    if (searchTimeout) clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      const next = get();
+      setAndSync(set, get, { search: next.search });
+    }, 400);
+  },
 
-    hydrateFromURL: () => {
-      const fromURL = readFiltersFromURL();
-      if (Object.keys(fromURL).length > 0) {
-        set(fromURL);
-        // Also update hasActiveFilters after hydration
-        const next = get();
-        const hasActive = 
-          next.search !== DEFAULTS.search ||
-          next.location !== DEFAULTS.location ||
-          next.specialty !== DEFAULTS.specialty ||
-          next.minPrice !== DEFAULTS.minPrice ||
-          next.maxPrice !== DEFAULTS.maxPrice;
-        set({ hasActiveFilters: hasActive } as Partial<PhotographerFiltersState>);
-      }
-    },
-  }),
-);
+  setLocation:  (value) => setAndSync(set, get, { location: value, page: 1 }),
+  setSpecialty: (value) => setAndSync(set, get, { specialty: value, page: 1 }),
+  setMinPrice:  (value) => setAndSync(set, get, { minPrice: value, page: 1 }),
+  setMaxPrice:  (value) => setAndSync(set, get, { maxPrice: value, page: 1 }),
+  setPage:      (value) => setAndSync(set, get, { page: value }),
+
+  reset: () => {
+    set({ ...DEFAULTS, hasActiveFilters: false });
+    writeFiltersToURL(DEFAULTS);
+  },
+
+  hydrateFromURL: () => {
+    const fromURL = readFiltersFromURL();
+    if (Object.keys(fromURL).length > 0) {
+      set(fromURL);
+      const next = get();
+      const hasActive = 
+        next.search !== DEFAULTS.search ||
+        next.location !== DEFAULTS.location ||
+        next.specialty !== DEFAULTS.specialty ||
+        next.minPrice !== DEFAULTS.minPrice ||
+        next.maxPrice !== DEFAULTS.maxPrice;
+      set({ hasActiveFilters: hasActive } as Partial<PhotographerFiltersState>);
+    }
+  },
+}));
