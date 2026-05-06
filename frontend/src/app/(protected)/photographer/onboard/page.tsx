@@ -12,18 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/features/auth";
 import { useCreateProfileMutation } from "@/features/photographer-studio/studio.queries";
 
-const CITIES = [
-  "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai",
-  "Kolkata", "Pune", "Ahmedabad", "Jaipur", "Lucknow",
-  "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal",
-  "Visakhapatnam", "Patna", "Vadodara", "Ghaziabad", "Ludhiana",
-].map((city) => ({ label: city, value: city.toLowerCase() }));
-
-const SPECIALTIES = [
-  "Wedding", "Portrait", "Event", "Commercial", "Fashion",
-  "Nature", "Real Estate", "Food", "Sports", "Product",
-  "Newborn", "Maternity", "Corporate", "Concert",
-].map((spec) => ({ label: spec, value: spec.toLowerCase() }));
+import { CITY_OPTIONS, SPECIALTY_OPTIONS } from "@/lib/constants/photographer";
 
 export default function PhotographerOnboardingPage() {
   const router = useRouter();
@@ -82,7 +71,7 @@ export default function PhotographerOnboardingPage() {
                 name="location"
                 label="Primary location"
                 placeholder="Select city"
-                options={CITIES}
+                options={CITY_OPTIONS}
                 disabled={createProfileMutation.isPending}
               />
 
@@ -90,7 +79,7 @@ export default function PhotographerOnboardingPage() {
                 control={form.control}
                 name="specialties"
                 label="Specialties"
-                options={SPECIALTIES}
+                options={SPECIALTY_OPTIONS}
                 description="Select up to 3"
                 disabled={createProfileMutation.isPending}
               />

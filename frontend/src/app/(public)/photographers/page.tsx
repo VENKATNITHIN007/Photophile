@@ -1,7 +1,11 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Page } from "@/components/Page";
-import { DiscoverySearchInput, DiscoveryFilters, DiscoveryResults } from "@/features/discovery/Discovery";
+import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
+import { Discovery } from "@/features/discovery/Discovery";
+
+
+
 import { PhotographerGridSkeleton } from "@/features/discovery/PhotographerCardSkeleton";
 
 // ── Item #14: SEO metadata ─────────────────────────────────────────
@@ -31,21 +35,28 @@ export default function PhotographersRoutePage() {
         </Page.Stack>
 
         <div className="mt-4">
-          <DiscoverySearchInput />
+          <Discovery.Search />
+          <Discovery.Summary />
         </div>
+        
+        {/* Production-grade mobile FAB: Placed at root level to ensure correct stacking */}
+        <Discovery.MobileFilters />
       </Page.Header>
 
       <Page.Body>
-        <Page.Aside>
-          <DiscoveryFilters />
+        <Page.Aside className="hidden md:flex">
+          <Discovery.Filters />
         </Page.Aside>
+
 
         {/* Item #15: Suspense boundary — page shell renders instantly,
             results show skeleton until the client component mounts + fetches. */}
         <Page.Section>
-          <Suspense fallback={<PhotographerGridSkeleton />}>
-            <DiscoveryResults />
-          </Suspense>
+          <QueryErrorBoundary>
+            <Suspense fallback={<PhotographerGridSkeleton />}>
+              <Discovery.Results />
+            </Suspense>
+          </QueryErrorBoundary>
         </Page.Section>
       </Page.Body>
     </Page>

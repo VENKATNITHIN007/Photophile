@@ -69,7 +69,7 @@ export function PaginationControls({ pagination, page, onPageChange }: Paginatio
 
   if (pagination.totalPages <= 1) return null;
 
-  const window_ = getPageWindow(page, pagination.totalPages);
+  const pageWindow = getPageWindow(page, pagination.totalPages);
 
   return (
     <div className="mt-10 flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm sm:px-6">
@@ -121,7 +121,7 @@ export function PaginationControls({ pagination, page, onPageChange }: Paginatio
           </Button>
 
           {/* Windowed page numbers */}
-          {window_.map((pageNum, idx) =>
+          {pageWindow.map((pageNum, idx) =>
             pageNum === null ? (
               <span
                 key={`ellipsis-${idx}`}
@@ -142,6 +142,7 @@ export function PaginationControls({ pagination, page, onPageChange }: Paginatio
               </Button>
             ),
           )}
+
 
           {/* Next arrow */}
           <Button
