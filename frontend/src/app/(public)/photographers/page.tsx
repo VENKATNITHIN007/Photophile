@@ -38,6 +38,9 @@ export default function PhotographersRoutePage() {
           <Discovery.Search />
           <Discovery.Summary />
         </div>
+        
+        {/* Production-grade mobile FAB: Placed at root level to ensure correct stacking */}
+        <Discovery.MobileFilters />
       </Page.Header>
 
       <Page.Body>

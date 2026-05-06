@@ -1,5 +1,5 @@
 import { DiscoverySearch } from "./DiscoverySearch";
-import { DiscoveryFilters } from "./DiscoveryFilters";
+import { DiscoveryFilters, DiscoveryMobileFilters } from "./DiscoveryFilters";
 import { DiscoveryResults } from "./DiscoveryResults";
 import { ActiveFiltersSummary } from "./ActiveFiltersSummary";
 
@@ -12,6 +12,8 @@ import { ActiveFiltersSummary } from "./ActiveFiltersSummary";
 export const Discovery = {
   Search: DiscoverySearch,
   Filters: DiscoveryFilters,
+  MobileFilters: DiscoveryMobileFilters,
   Results: DiscoveryResults,
   Summary: ActiveFiltersSummary,
 };
+

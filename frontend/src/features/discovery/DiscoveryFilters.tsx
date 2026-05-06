@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { usePhotographerFilters } from "./photographers.store";
 import { COMMON_LOCATIONS, COMMON_SPECIALTIES } from "@/lib/constants/photographer";
 
+// ── Helpers ────────────────────────────────────────────────────────
 
 function capitalizeWords(str: string): string {
   return str.split(" ").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
@@ -63,52 +64,79 @@ function FilterForm() {
   );
 }
 
+// ── Desktop Sidebar ────────────────────────────────────────────────
+
 export function DiscoveryFilters() {
   const { hasActiveFilters, reset } = usePhotographerFilters();
 
   return (
-    <>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 md:hidden">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button size="lg" className="rounded-full shadow-2xl bg-primary hover:bg-primary/90 gap-3 h-14 px-8 border-4 border-background animate-in zoom-in-50 duration-300">
-              <Filter className="size-5" />
-              <span className="font-bold tracking-tight">Filters</span>
-              {hasActiveFilters && <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-black text-primary ring-2 ring-primary/20">!</span>}
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[85vh] rounded-t-[2.5rem] p-0 flex flex-col border-none shadow-2xl">
-            <SheetHeader className="p-6 pb-4 flex-none text-left">
-              <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-4 md:hidden" />
-              <SheetTitle className="flex items-center justify-between text-2xl font-bold">
-                <span>Refine Results</span>
-                {hasActiveFilters && (
-                  <Button variant="ghost" size="sm" onClick={reset} className="text-primary hover:text-primary hover:bg-primary/5 gap-2 px-3">
-                    <RotateCcw className="size-3.5" />Reset
-                  </Button>
-                )}
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 overflow-y-auto px-6 py-4 pb-32"><FilterForm /></div>
-          </SheetContent>
-        </Sheet>
-      </div>
+    <aside className="w-full md:w-64 shrink-0">
+      <Card className="sticky top-24 border-muted/60 shadow-sm overflow-hidden">
+        <CardHeader className="pb-4 border-b bg-muted/5">
+          <Page.Row className="justify-between items-center">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">
+              Filters
+            </CardTitle>
+            {hasActiveFilters && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={reset} 
+                className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/5 text-xs font-semibold gap-1.5"
+              >
+                <RotateCcw className="size-3" />
+                Reset
+              </Button>
+            )}
+          </Page.Row>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <FilterForm />
+        </CardContent>
+      </Card>
+    </aside>
+  );
+}
 
-      <aside className="hidden md:block w-full md:w-64 shrink-0">
-        <Card className="sticky top-24 border-muted/60 shadow-sm overflow-hidden">
-          <CardHeader className="pb-4 border-b bg-muted/5">
-            <Page.Row className="justify-between items-center">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground/80">Filters</CardTitle>
+// ── Mobile FAB ────────────────────────────────────────────────────
+
+export function DiscoveryMobileFilters() {
+  const { hasActiveFilters, reset } = usePhotographerFilters();
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 md:hidden">
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button 
+            size="lg" 
+            className="rounded-full shadow-2xl bg-primary hover:bg-primary/90 gap-3 h-14 px-8 border-4 border-background animate-in zoom-in-50 duration-300"
+          >
+            <Filter className="size-5" />
+            <span className="font-bold tracking-tight">Filters</span>
+            {hasActiveFilters && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-black text-primary ring-2 ring-primary/20">
+                !
+              </span>
+            )}
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-[2.5rem] p-0 flex flex-col border-none shadow-2xl">
+          <SheetHeader className="p-6 pb-4 flex-none text-left">
+            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mb-4 md:hidden" />
+            <SheetTitle className="flex items-center justify-between text-2xl font-bold">
+              <span>Refine Results</span>
               {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={reset} className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/5 text-xs font-semibold gap-1.5">
-                  <RotateCcw className="size-3" />Reset
+                <Button variant="ghost" size="sm" onClick={reset} className="text-primary hover:text-primary hover:bg-primary/5 gap-2 px-3">
+                  <RotateCcw className="size-3.5" />Reset
                 </Button>
               )}
-            </Page.Row>
-          </CardHeader>
-          <CardContent className="pt-6"><FilterForm /></CardContent>
-        </Card>
-      </aside>
-    </>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-6 py-4 pb-32">
+            <FilterForm />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }
