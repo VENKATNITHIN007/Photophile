@@ -9,7 +9,7 @@ import { FilterSidebar } from "./FilterSidebar";
 import { PhotographerGrid } from "./PhotographerGrid";
 import { PhotographerGridSkeleton } from "./PhotographerCardSkeleton";
 import { PaginationControls } from "./PaginationControls";
-import { usePhotographersQuery } from "./photographers.queries";
+import { useSuspensePhotographersQuery } from "./photographers.queries";
 import { usePhotographerFilters } from "./photographers.store";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { BrowsePhotographersParams } from "./photographers.api";
@@ -47,51 +47,22 @@ export function DiscoverySearchInput() {
 }
 
 export function DiscoveryFilters() {
-  const {
-    location,
-    specialty,
-    minPrice,
-    maxPrice,
-    setLocation,
-    setSpecialty,
-    setMinPrice,
-    setMaxPrice,
-    reset,
-  } = usePhotographerFilters();
-
-  return (
-    <FilterSidebar
-      location={location}
-      specialty={specialty}
-      minPrice={minPrice}
-      maxPrice={maxPrice}
-      onLocationChange={setLocation}
-      onSpecialtyChange={setSpecialty}
-      onMinPriceChange={setMinPrice}
-      onMaxPriceChange={setMaxPrice}
-      onReset={reset}
-    />
-  );
+  return <FilterSidebar />;
 }
 
 export function DiscoveryResults() {
   const { search, location, specialty, minPrice, maxPrice, page, setPage, reset, hydrateFromURL } =
     usePhotographerFilters();
 
-  // Hydrate filters from URL on first mount (makes the page refresh-safe)
+  // Hydrate filters from URL on first mount
   useEffect(() => {
     hydrateFromURL();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrateFromURL]);
 
-  // --- Priority 1.1: Extracted useDebounce hook ---
   const debouncedSearch = useDebounce(search, 350);
-
-  // --- Priority 1.4: Validate price before API call ---
   const safeMinPrice = sanitizePrice(minPrice);
   const safeMaxPrice = sanitizePrice(maxPrice);
 
-  // --- Priority 1.2: Memoize queryParams to prevent React Query cache churn ---
   const queryParams: BrowsePhotographersParams = useMemo(
     () => ({
       search: debouncedSearch || undefined,
@@ -105,32 +76,10 @@ export function DiscoveryResults() {
     [debouncedSearch, location, specialty, safeMinPrice, safeMaxPrice, page],
   );
 
-  const { data, isLoading, error, refetch } = usePhotographersQuery(queryParams);
+  const { data } = useSuspensePhotographersQuery(queryParams);
   const photographers = data?.photographers || [];
   const pagination = data?.pagination || null;
 
-  // --- Priority 2.6: Surface errors as toasts so they're visible above the fold ---
-  useEffect(() => {
-    if (error) {
-      toast.error("Failed to load photographers", {
-        description: error instanceof Error ? error.message : "Please try again.",
-      });
-    }
-  }, [error]);
-
-  if (error) {
-    return (
-      <DataState.Error
-        message={error instanceof Error ? error.message : "Failed to load photographers"}
-        onRetry={() => refetch()}
-      />
-    );
-  }
-
-  // --- Priority 2.5: Skeleton grid instead of generic spinner ---
-  if (isLoading) {
-    return <PhotographerGridSkeleton />;
-  }
 
   if (photographers.length === 0) {
     return (

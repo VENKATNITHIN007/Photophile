@@ -45,20 +45,24 @@ export function PhotographerCard({ photographer }: PhotographerCardProps) {
               {photographer.bio || "No biography provided."}
             </p>
 
-            {(photographer.specialties?.length ?? 0) > 0 && (
-              <Page.Row className="flex-wrap gap-1.5">
-                {photographer.specialties!.slice(0, 3).map((spec) => (
-                  <Badge key={spec} variant="outline" className="capitalize">
-                    {spec}
-                  </Badge>
-                ))}
-                {photographer.specialties!.length > 3 && (
-                  <Badge variant="outline" className="text-[10px]">
-                    +{photographer.specialties!.length - 3}
-                  </Badge>
-                )}
-              </Page.Row>
-            )}
+            {(() => {
+              const specs = photographer.specialties || [];
+              if (specs.length === 0) return null;
+              return (
+                <Page.Row className="flex-wrap gap-1.5">
+                  {specs.slice(0, 3).map((spec) => (
+                    <Badge key={spec} variant="outline" className="capitalize">
+                      {spec}
+                    </Badge>
+                  ))}
+                  {specs.length > 3 && (
+                    <Badge variant="outline" className="text-[10px]">
+                      +{specs.length - 3}
+                    </Badge>
+                  )}
+                </Page.Row>
+              );
+            })()}
           </Page.Stack>
         </CardContent>
 

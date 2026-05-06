@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Page } from "@/components/Page";
+import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
 import { DiscoverySearchInput, DiscoveryFilters, DiscoveryResults } from "@/features/discovery/Discovery";
+
 import { PhotographerGridSkeleton } from "@/features/discovery/PhotographerCardSkeleton";
 
 // ── Item #14: SEO metadata ─────────────────────────────────────────
@@ -43,9 +45,11 @@ export default function PhotographersRoutePage() {
         {/* Item #15: Suspense boundary — page shell renders instantly,
             results show skeleton until the client component mounts + fetches. */}
         <Page.Section>
-          <Suspense fallback={<PhotographerGridSkeleton />}>
-            <DiscoveryResults />
-          </Suspense>
+          <QueryErrorBoundary>
+            <Suspense fallback={<PhotographerGridSkeleton />}>
+              <DiscoveryResults />
+            </Suspense>
+          </QueryErrorBoundary>
         </Page.Section>
       </Page.Body>
     </Page>

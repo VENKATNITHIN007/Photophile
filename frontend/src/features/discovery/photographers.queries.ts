@@ -1,4 +1,4 @@
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, keepPreviousData } from "@tanstack/react-query";
 import { browsePhotographers, type BrowsePhotographersParams } from "./photographers.api";
 import { queryKeys } from "@/lib/query/keys";
 
@@ -10,3 +10,12 @@ export function usePhotographersQuery(params: BrowsePhotographersParams) {
     placeholderData: keepPreviousData,
   });
 }
+
+/** Suspense-enabled version of the photographer search. */
+export function useSuspensePhotographersQuery(params: BrowsePhotographersParams) {
+  return useSuspenseQuery({
+    queryKey: queryKeys.photographersList(params),
+    queryFn: () => browsePhotographers(params),
+  });
+}
+

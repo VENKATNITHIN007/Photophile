@@ -18,36 +18,30 @@ function capitalizeWords(str: string): string {
 
 // ── Component ──────────────────────────────────────────────────────
 
-interface FilterSidebarProps {
-  location: string;
-  specialty: string;
-  minPrice: string;
-  maxPrice: string;
-  onLocationChange: (value: string) => void;
-  onSpecialtyChange: (value: string) => void;
-  onMinPriceChange: (value: string) => void;
-  onMaxPriceChange: (value: string) => void;
-  onReset: () => void;
-}
+import { usePhotographerFilters } from "./photographers.store";
 
-export function FilterSidebar({
-  location,
-  specialty,
-  minPrice,
-  maxPrice,
-  onLocationChange,
-  onSpecialtyChange,
-  onMinPriceChange,
-  onMaxPriceChange,
-  onReset,
-}: FilterSidebarProps) {
+// ... (capitalizeWords stays same)
+
+export function FilterSidebar() {
+  const {
+    location,
+    specialty,
+    minPrice,
+    maxPrice,
+    setLocation,
+    setSpecialty,
+    setMinPrice,
+    setMaxPrice,
+    reset,
+  } = usePhotographerFilters();
+
   return (
     <aside className="w-full md:w-64 shrink-0 space-y-6">
       <Card>
         <CardHeader className="pb-3 border-b">
           <Page.Row className="justify-between">
             <h2 className="text-lg font-medium text-gray-900">Filters</h2>
-            <Button variant="ghost" size="sm" onClick={onReset} className="h-8 px-2 text-blue-600">
+            <Button variant="ghost" size="sm" onClick={reset} className="h-8 px-2 text-blue-600">
               Reset
             </Button>
           </Page.Row>
@@ -58,7 +52,7 @@ export function FilterSidebar({
             {/* Location */}
             <Page.Stack className="gap-2">
               <Label htmlFor="filter-location">Location</Label>
-              <Select value={location} onValueChange={onLocationChange}>
+              <Select value={location} onValueChange={setLocation}>
                 <SelectTrigger id="filter-location">
                   <SelectValue placeholder="Any Location" />
                 </SelectTrigger>
@@ -76,7 +70,7 @@ export function FilterSidebar({
             {/* Specialty */}
             <Page.Stack className="gap-2">
               <Label htmlFor="filter-specialty">Specialty</Label>
-              <Select value={specialty} onValueChange={onSpecialtyChange}>
+              <Select value={specialty} onValueChange={setSpecialty}>
                 <SelectTrigger id="filter-specialty">
                   <SelectValue placeholder="Any Specialty" />
                 </SelectTrigger>
@@ -93,14 +87,14 @@ export function FilterSidebar({
 
             {/* Price range */}
             <Page.Stack className="gap-2">
-              <Label>Price Starting From ($)</Label>
+              <Label>Price Range ($)</Label>
               <Page.Row className="gap-2">
                 <Input
                   id="filter-min-price"
                   type="number"
                   placeholder="Min"
                   value={minPrice}
-                  onChange={(e) => onMinPriceChange(e.target.value)}
+                  onChange={(e) => setMinPrice(e.target.value)}
                   min="0"
                 />
                 <span className="text-gray-500">–</span>
@@ -109,9 +103,10 @@ export function FilterSidebar({
                   type="number"
                   placeholder="Max"
                   value={maxPrice}
-                  onChange={(e) => onMaxPriceChange(e.target.value)}
+                  onChange={(e) => setMaxPrice(e.target.value)}
                   min="0"
                 />
+
               </Page.Row>
             </Page.Stack>
           </Page.Stack>
